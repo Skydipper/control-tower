@@ -1,7 +1,7 @@
 {
-  "name": "control-tower",
-  "version": "1.0.79",
-  "description": "",
+  "name": "sd-control-tower",
+  "version": "2.0.0",
+  "description": "Control Tower API gateway - Skydipper edition",
   "main": "index.js",
   "scripts": {
     "dev": "NODE_PATH=app/src DEBUG=oauth-plugin,stadistics-plugin,redis-cache-plugin grunt --gruntfile app/Gruntfile.js | bunyan",
@@ -12,8 +12,27 @@
     "start": "NODE_PATH=app/src node $NODE_DEBUG_OPTION app/index"
   },
   "keywords": [],
-  "author": "",
-  "license": "ISC",
+  "author": {
+    "name": "Vizzuality",
+    "email": "hello@vizzuality.com",
+    "url": "http://vizzuality.com/"
+  },
+  "contributors": [
+    {
+      "name": "Raul Requero"
+    },
+    {
+      "name": "Sergio Gordillo"
+    },
+    {
+      "name": "Enrique Cornejo"
+    },
+    {
+      "name": "Tiago Garcia",
+      "url": "https://github.com/tiagojsag"
+    }
+  ],
+  "license": "MIT",
   "devDependencies": {
     "babel-eslint": "^6.1.0",
     "chai": "^4.1.2",
@@ -54,9 +73,9 @@
     "bunyan-syslog-udp": "^0.1.0",
     "config": "^1.21.0",
     "cron": "^1.1.0",
-    "ct-oauth-plugin": "1.8.15",
-    "ct-redis-cache-plugin": "1.2.3",
-    "ct-stadistics-plugin": "1.3.1",
+    "sd-ct-oauth-plugin": "2.0.0",
+    "sd-ct-redis-cache-plugin": "2.0.0",
+    "sd-ct-statistics-plugin": "2.0.0",
     "dockerode": "^2.4.3",
     "dotenv": "^2.0.0",
     "fastly-purge": "1.0.1",

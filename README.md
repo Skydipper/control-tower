@@ -1,10 +1,7 @@
-# Control Tower: API Gateway on Steroids
+# Control Tower API Gateway - Skydipper edition 
 
-<img src="https://avatars0.githubusercontent.com/u/20566771?v=3&s=200" style="display: block; margin: 0 auto;">
-
-[![Build Status](https://travis-ci.org/control-tower/control-tower.svg?branch=develop)](https://travis-ci.org/control-tower/control-tower)
-[![Test Coverage](https://api.codeclimate.com/v1/badges/27e5b69947977f399125/test_coverage)](https://codeclimate.com/github/control-tower/control-tower/test_coverage)
-[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](#contributing)
+[![Build Status](https://travis-ci.org/Skydipper/control-tower.svg?branch=develop)](https://travis-ci.org/Skydipper/control-tower)
+[![Test Coverage](https://api.codeclimate.com/v1/badges/b8b9bedf77eba1fd6e35/test_coverage)](https://codeclimate.com/github/Skydipper/control-tower/test_coverage)
 
 ## Dependencies
 
@@ -219,23 +216,3 @@ TODO
 3. Commit your changes: `git commit -am 'Added some new feature'`
 4. Push the commit to the branch: `git push origin feature/my-new-feature`
 5. Submit a pull request :D
-
-## Contributors
-
-  <a href="https://github.com/rrequero" target="_blank" style="display: inline-block">
-    <img src="https://secure.gravatar.com/avatar/88658283520e4fa50fd767c8b52bf4f8?s=80">
-  </a>
-
-  <a href="https://github.com/archelogos" target="_blank" style="display: inline-block">
-    <img src="https://avatars3.githubusercontent.com/u/8081142?v=3&s=80">
-  </a>
-
-  <a href="https://github.com/hectoruch" target="_blank" style="display: inline-block">
-    <img src="https://avatars2.githubusercontent.com/u/8074563?v=3&s=80">
-  </a>
-
-  <a href="https://github.com/EnriqueCornejo" target="_blank" style="display: inline-block">
-    <img src="https://avatars0.githubusercontent.com/u/411529?v=3&s=80">
-  </a>
-
-

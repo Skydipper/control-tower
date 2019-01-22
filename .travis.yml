@@ -8,7 +8,7 @@ cache:
   - "node_modules"
 env:
   global:
-    - CC_TEST_REPORTER_ID=013b3b345b14b2653a0012d63173882e853af3e5bd60ed19244d237cca50af33
+    - CC_TEST_REPORTER_ID=cbef27efebac45f676a4a44ac1cc1257d32178cd2858f9bc66678a7ab35996fb
     - NODE_ENV=test
     - PORT=5037
     - LOGGER_TYPE=console
