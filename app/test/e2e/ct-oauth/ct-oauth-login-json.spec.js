@@ -148,7 +148,9 @@ describe('Auth endpoints tests', () => {
             _id: '5becfa2b67da0d3ec07a27f6',
             createdAt: '2018-11-15T04:46:35.313Z',
             role: 'USER',
-            provider: 'local'
+            provider: 'local',
+            name: 'lorem-ipsum',
+            photo: 'http://www.random.rand/abc.jpg'
         }).save();
 
         const response = await requester
@@ -163,13 +165,13 @@ describe('Auth endpoints tests', () => {
         response.redirects.should.be.an('array').and.length(0);
 
         const responseUser = response.body.data;
-        responseUser.should.have.property('id').and.be.an('string').and.not.be.empty;
-        responseUser.should.have.property('name').and.be.an('string');
-        responseUser.should.have.property('photo').and.be.an('string');
+        responseUser.should.have.property('id').and.be.a('string').and.not.be.empty;
+        responseUser.should.have.property('name').and.be.a('string').and.equal('lorem-ipsum');
+        responseUser.should.have.property('photo').and.be.a('string').and.equal('http://www.random.rand/abc.jpg');
         responseUser.should.have.property('email').and.equal('test@example.com');
         responseUser.should.have.property('role').and.equal('USER');
         responseUser.should.have.property('extraUserData').and.be.an('object');
-        responseUser.should.have.property('token').and.be.an('string').and.not.be.empty;
+        responseUser.should.have.property('token').and.be.a('string').and.not.be.empty;
         // eslint-disable-next-line
         responseUser.extraUserData.should.have.property('apps').and.be.an('array').and.contain    });
 
@@ -197,6 +199,9 @@ describe('Auth endpoints tests', () => {
         response.redirects.should.be.an('array').and.length(0);
 
         const responseUser = response.body.data;
+        responseUser.should.have.property('id').and.be.a('string').and.not.be.empty;
+        responseUser.should.have.property('name').and.be.a('string').and.equal('lorem-ipsum');
+        responseUser.should.have.property('photo').and.be.a('string').and.equal('http://www.random.rand/abc.jpg');
         responseUser.should.have.property('email').and.equal('test@example.com');
         responseUser.should.have.property('role').and.equal('USER');
         responseUser.should.have.property('extraUserData').and.be.an('object');
