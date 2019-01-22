@@ -3,7 +3,7 @@ const chai = require('chai');
 
 const mongoose = require('mongoose');
 const config = require('config');
-const userModelFunc = require('ct-oauth-plugin/lib/models/user.model');
+const userModelFunc = require('sd-ct-oauth-plugin/lib/models/user.model');
 
 const { getTestAgent, closeTestAgent } = require('./../test-server');
 const { TOKENS } = require('./../test.constants');

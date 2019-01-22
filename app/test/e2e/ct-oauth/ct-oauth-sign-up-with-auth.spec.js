@@ -3,8 +3,8 @@ const chai = require('chai');
 
 const mongoose = require('mongoose');
 const config = require('config');
-const userModelFunc = require('ct-oauth-plugin/lib/models/user.model');
-const userTempModelFunc = require('ct-oauth-plugin/lib/models/user-temp.model');
+const userModelFunc = require('sd-ct-oauth-plugin/lib/models/user.model');
+const userTempModelFunc = require('sd-ct-oauth-plugin/lib/models/user-temp.model');
 
 const { setPluginSetting } = require('./../utils');
 const { getTestAgent, closeTestAgent } = require('./../test-server');

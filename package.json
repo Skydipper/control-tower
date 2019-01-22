@@ -4,9 +4,9 @@
   "description": "Control Tower API gateway - Skydipper edition",
   "main": "index.js",
   "scripts": {
-    "dev": "NODE_PATH=app/src DEBUG=oauth-plugin,stadistics-plugin,redis-cache-plugin grunt --gruntfile app/Gruntfile.js | bunyan",
-    "run": "NODE_PATH=app/src DEBUG=oauth-plugin,stadistics-plugin,redis-cache-plugin node app/index.js | bunyan",
-    "cron": "NODE_PATH=app/src DEBUG=oauth-plugin,stadistics-plugin,redis-cache-plugin node app/index-crons.js | bunyan",
+    "dev": "NODE_PATH=app/src DEBUG=oauth-plugin,statistics-plugin,redis-cache-plugin grunt --gruntfile app/Gruntfile.js | bunyan",
+    "run": "NODE_PATH=app/src DEBUG=oauth-plugin,statistics-plugin,redis-cache-plugin node app/index.js | bunyan",
+    "cron": "NODE_PATH=app/src DEBUG=oauth-plugin,statistics-plugin,redis-cache-plugin node app/index-crons.js | bunyan",
     "test": "NODE_PATH=app/src node $NODE_DEBUG_OPTION ./node_modules/.bin/grunt --gruntfile app/Gruntfile.js e2eTest",
     "coverage": "NODE_PATH=app/src node $NODE_DEBUG_OPTION ./node_modules/.bin/grunt --gruntfile app/Gruntfile.js nyc",
     "start": "NODE_PATH=app/src node $NODE_DEBUG_OPTION app/index"
@@ -73,7 +73,7 @@
     "bunyan-syslog-udp": "^0.1.0",
     "config": "^1.21.0",
     "cron": "^1.1.0",
-    "sd-ct-oauth-plugin": "2.0.0",
+    "sd-ct-oauth-plugin": "2.0.2",
     "sd-ct-redis-cache-plugin": "2.0.0",
     "sd-ct-statistics-plugin": "2.0.0",
     "dockerode": "^2.4.3",

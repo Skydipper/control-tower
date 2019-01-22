@@ -159,7 +159,7 @@ Live cron variables
 
 ### Audit and statistics
 
-Actions going through Control Tower are logged on the `stadistics` (sorry about the typo) table, with the following format:
+Actions going through Control Tower are logged on the `statistics` (sorry about the typo) table, with the following format:
 
 ```json
 {

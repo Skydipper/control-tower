@@ -50,11 +50,11 @@ module.exports = async function init() {
     }).save();
 
     await new Plugin({
-        name: 'stadistics',
-        description: 'Add stadistics info',
-        mainFile: 'ct-stadistics-plugin',
+        name: 'statistics',
+        description: 'Add statistics info',
+        mainFile: 'sd-ct-statistics-plugin',
         active: true,
-        cronFile: 'ct-stadistics-plugin/cron',
+        cronFile: 'sd-ct-statistics-plugin/cron',
     }).save();
     await new Plugin({
         name: 'sessionMongo',
@@ -70,7 +70,7 @@ module.exports = async function init() {
     await new Plugin({
         name: 'oauth',
         description: 'Plugin oauth with passport',
-        mainFile: 'ct-oauth-plugin',
+        mainFile: 'sd-ct-oauth-plugin',
         active: true,
         config: {
             defaultApp: 'gfw',
@@ -167,7 +167,7 @@ module.exports = async function init() {
     await new Plugin({
         name: 'redisCache',
         description: 'Cache request',
-        mainFile: 'ct-redis-cache-plugin',
+        mainFile: 'sd-ct-redis-cache-plugin',
         active: false,
         config: {
             redis: {
