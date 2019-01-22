@@ -1,3 +1,6 @@
+# 2.0.0
+- Copy package to Skydipper repo; update dependencies to Skydipper versions
+
 # 1.0.79
 - Update `ct-oauth` to 1.8.15 - refer to [the plugin's changelog](https://github.com/control-tower/ct-oauth-plugin/blob/1.8.15/CHANGELOG.md) for more details
 
