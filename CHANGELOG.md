@@ -1,3 +1,7 @@
+
+# 2.0.1
+- Update `sd-ct-oauth` to 2.0.4 - refer to [the plugin's changelog](https://github.com/Skydipper/ct-oauth-plugin/blob/2.0.4/CHANGELOG.md) for more details
+
 # 2.0.0
 - Copy package to Skydipper repo; update dependencies to Skydipper versions
 
