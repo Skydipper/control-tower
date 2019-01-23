@@ -1,6 +1,6 @@
 {
   "name": "sd-control-tower",
-  "version": "2.0.1",
+  "version": "2.0.2",
   "description": "Control Tower API gateway - Skydipper edition",
   "main": "index.js",
   "scripts": {
@@ -102,5 +102,8 @@
     "restling": "0.9.1",
     "sleep": "^5.2.3",
     "url-parse": "^1.4.3"
+  },
+  "engines": {
+    "node": ">=9.4 <=11.6"
   }
 }
