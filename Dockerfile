@@ -1,4 +1,4 @@
-FROM node:9.4-alpine
+FROM node:11.6-alpine
 MAINTAINER tiago.garcia@vizzuality.com
 
 ENV NAME control-tower
