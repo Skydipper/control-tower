@@ -1,5 +1,5 @@
 FROM node:9.4-alpine
-MAINTAINER raul.requero@vizzuality.com
+MAINTAINER tiago.garcia@vizzuality.com
 
 ENV NAME control-tower
 ENV USER control_tower
