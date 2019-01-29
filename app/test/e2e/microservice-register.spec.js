@@ -28,21 +28,6 @@ describe('Microservices endpoints', () => {
         nock.cleanAll();
     });
 
-    it('Getting a list of microservices without being authenticated should fail', async () => {
-        const response = await requester.get(`/api/v1/microservice`).send();
-        response.status.should.equal(401);
-    });
-
-    it('Getting a list of microservices should return empty if no services are registered', async () => {
-        const response = await requester
-            .get(`/api/v1/microservice`)
-            .set('Authorization', `Bearer ${TOKENS.ADMIN}`)
-            .send();
-
-        response.status.should.equal(200);
-        response.body.should.be.an.instanceOf(Array).and.have.lengthOf(0);
-    });
-
     /* Register a microservice */
     it('Registering a microservice should be successful', async () => {
         const testMicroserviceOne = {
@@ -75,8 +60,62 @@ describe('Microservices endpoints', () => {
         response.status.should.equal(200);
         response.body.status.should.equal('active');
 
-        (await Microservice.find()).should.have.lengthOf(1);
+        const microservice = await Microservice.find();
+        microservice.should.have.lengthOf(1);
 
+        const endpoints = await Endpoint.find({ toDelete: false });
+        endpoints.should.have.lengthOf(1);
+
+        const deletedEndpoints = await Endpoint.find({ toDelete: true });
+        deletedEndpoints.should.have.lengthOf(0);
+    });
+
+    it('Updating info for an existing microservice should be successful', async () => {
+        const testMicroserviceOne = {
+            name: `test-microservice-one`,
+            url: 'http://test-microservice-one:8000',
+            active: true
+        };
+
+        nock('http://test-microservice-one:8000')
+            .get((uri) => {
+                logger.info('Uri', uri);
+                return uri.startsWith('/info');
+            })
+            .reply(200, {
+                swagger: {},
+                name: 'test-microservice-one',
+                tags: ['test'],
+                endpoints: [{
+                    path: '/v1/testOne',
+                    method: 'GET',
+                    redirect: {
+                        method: 'GET',
+                        path: '/api/v1/testOne'
+                    }
+                }, {
+                    path: '/v1/testTwo',
+                    method: 'GET',
+                    redirect: {
+                        method: 'GET',
+                        path: '/api/v1/testTwo'
+                    }
+                }]
+            });
+
+        const response = await requester.post(`/api/v1/microservice`).send(testMicroserviceOne);
+
+        response.status.should.equal(200);
+        response.body.status.should.equal('active');
+
+        const microservice = await Microservice.find();
+        microservice.should.have.lengthOf(1);
+
+        const endpoints = await Endpoint.find({ toDelete: false });
+        endpoints.should.have.lengthOf(2);
+
+        const deletedEndpoints = await Endpoint.find({ toDelete: true });
+        deletedEndpoints.should.have.lengthOf(1);
     });
 
     it('Authorized status check and registered microservice (happy case)', async () => {
@@ -89,7 +128,7 @@ describe('Microservices endpoints', () => {
 
     it('Deleting a microservice should delete endpoints but keep microservice document in the database (happy case)', async () => {
         (await Microservice.find()).should.have.lengthOf(1);
-        (await Endpoint.find({ toDelete: true })).should.have.lengthOf(0);
+        (await Endpoint.find({ toDelete: true })).should.have.lengthOf(1);
 
         const existingMicroservice = await requester.get(`/api/v1/microservice`)
             .set('Authorization', `Bearer ${TOKENS.ADMIN}`)
@@ -102,7 +141,8 @@ describe('Microservices endpoints', () => {
         response.status.should.equal(200);
 
         (await Microservice.find()).should.have.lengthOf(1);
-        (await Endpoint.find({ toDelete: true })).should.have.lengthOf(1);
+        (await Endpoint.find({ toDelete: true })).should.have.lengthOf(3);
+        (await Endpoint.find({ toDelete: false })).should.have.lengthOf(0);
 
     });
 
@@ -112,15 +152,7 @@ describe('Microservices endpoints', () => {
             .set('Authorization', `Bearer ${TOKENS.ADMIN}`);
 
         response.status.should.equal(200);
-        response.body.should.be.an('array').and.have.lengthOf(1);
-    });
-
-    it('Get documentation for existing endpoints should be successful (happy case)', async () => {
-        const response = await requester.get(`/api/v1/doc/swagger`)
-            .send()
-            .set('Authorization', `Bearer ${TOKENS.ADMIN}`);
-
-        response.status.should.equal(200);
+        response.body.should.be.an('array').and.have.lengthOf(3);
     });
 
     /* Testing redirects and filters */
