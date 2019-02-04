@@ -73,7 +73,7 @@
     "bunyan-syslog-udp": "^0.1.0",
     "config": "^1.21.0",
     "cron": "^1.1.0",
-    "sd-ct-oauth-plugin": "2.0.4",
+    "sd-ct-oauth-plugin": "2.0.5",
     "sd-ct-redis-cache-plugin": "2.0.0",
     "sd-ct-statistics-plugin": "2.0.0",
     "dockerode": "^2.4.3",
