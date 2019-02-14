@@ -1,6 +1,6 @@
 {
   "name": "sd-control-tower",
-  "version": "2.0.4",
+  "version": "2.0.5",
   "description": "Control Tower API gateway - Skydipper edition",
   "main": "index.js",
   "scripts": {
