@@ -10,22 +10,31 @@ const Microservice = new Schema({
     status: { type: String, default: 'pending' },
     cache: [{ type: String, required: false }],
     uncache: [{ type: String, required: false }],
-    infoStatus: {
-        _id: false,
-        lastCheck: { type: Date, required: false },
-        numRetries: { type: Number, required: true, default: 0 },
-        error: { type: String, required: false, trim: true },
-    },
+    infoStatus:
+        new Schema(
+            {
+                lastCheck: { type: Date, required: false },
+                numRetries: { type: Number, required: true, default: 0 },
+                error: { type: String, required: false, trim: true },
+            }, {
+                _id: false
+            }
+        ),
     updatedAt: { type: Date, default: Date.now, required: true },
-    endpoints: [{
-        _id: false,
-        path: { type: String, required: true, trim: true },
-        method: { type: String, required: true, trim: true },
-        redirect: {
-            path: { type: String, required: true, trim: true },
-            method: { type: String, required: true, trim: true },
-        },
-    }],
+    endpoints: [
+        new Schema(
+            {
+                path: { type: String, required: true, trim: true },
+                method: { type: String, required: true, trim: true },
+                redirect: {
+                    path: { type: String, required: true, trim: true },
+                    method: { type: String, required: true, trim: true },
+                },
+            }, {
+                _id: false
+            }
+        )
+    ],
     tags: [{ type: String, required: false, trim: true }],
     version: { type: Number, required: true },
 });
