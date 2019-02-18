@@ -1,47 +1,47 @@
 {
-    "mongodb": {
-        "database": "control_tower_db",
-        "host": "localhost",
-        "port": 27017
-    },
-    "logger": {
-        "name": "API-Gateway-DEV",
-        "level": "debug",
-        "type": "console",
-        "syslog": {
-            "host": "",
-            "port": null,
-            "name": "control-tower-dev"
-        }
-    },
-    "server": {
-        "port": 9000,
-        "publicUrl": "http://control.tower.dev:9000",
-        "internalUrl": "http://localhost:9000",
-        "cookie": {
-            "domain": "control.tower.dev"
-        },
-        "sessionKey": "control-tower-key"
-    },
-    "microservice":{
-        "overrideDuplicated": true
-    },
-    "application": {
-        "name": "Control Tower",
-        "logo": "http://i.imgur.com/BiEx7R3.png",
-        "principalColor": "#5d73f9",
-        "sendNotifications": false
-    },
-    "instapush": {
-        "token": "",
-        "id": "",
-        "secret": "",
-        "events": {
-            "microserviceDown": "microserviceDown",
-            "microserviceRestore": "microserviceRestore"
-        }
-    },
-    "jwt": {
-        "token": ""
+  "mongodb": {
+    "database": "control_tower_db",
+    "host": "localhost",
+    "port": 27017
+  },
+  "logger": {
+    "name": "API-Gateway-DEV",
+    "level": "debug",
+    "type": "console",
+    "syslog": {
+      "host": "",
+      "port": null,
+      "name": "control-tower-dev"
     }
+  },
+  "server": {
+    "port": 9000,
+    "publicUrl": "http://control.tower.dev:9000",
+    "internalUrl": "http://localhost:9000",
+    "cookie": {
+      "domain": "control.tower.dev"
+    },
+    "sessionKey": "control-tower-key"
+  },
+  "microservice": {
+    "overrideDuplicated": true
+  },
+  "application": {
+    "name": "Control Tower",
+    "logo": "http://i.imgur.com/BiEx7R3.png",
+    "principalColor": "#5d73f9",
+    "sendNotifications": false
+  },
+  "instapush": {
+    "token": "",
+    "id": "",
+    "secret": "",
+    "events": {
+      "microserviceDown": "microserviceDown",
+      "microserviceRestore": "microserviceRestore"
+    }
+  },
+  "jwt": {
+    "token": ""
+  }
 }

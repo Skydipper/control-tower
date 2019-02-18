@@ -1,8 +1,8 @@
 {
-     "logger": {
-        "level": "info",
-        "syslog": {
-            "name": "control-tower-staging"
-        }
+  "logger": {
+    "level": "info",
+    "syslog": {
+      "name": "control-tower-staging"
     }
+  }
 }

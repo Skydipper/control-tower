@@ -107,7 +107,8 @@ describe('OAuth endpoints tests - Recover password', () => {
                 };
 
                 return (
-                    body.substitution_data.urlRecover.match(/http.\/\/tower\.dev:5037\/auth\/reset-password\/[\w*]/) &&
+                    body.substitution_data.urlRecover.match(new RegExp(`http:\/\/tower\.dev:${process.env.PORT
+                        }\/auth\/reset\-password\/[\\w\*]`)) &&
                     body.content.template_id === expectedRequestBody.content.template_id &&
                     body.recipients[0].address.email === expectedRequestBody.recipients[0].address.email
                 );
@@ -124,6 +125,8 @@ describe('OAuth endpoints tests - Recover password', () => {
             .send({
                 email: 'potato@gmail.com'
             });
+
+        console.log(response);
 
         response.status.should.equal(200);
         response.header['content-type'].should.equal('text/html; charset=utf-8');
@@ -147,7 +150,8 @@ describe('OAuth endpoints tests - Recover password', () => {
                 };
 
                 return (
-                    body.substitution_data.urlRecover.match(/http.\/\/tower\.dev:5037\/auth\/reset-password\/[\w*]/) &&
+                    body.substitution_data.urlRecover.match(new RegExp(`http:\/\/tower\.dev:${process.env.PORT
+                        }\/auth\/reset\-password\/[\\w\*]`)) &&
                     body.content.template_id === expectedRequestBody.content.template_id &&
                     body.recipients[0].address.email === expectedRequestBody.recipients[0].address.email
                 );

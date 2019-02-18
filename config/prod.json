@@ -1,7 +1,7 @@
 {
-     "logger": {
-        "syslog": {
-            "name": "control-tower-staging"
-        }
+  "logger": {
+    "syslog": {
+      "name": "control-tower-staging"
     }
+  }
 }
