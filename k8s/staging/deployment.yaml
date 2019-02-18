@@ -1,34 +1,18 @@
-apiVersion: v1
-kind: Service
-metadata:
-  labels:
-    name: control-tower
-  name: control-tower
-spec:
-  ports:
-    - name: http
-      protocol: TCP
-      port: 80
-      targetPort: 9000
-  selector:
-    name: control-tower
-
----
 apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
   labels:
-    name: control-tower
-  name: control-tower
+    name: {name}
+  name: {name}
 spec:
   template:
     metadata:
       labels:
-        name: control-tower
+        name: {name}
     spec:
       containers:
-        - name: control-tower
-          image: vizzuality/control-tower:2.0.6
+        - name: {name}
+          image: vizzuality/{name}
           imagePullPolicy: Always
           resources:
             requests:
@@ -205,18 +189,3 @@ spec:
             - containerPort: 9000
 
       restartPolicy: Always
-
----
-apiVersion: autoscaling/v1
-kind: HorizontalPodAutoscaler
-metadata:
-  name: control-tower
-  namespace: default
-spec:
-  scaleTargetRef:
-    apiVersion: apps/v1beta1
-    kind: Deployment
-    name: control-tower
-  minReplicas: 1
-  maxReplicas: 10
-  targetCPUUtilizationPercentage: 60

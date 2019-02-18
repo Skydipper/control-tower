@@ -6,6 +6,9 @@ metadata:
   name: {name}
 spec:
   ports:
-    - port: 3000
+    - name: http
+      protocol: TCP
+      port: 80
+      targetPort: 9000
   selector:
     name: {name}
