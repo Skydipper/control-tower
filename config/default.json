@@ -32,15 +32,6 @@
         "principalColor": "#5d73f9",
         "sendNotifications": false
     },
-    "consul":{
-        "url": "",
-        "basicAuth": {
-            "username": "",
-            "password": ""
-        },
-        "getServicesPath": "/v1/catalog/services",
-        "getServicePath": "/v1/catalog/service"
-    },
     "instapush": {
         "token": "",
         "id": "",
