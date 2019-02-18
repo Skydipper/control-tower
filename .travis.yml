@@ -2,9 +2,8 @@ language: node_js
 services:
   - mongodb
 node_js:
+  - "11"
   - "11.6"
-  - "10"
-  - "9"
 cache:
   directories:
   - "node_modules"

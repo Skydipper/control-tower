@@ -10,7 +10,6 @@ const NotApplicationKey = require('errors/notApplicationKey');
 const FilterError = require('errors/filterError');
 const fs = require('fs');
 const router = new Router();
-// const restling = require('restling');
 const requestPromise = require('request-promise');
 const request = require('request');
 
