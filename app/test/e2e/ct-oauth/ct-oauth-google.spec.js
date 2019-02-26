@@ -97,28 +97,20 @@ describe('Google auth endpoint tests', () => {
                 id_token: 'some_id_token'
             });
 
-        nock('https://www.googleapis.com:443')
-            .get('/plus/v1/people/me')
+        nock('https://www.googleapis.com')
+            .get('/oauth2/v3/userinfo')
             .query({
                 access_token: 'TEST_GOOGLE_OAUTH2_ACCESS_TOKEN'
             })
             .reply(200, {
-                kind: 'plus#person',
-                etag: '"k-5ZH5-QJvSewqvyYHTE9ETORZg/PxCnXGvww9BVjIHZW1fUZXsbsPs"',
-                emails: [{ value: 'john.doe@vizzuality.com', type: 'account' }],
-                objectType: 'person',
-                id: '113994825016233013735',
-                displayName: 'John Doe',
-                name: { familyName: 'Doe', givenName: 'John' },
-                url: 'https://plus.google.com/my-url',
-                image: {
-                    url: 'https://images.pexels.com/photos/20787/pexels-photo.jpg?auto=compress&cs=tinysrgb&h=750&w=1260',
-                    isDefault: false
-                },
-                isPlusUser: true,
-                circledByCount: 0,
-                verified: false,
-                domain: 'vizzuality.com'
+                sub: '113994825016233013735',
+                name: 'John Doe',
+                given_name: 'John',
+                family_name: 'Doe',
+                picture: 'https://images.pexels.com/photos/20787/pexels-photo.jpg?auto=compress&cs=tinysrgb&h=750&w=1260',
+                email: 'john.doe@vizzuality.com',
+                email_verified: true,
+                hd: 'vizzuality.com'
             });
 
 
@@ -157,40 +149,21 @@ describe('Google auth endpoint tests', () => {
         existingUser.should.have.property('providerId').and.equal('113994825016233013735');
         existingUser.should.have.property('userToken').and.equal(undefined);
 
-        // nock('https://www.googleapis.com')
-        //     .get('/oauth2/v3/userinfo')
-        //     .reply(200, {
-        //         sub: '113994825016233013735',
-        //         name: 'John Doe',
-        //         given_name: 'John',
-        //         family_name: 'Doe',
-        //         picture: 'https://images.pexels.com/photos/20787/pexels-photo.jpg?auto=compress&cs=tinysrgb&h=750&w=1260',
-        //         email: 'john.doe@vizzuality.com',
-        //         email_verified: true,
-        //         hd: 'vizzuality.com'
-        //     });
-
-        nock('https://www.googleapis.com:443')
-            .get('/plus/v1/people/me')
+        nock('https://www.googleapis.com')
+            .get('/oauth2/v1/userinfo')
+            .query({
+                access_token: 'TEST_GOOGLE_OAUTH2_ACCESS_TOKEN'
+            })
             .reply(200, {
-                kind: 'plus#person',
-                etag: '"k-5ZH5-QJvSewqvyYHTE9ETORZg/PxCnXGvww9BVjIHZW1fUZXsbsPs"',
-                emails: [{ value: 'john.doe@vizzuality.com', type: 'account' }],
-                objectType: 'person',
                 id: '113994825016233013735',
-                displayName: 'John Doe',
-                name: { familyName: 'Doe', givenName: 'John' },
-                url: 'https://plus.google.com/my-url',
-                image: {
-                    url: 'https://images.pexels.com/photos/20787/pexels-photo.jpg?auto=compress&cs=tinysrgb&h=750&w=1260',
-                    isDefault: false
-                },
-                isPlusUser: true,
-                circledByCount: 0,
-                verified: false,
-                domain: 'vizzuality.com'
+                email: 'john.doe@vizzuality.com',
+                verified_email: true,
+                name: 'John Doe',
+                given_name: 'John',
+                family_name: 'Doe',
+                picture: 'https://images.pexels.com/photos/20787/pexels-photo.jpg?auto=compress&cs=tinysrgb&h=750&w=1260',
+                hd: 'vizzuality.com'
             });
-
 
         const response = await requester
             .get(`/auth/google/token?access_token=TEST_GOOGLE_OAUTH2_ACCESS_TOKEN`)
