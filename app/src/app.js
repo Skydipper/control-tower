@@ -8,6 +8,9 @@ const path = require('path');
 const convert = require('koa-convert');
 const sleep = require('sleep');
 
+// const nock = require('nock');
+// nock.recorder.rec();
+
 const mongoUri = process.env.CT_MONGO_URI || `mongodb://${config.get('mongodb.host')}:${config.get('mongodb.port')}/${config.get('mongodb.database')}`;
 
 const koaBody = require('koa-body')({

@@ -33,8 +33,8 @@ async function setPluginSetting(pluginName, settingKey, settingValue) {
             }
 
             const newConfig = {};
-            const pluginObjkey = `config.${settingKey}`;
-            newConfig[pluginObjkey] = settingValue;
+            const pluginObjectKey = `config.${settingKey}`;
+            newConfig[pluginObjectKey] = settingValue;
 
             return Plugin.update({ name: pluginName }, { $set: newConfig }).exec().then(resolve);
         }

@@ -125,7 +125,7 @@ describe('OAuth endpoints tests - Sign up without auth', () => {
                 };
 
                 return (
-                    body.substitution_data.urlConfirm.match(new RegExp(`http:\/\/tower\.dev:${process.env.PORT}\/auth\/confirm\/[\\w\*]`)) &&
+                    body.substitution_data.urlConfirm.match(new RegExp(`${process.env.PUBLIC_URL}\/auth\/confirm\/[\\w\*]`)) &&
                     body.content.template_id === expectedRequestBody.content.template_id &&
                     body.recipients[0].address.email === expectedRequestBody.recipients[0].address.email
                 );
@@ -234,7 +234,7 @@ describe('OAuth endpoints tests - Sign up without auth', () => {
                 };
 
                 return (
-                    body.substitution_data.urlConfirm.match(new RegExp(`http:\/\/tower\.dev:${process.env.PORT}\/auth\/confirm\/[\\w\*]`)) &&
+                    body.substitution_data.urlConfirm.match(new RegExp(`${process.env.PUBLIC_URL}\/auth\/confirm\/[\\w\*]`)) &&
                     body.content.template_id === expectedRequestBody.content.template_id &&
                     body.recipients[0].address.email === expectedRequestBody.recipients[0].address.email
                 );

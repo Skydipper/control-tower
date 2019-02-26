@@ -79,6 +79,12 @@ Follow the instruction above for setting up the runtime environment for Docker e
 ./controlTower.sh test
 ```
 
+### Google OAuth tests
+
+Some tests require real Google OAuth credentials to be set as environment variables.
+You can get the values to those variables at the [Google APIs page](https://console.developers.google.com/apis/credentials?project=resource-watch&authuser=0&folder&organizationId).
+
+- TEST_GOOGLE_OAUTH2_CLIENT_ID => Google OAuth2 API client ID
 
 ## Documentation
 
@@ -126,7 +132,7 @@ Core Variables
 - NODE_ENV => Environment variable of nodejs. Required.
 - NODE_PATH => Required value. Always set it to 'app/src'.
 
-Oauth Variables
+OAuth Variables
 
 - JWT_SECRET				=> The secret used to generate JWT tokens. It's a required field if the JWT feature in the auth-plugin is active. The JWT feature is active by default.
 - TWITTER_CONSUMER_KEY		=> Twitter OAuth consumer key. If's a required field if the Twitter feature in the auth-plugin is active. It's not active by default.
@@ -156,6 +162,11 @@ Live cron variables
 - INSTAPUSH_TOKEN	=> Instapush token for sending alerts to mobile devices with the Live cron. It's required if you activate Live cron.
 - INSTAPUSH_ID		=> Instapush ID for sending alerts to mobile devices with the Live cron. It's required if you activate Live cron.
 - INSTAPUSH_SECRET	=> Instapush secret for sending alerts to mobile devices with the Live cron. It's required if you activate Live cron.
+
+Variables used for testing environments only:
+
+- TEST_GOOGLE_OAUTH2_CLIENT_ID => Google OAuth2 API client ID
+
 
 ### Audit and statistics
 
