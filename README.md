@@ -85,9 +85,6 @@ Some tests require real Google OAuth credentials to be set as environment variab
 You can get the values to those variables at the [Google APIs page](https://console.developers.google.com/apis/credentials?project=resource-watch&authuser=0&folder&organizationId).
 
 - TEST_GOOGLE_OAUTH2_CLIENT_ID => Google OAuth2 API client ID
-- TEST_GOOGLE_OAUTH2_CLIENT_SECRET =>  Google OAuth2 API client secret
-- TEST_GOOGLE_OAUTH2_ACCESS_TOKEN => Google API access token
-- TEST_GOOGLE_OAUTH2_CALLBACK_CODE => Google OAuth2 access token
 
 ## Documentation
 
@@ -169,9 +166,6 @@ Live cron variables
 Variables used for testing environments only:
 
 - TEST_GOOGLE_OAUTH2_CLIENT_ID => Google OAuth2 API client ID
-- TEST_GOOGLE_OAUTH2_CLIENT_SECRET =>  Google OAuth2 API client secret
-- TEST_GOOGLE_OAUTH2_ACCESS_TOKEN => Google API access token
-- TEST_GOOGLE_OAUTH2_CALLBACK_CODE => Google OAuth2 access token
 
 
 ### Audit and statistics

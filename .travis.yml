@@ -11,7 +11,7 @@ env:
   global:
     - CC_TEST_REPORTER_ID=cbef27efebac45f676a4a44ac1cc1257d32178cd2858f9bc66678a7ab35996fb
     - NODE_ENV=test
-    - PORT=5037
+    - PORT=9000
     - LOGGER_TYPE=console
     - DEBUG=redis-cache-plugin
     - NODE_PATH=app/src
@@ -19,7 +19,7 @@ env:
     - JWT_SECRET=mysecret
     - COOKIE_DOMAIN=mymachine
     - SESSION_KEY=test
-    - PUBLIC_URL=http://tower.dev:5037
+    - PUBLIC_URL=http://localhost:9000
     - SPARKPOST_KEY=fakeSparkpostKey
 before_script:
   - curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter

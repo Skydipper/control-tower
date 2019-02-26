@@ -22,18 +22,19 @@ describe('Google auth endpoint tests', () => {
             throw Error(`Running the test suite with NODE_ENV ${process.env.NODE_ENV} may result in permanent data loss. Please use NODE_ENV=test.`);
         }
 
-        if (!process.env.TEST_GOOGLE_OAUTH2_CLIENT_ID || !process.env.TEST_GOOGLE_OAUTH2_CLIENT_SECRET) {
-            skipTests = true;
-            return;
-        }
-
         // We need to force-start the server, to ensure mongo has plugin info we can manipulate in the next instruction
         await getTestAgent(true);
 
         await setPluginSetting('oauth', 'defaultApp', 'rw');
         await setPluginSetting('oauth', 'thirdParty.rw.google.active', true);
-        await setPluginSetting('oauth', 'thirdParty.rw.google.clientID', process.env.TEST_GOOGLE_OAUTH2_CLIENT_ID);
-        await setPluginSetting('oauth', 'thirdParty.rw.google.clientSecret', process.env.TEST_GOOGLE_OAUTH2_CLIENT_SECRET);
+        await setPluginSetting('oauth', 'thirdParty.rw.google.clientSecret', 'TEST_GOOGLE_OAUTH2_CLIENT_SECRET');
+
+        if (!process.env.TEST_GOOGLE_OAUTH2_CLIENT_ID) {
+            skipTests = true;
+            await setPluginSetting('oauth', 'thirdParty.rw.google.clientID', 'TEST_GOOGLE_OAUTH2_CLIENT_ID');
+        } else {
+            await setPluginSetting('oauth', 'thirdParty.rw.google.clientID', process.env.TEST_GOOGLE_OAUTH2_CLIENT_ID);
+        }
 
         requester = await getTestAgent(true);
 
@@ -61,20 +62,20 @@ describe('Google auth endpoint tests', () => {
     });
 
     it('Visiting /auth/google/callback ', async () => {
-        if (skipTests || !process.env.TEST_GOOGLE_OAUTH2_CALLBACK_CODE) {
+        if (skipTests) {
             return;
         }
 
         nock('https://www.googleapis.com')
             .post('/oauth2/v4/token', {
                 grant_type: 'authorization_code',
-                redirect_uri: 'http://localhost:9000/auth/google/callback',
+                redirect_uri: `${process.env.PUBLIC_URL}/auth/google/callback`,
                 client_id: process.env.TEST_GOOGLE_OAUTH2_CLIENT_ID,
-                client_secret: process.env.TEST_GOOGLE_OAUTH2_CLIENT_SECRET,
-                code: process.env.TEST_GOOGLE_OAUTH2_CALLBACK_CODE
+                client_secret: 'TEST_GOOGLE_OAUTH2_CLIENT_SECRET',
+                code: 'TEST_GOOGLE_OAUTH2_CALLBACK_CODE'
             })
             .reply(200, {
-                access_token: process.env.TEST_GOOGLE_OAUTH2_ACCESS_TOKEN,
+                access_token: 'TEST_GOOGLE_OAUTH2_ACCESS_TOKEN',
                 expires_in: 3599,
                 scope: 'openid https://www.googleapis.com/auth/userinfo.email',
                 token_type: 'Bearer',
@@ -84,7 +85,7 @@ describe('Google auth endpoint tests', () => {
         nock('https://www.googleapis.com:443')
             .get('/plus/v1/people/me')
             .query({
-                access_token: process.env.TEST_GOOGLE_OAUTH2_ACCESS_TOKEN
+                access_token: 'TEST_GOOGLE_OAUTH2_ACCESS_TOKEN'
             })
             .reply(200, {
                 kind: 'plus#person',
@@ -111,7 +112,7 @@ describe('Google auth endpoint tests', () => {
             .send();
 
         const response = await requester
-            .get(`/auth/google/callback?code=${process.env.TEST_GOOGLE_OAUTH2_CALLBACK_CODE}&scope=openid%20email%20https://www.googleapis.com/auth/userinfo.email`)
+            .get(`/auth/google/callback?code=TEST_GOOGLE_OAUTH2_CALLBACK_CODE&scope=openid%20email%20https://www.googleapis.com/auth/userinfo.email`)
             .send();
 
         response.status.should.equal(200);
@@ -121,10 +122,6 @@ describe('Google auth endpoint tests', () => {
     });
 
     it('Visiting /auth/google/token with a valid Google OAuth token should generate a new token', async () => {
-        if (skipTests || !process.env.TEST_GOOGLE_OAUTH2_ACCESS_TOKEN) {
-            return;
-        }
-
         nock('https://www.googleapis.com:443')
             .get('/plus/v1/people/me')
             .reply(200, {
@@ -148,7 +145,7 @@ describe('Google auth endpoint tests', () => {
 
 
         const response = await requester
-            .get(`/auth/google/token?access_token=${process.env.TEST_GOOGLE_OAUTH2_ACCESS_TOKEN}`)
+            .get(`/auth/google/token?access_token=TEST_GOOGLE_OAUTH2_ACCESS_TOKEN`)
             .send();
 
         response.status.should.equal(200);
