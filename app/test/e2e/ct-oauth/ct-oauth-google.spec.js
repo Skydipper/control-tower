@@ -138,6 +138,14 @@ describe('Google auth endpoint tests', () => {
     });
 
     it('Visiting /auth/google/token with a valid Google OAuth token should generate a new token', async () => {
+        await new UserModel({
+            name: 'John Doe',
+            email: 'john.doe@vizzuality.com',
+            role: 'USER',
+            provider: 'google',
+            providerId: '113994825016233013735',
+            photo: 'https://images.pexels.com/photos/20787/pexels-photo.jpg?auto=compress&cs=tinysrgb&h=750&w=1260'
+        }).save();
 
         const existingUser = await UserModel.findOne({ email: 'john.doe@vizzuality.com' }).exec();
         should.exist(existingUser);
@@ -187,17 +195,14 @@ describe('Google auth endpoint tests', () => {
         userWithToken.should.have.property('userToken').and.equal(response.body.token);
     });
 
-    after(async () => {
-        const UserModel = userModelFunc(connection);
-
-        UserModel.deleteMany({}).exec();
-    });
-
-
     afterEach(() => {
         if (!nock.isDone()) {
             throw new Error(`Not all nock interceptors were used: ${nock.pendingMocks()}`);
         }
+
+        const UserModel = userModelFunc(connection);
+
+        UserModel.deleteMany({}).exec();
 
         closeTestAgent();
     });
