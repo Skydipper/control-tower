@@ -1,7 +1,10 @@
 const nock = require('nock');
 const chai = require('chai');
 const jwt = require('jsonwebtoken');
+const mongoose = require('mongoose');
+const config = require('config');
 
+const userModelFunc = require('sd-ct-oauth-plugin/lib/models/user.model');
 const { getTestAgent, closeTestAgent } = require('./../test-server');
 const { setPluginSetting } = require('./../utils');
 
@@ -9,8 +12,13 @@ const should = chai.should();
 
 let requester;
 
+const mongoUri = process.env.CT_MONGO_URI || `mongodb://${config.get('mongodb.host')}:${config.get('mongodb.port')}/${config.get('mongodb.database')}`;
+const connection = mongoose.createConnection(mongoUri);
+
 // https://github.com/mochajs/mocha/issues/2683
 let skipTests = false;
+
+let UserModel;
 
 nock.disableNetConnect();
 nock.enableNetConnect(process.env.HOST_IP);
@@ -37,6 +45,10 @@ describe('Google auth endpoint tests', () => {
         }
 
         requester = await getTestAgent(true);
+
+        UserModel = userModelFunc(connection);
+
+        UserModel.deleteMany({}).exec();
 
         nock.cleanAll();
     });
@@ -65,6 +77,9 @@ describe('Google auth endpoint tests', () => {
         if (skipTests) {
             return;
         }
+
+        const missingUser = await UserModel.findOne({ email: 'john.doe@vizzuality.com' }).exec();
+        should.not.exist(missingUser);
 
         nock('https://www.googleapis.com')
             .post('/oauth2/v4/token', {
@@ -119,9 +134,42 @@ describe('Google auth endpoint tests', () => {
         response.header['content-type'].should.equal('text/html; charset=utf-8');
         response.redirects.should.be.an('array').and.length(1);
         response.redirects[0].should.match(new RegExp(`\/auth\/success$`));
+
+        const confirmedUser = await UserModel.findOne({ email: 'john.doe@vizzuality.com' }).exec();
+        should.exist(confirmedUser);
+        confirmedUser.should.have.property('email').and.equal('john.doe@vizzuality.com');
+        confirmedUser.should.have.property('name').and.equal('John Doe');
+        confirmedUser.should.have.property('photo').and.equal('https://images.pexels.com/photos/20787/pexels-photo.jpg?auto=compress&cs=tinysrgb&h=750&w=1260');
+        confirmedUser.should.have.property('role').and.equal('USER');
+        confirmedUser.should.have.property('provider').and.equal('google');
+        confirmedUser.should.have.property('providerId').and.equal('113994825016233013735');
     });
 
     it('Visiting /auth/google/token with a valid Google OAuth token should generate a new token', async () => {
+
+        const existingUser = await UserModel.findOne({ email: 'john.doe@vizzuality.com' }).exec();
+        should.exist(existingUser);
+        existingUser.should.have.property('email').and.equal('john.doe@vizzuality.com');
+        existingUser.should.have.property('name').and.equal('John Doe');
+        existingUser.should.have.property('photo').and.equal('https://images.pexels.com/photos/20787/pexels-photo.jpg?auto=compress&cs=tinysrgb&h=750&w=1260');
+        existingUser.should.have.property('role').and.equal('USER');
+        existingUser.should.have.property('provider').and.equal('google');
+        existingUser.should.have.property('providerId').and.equal('113994825016233013735');
+        existingUser.should.have.property('userToken').and.equal(undefined);
+
+        // nock('https://www.googleapis.com')
+        //     .get('/oauth2/v3/userinfo')
+        //     .reply(200, {
+        //         sub: '113994825016233013735',
+        //         name: 'John Doe',
+        //         given_name: 'John',
+        //         family_name: 'Doe',
+        //         picture: 'https://images.pexels.com/photos/20787/pexels-photo.jpg?auto=compress&cs=tinysrgb&h=750&w=1260',
+        //         email: 'john.doe@vizzuality.com',
+        //         email_verified: true,
+        //         hd: 'vizzuality.com'
+        //     });
+
         nock('https://www.googleapis.com:443')
             .get('/plus/v1/people/me')
             .reply(200, {
@@ -154,7 +202,24 @@ describe('Google auth endpoint tests', () => {
         response.body.should.have.property('token').and.be.a('string');
 
         jwt.verify(response.body.token, process.env.JWT_SECRET);
+
+        const userWithToken = await UserModel.findOne({ email: 'john.doe@vizzuality.com' }).exec();
+        should.exist(userWithToken);
+        userWithToken.should.have.property('email').and.equal('john.doe@vizzuality.com');
+        userWithToken.should.have.property('name').and.equal('John Doe');
+        userWithToken.should.have.property('photo').and.equal('https://images.pexels.com/photos/20787/pexels-photo.jpg?auto=compress&cs=tinysrgb&h=750&w=1260');
+        userWithToken.should.have.property('role').and.equal('USER');
+        userWithToken.should.have.property('provider').and.equal('google');
+        userWithToken.should.have.property('providerId').and.equal('113994825016233013735');
+        userWithToken.should.have.property('userToken').and.equal(response.body.token);
     });
+
+    after(async () => {
+        const UserModel = userModelFunc(connection);
+
+        UserModel.deleteMany({}).exec();
+    });
+
 
     afterEach(() => {
         if (!nock.isDone()) {
