@@ -15,7 +15,7 @@ services:
       EXEC_MIGRATION: 'true'
       JWT_SECRET: mysecret
       COOKIE_DOMAIN: mymachine
-      PUBLIC_URL: http://tower.dev:9000
+      PUBLIC_URL: http://localhost:9000
       SPARKPOST_KEY: fakeSparkpostKey
       MONGO_PORT_27017_TCP_ADDR: mongo
     command: test
