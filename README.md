@@ -68,6 +68,7 @@ There are two ways to run the included tests:
 ### Using native execution
 
 Follow the instruction above for setting up the runtime environment for native execution, then run:
+
 ```
 npm test
 ```
@@ -75,16 +76,27 @@ npm test
 ### Using Docker
 
 Follow the instruction above for setting up the runtime environment for Docker execution, then run:
+
 ```
 ./controlTower.sh test
 ```
 
-### Google OAuth tests
+### OAuth tests
 
-Some tests require real Google OAuth credentials to be set as environment variables.
+Some tests require real OAuth credentials to be set as environment variables, as it's currently not possible to mock all requests using the mocking library this project employs. The test code is built to detect the presence of these configuration values, and bypass these tests should the variables below not be present.
+
+Additionally, as these tests cause external services to use the callback URLs, the `PUBLIC_URL` env variable needs to be set to `http://localhost:9000`, otherwise the external services will refuse to callback, and the tests will fail.
+
+#### Google OAuth tests
+
 You can get the values to those variables at the [Google APIs page](https://console.developers.google.com/apis/credentials?project=resource-watch&authuser=0&folder&organizationId).
 
 - TEST_GOOGLE_OAUTH2_CLIENT_ID => Google OAuth2 API client ID
+
+#### Facebook OAuth tests
+
+- TEST_FACEBOOK_OAUTH2_APP_ID => Facebook OAuth app ID
+- TEST_FACEBOOK_OAUTH2_APP_SECRET => Facebook OAuth app secret
 
 ## Documentation
 
@@ -143,7 +155,7 @@ OAuth Variables
 - FACEBOOK_CLIENT_SECRET	=> Facebook OAuth client secret. If's a required field if the Facebook feature in the auth-plugin is active. It's not active by default.
 - SPARKPOST_KEY				=> Key to send mails with Sparkpost. It's a required field if you offer a local OAuth provider.
 - CONFIRM_URL_REDIRECT		=> URL to redirect users whenever they activate their account. It's a required field if you offer a local OAuth provider.
-- PUBLIC_URL				=> Base Application URL. It must be the public domain of your Control Tower instance, and it's used to compose account links. It you are offering a local OAuth provider it's a required field.
+- PUBLIC_URL				=> Base Application URL. It must be the public domain of your Control Tower instance, and it's used to compose account links. It you are offering a local OAuth provider it's a required field. This URL also needs to be configured as an acceptable callback on the OAuth provider settings.
 - BASICAUTH_USERNAME		=> Basic authentication's username. Required if you activate basic auth.
 - BASICAUTH_PASSWORD		=> Basic authentication's password. Required if you activate basic auth.
 
@@ -166,6 +178,8 @@ Live cron variables
 Variables used for testing environments only:
 
 - TEST_GOOGLE_OAUTH2_CLIENT_ID => Google OAuth2 API client ID
+- TEST_FACEBOOK_OAUTH2_APP_ID => Facebook OAuth app ID
+- TEST_FACEBOOK_OAUTH2_APP_SECRET => Facebook OAuth app secret
 
 
 ### Audit and statistics

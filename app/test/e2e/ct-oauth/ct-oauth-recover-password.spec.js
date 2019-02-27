@@ -125,8 +125,6 @@ describe('OAuth endpoints tests - Recover password', () => {
                 email: 'potato@gmail.com'
             });
 
-        console.log(response);
-
         response.status.should.equal(200);
         response.header['content-type'].should.equal('text/html; charset=utf-8');
         response.text.should.include(`Email sent`);
