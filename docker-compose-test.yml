@@ -26,7 +26,6 @@ services:
 
   mongo:
     image: mongo
-    container_name: ct-mongo
     command: --smallfiles
     ports:
       - "27017"
