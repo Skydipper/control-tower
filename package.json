@@ -60,7 +60,6 @@
     "should": "^11.2.1"
   },
   "dependencies": {
-    "@google-cloud/logging-bunyan": "^0.10.0",
     "babel-core": "^6.26.3",
     "babel-preset-es2015-node5": "^1.2.0",
     "babel-preset-stage-3": "^6.11.0",

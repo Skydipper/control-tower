@@ -1,21 +1,15 @@
 const config = require('config');
 const bunyan = require('bunyan');
 
-const { LoggingBunyan } = require('@google-cloud/logging-bunyan');
-
 const streams = [
     {
-        stream: process.stdout, level: config.get('logger.level') || 'debug'
+        stream: process.stdout,
+        level: config.get('logger.level') || 'debug'
     }, {
-        stream: process.stderr, level: 'warn'
+        stream: process.stderr,
+        level: 'warn'
     },
 ];
-
-
-if (config.get('logger.stackdriver')) {
-    const loggingBunyan = new LoggingBunyan();
-    streams.push(loggingBunyan.stream('info'));
-}
 
 const logger = bunyan.createLogger({
     name: config.get('logger.name'),
