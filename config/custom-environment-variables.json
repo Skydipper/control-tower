@@ -6,11 +6,7 @@
   },
   "logger": {
     "type": "LOGGER_TYPE",
-    "level": "LOGGER_LEVEL",
-    "syslog": {
-      "host": "LOGGER_SYSLOG_HOST",
-      "port": "LOGGER_SYSLOG_PORT"
-    }
+    "level": "LOGGER_LEVEL"
   },
   "server": {
     "internalUrl": "INTERNAL_URL",

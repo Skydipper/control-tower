@@ -62,12 +62,12 @@
     "supertest": "^3.0.0"
   },
   "dependencies": {
+    "@google-cloud/logging-bunyan": "^0.10.0",
     "babel-core": "^6.26.3",
     "babel-preset-es2015-node5": "^1.2.0",
     "babel-preset-stage-3": "^6.11.0",
     "bluebird": "^3.4.1",
     "bunyan": "^1.8.1",
-    "bunyan-syslog-udp": "^0.1.0",
     "config": "^1.21.0",
     "cron": "^1.1.0",
     "dotenv": "^2.0.0",
