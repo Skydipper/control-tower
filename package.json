@@ -52,14 +52,12 @@
     "grunt-express-server": "0.5.1",
     "grunt-mocha-test": "0.12.7",
     "grunt-notify": "0.4.3",
-    "grunt-simple-nyc": "tandrewnichols/grunt-simple-nyc#nyc@13.3.0",
+    "grunt-simple-nyc": "^2.0.0",
     "load-grunt-tasks": "3.4.0",
     "mocha": "^5.2.0",
     "nock": "^9.0.2",
     "nyc": "^13.3.0",
-    "should": "^11.2.1",
-    "superagent": "^3.3.1",
-    "supertest": "^3.0.0"
+    "should": "^11.2.1"
   },
   "dependencies": {
     "@google-cloud/logging-bunyan": "^0.10.0",
