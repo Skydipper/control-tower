@@ -15,15 +15,6 @@ spec:
           operator: "Equal"
           value: "gateway"
           effect: "NoSchedule"
-      affinity:
-        nodeAffinity:
-          requiredDuringSchedulingIgnoredDuringExecution:
-            nodeSelectorTerms:
-              - matchExpressions:
-                  - key: type
-                    operator: In
-                    values:
-                      - gateway
       containers:
         - name: {name}
           image: vizzuality/{name}
@@ -47,9 +38,9 @@ spec:
             - name: BASICAUTH_USERNAME
               value: vizzuality
             - name: CONFIRM_URL_REDIRECT
-              value: http://www.globalforestwatch.org
+              value: http://api.skydipper.org
             - name: PUBLIC_URL
-              value: http://production-api.globalforestwatch.org
+              value: http://api.skydipper.org
             - name: APP_NAME
               value: "WRI API"
             - name: APP_LOGO
@@ -71,96 +62,6 @@ spec:
                 secretKeyRef:
                   name: ctsecrets
                   key: JWT_SECRET
-            - name: GFW_TWITTER_CONSUMER_KEY
-              valueFrom:
-                secretKeyRef:
-                  name: ctsecrets
-                  key: GFW_TWITTER_CONSUMER_KEY
-            - name: GFW_TWITTER_CONSUMER_SECRET
-              valueFrom:
-                secretKeyRef:
-                  name: ctsecrets
-                  key: GFW_TWITTER_CONSUMER_SECRET
-            - name: GFW_FACEBOOK_CLIENT_ID
-              valueFrom:
-                secretKeyRef:
-                  name: ctsecrets
-                  key: GFW_FACEBOOK_CLIENT_ID
-            - name: GFW_FACEBOOK_CLIENT_SECRET
-              valueFrom:
-                secretKeyRef:
-                  name: ctsecrets
-                  key: GFW_FACEBOOK_CLIENT_SECRET
-            - name: GFW_GOOGLE_CLIENT_ID
-              valueFrom:
-                secretKeyRef:
-                  name: ctsecrets
-                  key: GFW_GOOGLE_CLIENT_ID
-            - name: GFW_GOOGLE_CLIENT_SECRET
-              valueFrom:
-                secretKeyRef:
-                  name: ctsecrets
-                  key: GFW_GOOGLE_CLIENT_SECRET
-            - name: RW_TWITTER_CONSUMER_KEY
-              valueFrom:
-                secretKeyRef:
-                  name: ctsecrets
-                  key: RW_TWITTER_CONSUMER_KEY
-            - name: RW_TWITTER_CONSUMER_SECRET
-              valueFrom:
-                secretKeyRef:
-                  name: ctsecrets
-                  key: RW_TWITTER_CONSUMER_SECRET
-            - name: RW_FACEBOOK_CLIENT_ID
-              valueFrom:
-                secretKeyRef:
-                  name: ctsecrets
-                  key: RW_FACEBOOK_CLIENT_ID
-            - name: RW_FACEBOOK_CLIENT_SECRET
-              valueFrom:
-                secretKeyRef:
-                  name: ctsecrets
-                  key: RW_FACEBOOK_CLIENT_SECRET
-            - name: RW_GOOGLE_CLIENT_ID
-              valueFrom:
-                secretKeyRef:
-                  name: ctsecrets
-                  key: RW_GOOGLE_CLIENT_ID
-            - name: RW_GOOGLE_CLIENT_SECRET
-              valueFrom:
-                secretKeyRef:
-                  name: ctsecrets
-                  key: RW_GOOGLE_CLIENT_SECRET
-            - name: PREP_TWITTER_CONSUMER_KEY
-              valueFrom:
-                secretKeyRef:
-                  name: ctsecrets
-                  key: PREP_TWITTER_CONSUMER_KEY
-            - name: PREP_TWITTER_CONSUMER_SECRET
-              valueFrom:
-                secretKeyRef:
-                  name: ctsecrets
-                  key: PREP_TWITTER_CONSUMER_SECRET
-            - name: PREP_FACEBOOK_CLIENT_ID
-              valueFrom:
-                secretKeyRef:
-                  name: ctsecrets
-                  key: PREP_FACEBOOK_CLIENT_ID
-            - name: PREP_FACEBOOK_CLIENT_SECRET
-              valueFrom:
-                secretKeyRef:
-                  name: ctsecrets
-                  key: PREP_FACEBOOK_CLIENT_SECRET
-            - name: PREP_GOOGLE_CLIENT_ID
-              valueFrom:
-                secretKeyRef:
-                  name: ctsecrets
-                  key: PREP_GOOGLE_CLIENT_ID
-            - name: PREP_GOOGLE_CLIENT_SECRET
-              valueFrom:
-                secretKeyRef:
-                  name: ctsecrets
-                  key: PREP_GOOGLE_CLIENT_SECRET
             - name: BASICAUTH_PASSWORD
               valueFrom:
                 secretKeyRef:

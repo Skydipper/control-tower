@@ -74,78 +74,11 @@ module.exports = async function init() {
         active: true,
         config: {
             defaultApp: 'gfw',
-            thirdParty: {
-                rw: {
-                    twitter: {
-                        active: false,
-                        consumerKey: process.env.RW_TWITTER_CONSUMER_KEY,
-                        consumerSecret: process.env.RW_TWITTER_CONSUMER_SECRET,
-                    },
-                    google: {
-                        active: false,
-                        clientID: process.env.RW_GOOGLE_CLIENT_ID,
-                        clientSecret: process.env.RW_GOOGLE_CLIENT_SECRET,
-                        scope: ['https://www.googleapis.com/auth/plus.me', 'https://www.googleapis.com/auth/userinfo.email'],
-                    },
-                    facebook: {
-                        active: false,
-                        clientID: process.env.RW_FACEBOOK_CLIENT_ID,
-                        clientSecret: process.env.RW_FACEBOOK_CLIENT_SECRET,
-                        scope: ['email'],
-                    },
-                },
-                prep: {
-                    twitter: {
-                        active: false,
-                        consumerKey: process.env.PREP_TWITTER_CONSUMER_KEY,
-                        consumerSecret: process.env.PREP_TWITTER_CONSUMER_SECRET,
-                    },
-                    google: {
-                        active: false,
-                        clientID: process.env.PREP_GOOGLE_CLIENT_ID,
-                        clientSecret: process.env.PREP_GOOGLE_CLIENT_SECRET,
-                        scope: ['https://www.googleapis.com/auth/plus.me', 'https://www.googleapis.com/auth/userinfo.email'],
-                    },
-                    facebook: {
-                        active: false,
-                        clientID: process.env.PREP_FACEBOOK_CLIENT_ID,
-                        clientSecret: process.env.PREP_FACEBOOK_CLIENT_SECRET,
-                        scope: ['email'],
-                    },
-                },
-                gfw: {
-                    twitter: {
-                        active: false,
-                        consumerKey: process.env.GFW_TWITTER_CONSUMER_KEY,
-                        consumerSecret: process.env.GFW_TWITTER_CONSUMER_SECRET,
-                    },
-                    google: {
-                        active: false,
-                        clientID: process.env.GFW_GOOGLE_CLIENT_ID,
-                        clientSecret: process.env.GFW_GOOGLE_CLIENT_SECRET,
-                        scope: ['https://www.googleapis.com/auth/plus.me', 'https://www.googleapis.com/auth/userinfo.email'],
-                    },
-                    facebook: {
-                        active: false,
-                        clientID: process.env.GFW_FACEBOOK_CLIENT_ID,
-                        clientSecret: process.env.GFW_FACEBOOK_CLIENT_SECRET,
-                        scope: ['email'],
-                    },
-                }
-            },
+            thirdParty: {},
             local: {
                 active: true,
                 sparkpostKey: process.env.SPARKPOST_KEY,
                 confirmUrlRedirect: process.env.CONFIRM_URL_REDIRECT,
-                gfw: {
-                    confirmUrlRedirect: process.env.CONFIRM_URL_REDIRECT,
-                },
-                rw: {
-                    confirmUrlRedirect: process.env.CONFIRM_URL_REDIRECT,
-                },
-                prep: {
-                    confirmUrlRedirect: process.env.CONFIRM_URL_REDIRECT,
-                }
             },
             basic: {
                 active: false,
