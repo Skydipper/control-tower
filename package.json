@@ -88,7 +88,7 @@
     "path-to-regexp": "^1.5.3",
     "request": "^2.88.0",
     "request-promise": "^4.1.1",
-    "sd-ct-oauth-plugin": "2.0.7",
+    "sd-ct-oauth-plugin": "2.0.8",
     "sd-ct-redis-cache-plugin": "2.0.0",
     "sd-ct-statistics-plugin": "2.0.0",
     "sleep": "^5.2.3",
