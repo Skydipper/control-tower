@@ -22,4 +22,4 @@ async function onDbReady(err) {
 
 }
 
-mongoose.connect(mongoUri, onDbReady);
+mongoose.connect(mongoUri, { useNewUrlParser: true }, onDbReady);

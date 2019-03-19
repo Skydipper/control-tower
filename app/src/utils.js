@@ -21,7 +21,7 @@ async function isAdmin(ctx, next) {
         await next();
     } else {
         logger.debug('Not admin');
-        ctx.throw(401, 'Not authenticated');
+        ctx.throw(403, 'Not authorized');
     }
 }
 

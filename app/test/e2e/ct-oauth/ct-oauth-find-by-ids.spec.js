@@ -2,22 +2,13 @@
 const nock = require('nock');
 const chai = require('chai');
 
-const mongoose = require('mongoose');
-const config = require('config');
-const userModelFunc = require('sd-ct-oauth-plugin/lib/models/user.model');
+const UserModel = require('plugins/sd-ct-oauth-plugin/models/user.model');
 
 const { createUser } = require('./../utils');
 const { getTestAgent, closeTestAgent } = require('./../test-server');
 const { TOKENS } = require('./../test.constants');
 
-const should = chai.should();
-
 let requester;
-
-const mongoUri = process.env.CT_MONGO_URI || `mongodb://${config.get('mongodb.host')}:${config.get('mongodb.port')}/${config.get('mongodb.database')}`;
-const connection = mongoose.createConnection(mongoUri);
-
-let UserModel;
 
 let userOne;
 let userTwo;
@@ -33,8 +24,6 @@ describe('Find users by id', () => {
         }
 
         requester = await getTestAgent();
-
-        UserModel = userModelFunc(connection);
 
         UserModel.deleteMany({}).exec();
 
@@ -174,8 +163,6 @@ describe('Find users by id', () => {
     });
 
     after(async () => {
-        const UserModel = userModelFunc(connection);
-
         UserModel.deleteMany({}).exec();
 
         closeTestAgent();

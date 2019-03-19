@@ -147,27 +147,27 @@ class DispatcherRouter {
                 ctx.response.type = result.headers['content-type'];
             }
         } catch (err) {
-            logger.error(err);
             if (err instanceof EndpointNotFound) {
-                logger.error('Endpoint not found');
-                ctx.throw(404, 'Endpoint not found');
+                logger.info(`Endpoint not found: ${err.message}`);
+                ctx.throw(404, `Endpoint not found`);
                 return;
             }
             if (err instanceof FilterError) {
-                logger.error('Filter error', err);
+                logger.info('Filter error', err);
                 ctx.throw(500, err.message);
                 return;
             }
             if (err instanceof NotAuthenticated) {
-                logger.error('Not authorized');
+                logger.info('Not authenticated');
                 ctx.throw(401, err.message);
                 return;
             }
             if (err instanceof NotApplicationKey) {
-                logger.error('Not application key');
+                logger.info('Not application key');
                 ctx.throw(401, err.message);
                 return;
             }
+            logger.error(err);
             if (err.errors && err.errors.length > 0 && err.errors[0].status >= 400 && err.errors[0].status < 500) {
                 ctx.status = err.errors[0].status;
                 ctx.body = err;

@@ -1,10 +1,8 @@
 const nock = require('nock');
 const chai = require('chai');
 
-const mongoose = require('mongoose');
-const config = require('config');
-const userModelFunc = require('sd-ct-oauth-plugin/lib/models/user.model');
-const userTempModelFunc = require('sd-ct-oauth-plugin/lib/models/user-temp.model');
+const UserModel = require('plugins/sd-ct-oauth-plugin/models/user.model');
+const UserTempModel = require('plugins/sd-ct-oauth-plugin/models/user-temp.model');
 
 const { setPluginSetting } = require('./../utils');
 const { getTestAgent, closeTestAgent } = require('./../test-server');
@@ -12,12 +10,6 @@ const { getTestAgent, closeTestAgent } = require('./../test-server');
 const should = chai.should();
 
 let requester;
-
-const mongoUri = process.env.CT_MONGO_URI || `mongodb://${config.get('mongodb.host')}:${config.get('mongodb.port')}/${config.get('mongodb.database')}`;
-const connection = mongoose.createConnection(mongoUri);
-
-let UserModel;
-let UserTempModel;
 
 nock.disableNetConnect();
 nock.enableNetConnect(process.env.HOST_IP);
@@ -35,9 +27,6 @@ describe('OAuth endpoints tests - Sign up with JSON content type', () => {
         await setPluginSetting('oauth', 'allowPublicRegistration', true);
 
         requester = await getTestAgent(true);
-
-        UserModel = userModelFunc(connection);
-        UserTempModel = userTempModelFunc(connection);
 
         UserModel.deleteMany({}).exec();
         UserTempModel.deleteMany({}).exec();
@@ -314,9 +303,6 @@ describe('OAuth endpoints tests - Sign up with JSON content type', () => {
     });
 
     after(async () => {
-        const UserModel = userModelFunc(connection);
-        const UserTempModel = userTempModelFunc(connection);
-
         UserModel.deleteMany({}).exec();
         UserTempModel.deleteMany({}).exec();
 

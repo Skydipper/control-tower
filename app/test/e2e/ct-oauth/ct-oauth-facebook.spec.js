@@ -1,12 +1,9 @@
 const nock = require('nock');
 const chai = require('chai');
 const jwt = require('jsonwebtoken');
-const mongoose = require('mongoose');
-const config = require('config');
-const querystring = require('querystring');
 const crypto = require('crypto');
 
-const userModelFunc = require('sd-ct-oauth-plugin/lib/models/user.model');
+const UserModel = require('plugins/sd-ct-oauth-plugin/models/user.model');
 const { getTestAgent, closeTestAgent } = require('./../test-server');
 const { setPluginSetting } = require('./../utils');
 
@@ -14,13 +11,8 @@ const should = chai.should();
 
 let requester;
 
-const mongoUri = process.env.CT_MONGO_URI || `mongodb://${config.get('mongodb.host')}:${config.get('mongodb.port')}/${config.get('mongodb.database')}`;
-const connection = mongoose.createConnection(mongoUri);
-
 // https://github.com/mochajs/mocha/issues/2683
 let skipTests = false;
-
-let UserModel;
 
 nock.disableNetConnect();
 nock.enableNetConnect(process.env.HOST_IP);
@@ -48,8 +40,6 @@ describe('Facebook auth endpoint tests', () => {
         }
 
         requester = await getTestAgent(true);
-
-        UserModel = userModelFunc(connection);
 
         UserModel.deleteMany({}).exec();
 
@@ -208,8 +198,6 @@ describe('Facebook auth endpoint tests', () => {
         if (!nock.isDone()) {
             throw new Error(`Not all nock interceptors were used: ${nock.pendingMocks()}`);
         }
-
-        const UserModel = userModelFunc(connection);
 
         UserModel.deleteMany({}).exec();
 

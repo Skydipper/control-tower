@@ -36,10 +36,10 @@ async function setPluginSetting(pluginName, settingKey, settingValue) {
             const pluginObjectKey = `config.${settingKey}`;
             newConfig[pluginObjectKey] = settingValue;
 
-            return Plugin.update({ name: pluginName }, { $set: newConfig }).exec().then(resolve);
+            return Plugin.updateOne({ name: pluginName }, { $set: newConfig }).exec().then(resolve);
         }
 
-        mongoose.connect(mongoUri, onDbReady);
+        mongoose.connect(mongoUri, { useNewUrlParser: true }, onDbReady);
     });
 }
 
