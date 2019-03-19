@@ -4,7 +4,6 @@ const appConstants = require('app.constants');
 const MicroserviceModel = require('models/microservice.model');
 const EndpointModel = require('models/endpoint.model');
 const VersionModel = require('models/version.model');
-const MicroserviceDuplicated = require('errors/microserviceDuplicated');
 const MicroserviceNotExist = require('errors/microserviceNotExist');
 const request = require('request-promise');
 const url = require('url');
@@ -16,7 +15,6 @@ const JWT = Promise.promisifyAll(require('jsonwebtoken'));
 
 const MICRO_STATUS_PENDING = 'pending';
 const MICRO_STATUS_ACTIVE = 'active';
-const MICRO_STATUS_DEACTIVATED = 'deactivated';
 const MICRO_STATUS_ERROR = 'error';
 
 class Microservice {
@@ -223,7 +221,6 @@ class Microservice {
             let version = ver;
             let existingVersion = null;
             if (!version) {
-                existingVersion = true;
                 const versionFound = await VersionModel.findOne({
                     name: appConstants.ENDPOINT_VERSION,
                 });
@@ -236,24 +233,6 @@ class Microservice {
                 url: info.url,
                 version,
             });
-            // if (exist) {
-            //     if (!config.get('microservice.overrideDuplicated')) {
-            //         logger.debug('Not override activated');
-            //         throw new MicroserviceDuplicated(`Microservice with url ${info.url} exists`);
-            //     } else {
-            //         logger.debug('Override activated, Removing old version of microservice');
-            //         const finded = await MicroserviceModel.find({
-            //             url: info.url,
-            //             version,
-            //         });
-            //         if (finded) {
-            //             for (let i = 0; i < finded.length; i++) {
-            //                 await Microservice.remove(finded[i]._id); // eslint-disable-line no-underscore-dangle
-            //             }
-            //         }
-
-            //     }
-            // }
             let micro = null;
             if (existingMicroservice) {
                 existingMicroservice = await MicroserviceModel.findByIdAndUpdate(existingMicroservice._id, {

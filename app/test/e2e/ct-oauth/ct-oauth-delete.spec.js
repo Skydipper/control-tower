@@ -4,8 +4,8 @@ const chai = require('chai');
 
 const mongoose = require('mongoose');
 const config = require('config');
-const userModelFunc = require('sd-ct-oauth-plugin/lib/models/user.model');
-const whiteListModelFunc = require('sd-ct-oauth-plugin/lib/models/white-list.model');
+const UserModel = require('plugins/sd-ct-oauth-plugin/models/user.model');
+const whiteListModelFunc = require('plugins/sd-ct-oauth-plugin/models/white-list.model');
 
 const { getTestAgent, closeTestAgent } = require('./../test-server');
 const { TOKENS } = require('./../test.constants');
@@ -17,7 +17,6 @@ let requester;
 const mongoUri = process.env.CT_MONGO_URI || `mongodb://${config.get('mongodb.host')}:${config.get('mongodb.port')}/${config.get('mongodb.database')}`;
 const connection = mongoose.createConnection(mongoUri);
 
-let UserModel;
 let WhiteListModel;
 
 nock.disableNetConnect();
@@ -32,7 +31,6 @@ describe('Auth endpoints tests - Delete user', () => {
 
         requester = await getTestAgent();
 
-        UserModel = userModelFunc(connection);
         WhiteListModel = whiteListModelFunc(connection);
 
         UserModel.deleteMany({}).exec();
@@ -140,7 +138,6 @@ describe('Auth endpoints tests - Delete user', () => {
 
 
     after(async () => {
-        const UserModel = userModelFunc(connection);
         const WhiteListModel = whiteListModelFunc(connection);
 
         UserModel.deleteMany({}).exec();

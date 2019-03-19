@@ -130,7 +130,7 @@ class Dispatcher {
                 for (let j = 0, lengthRF = redirect.filters.length; j < lengthRF; j++) {
                     const filterValue = Dispatcher.searchFilterValue(redirect.filters[j], filters);
                     if (!filterValue || !Dispatcher.checkCompare(redirect.filters[j].compare, filterValue, redirect.filters[j].condition)) {
-                        logger.warn('Not valid filter');
+                        logger.debug('Not valid filter');
                         valid = false;
                         break;
                     }
@@ -248,7 +248,7 @@ class Dispatcher {
         logger.debug('Version found ', version);
         logger.debug('Version last', version.lastUpdated);
         if (!CACHE.version || !CACHE.version.lastUpdated || !version.lastUpdated || CACHE.version.lastUpdated.getTime() !== version.lastUpdated.getTime()) {
-            logger.debug('Reloading endponts');
+            logger.debug('Reloading endpoints');
             await Dispatcher.reloadEndpoints(version);
         }
         logger.debug('Searching endpoints');
@@ -291,7 +291,7 @@ class Dispatcher {
         let redirectEndpoint = null;
         endpoint = await Dispatcher.checkFilters(parsedUrl.pathname, endpoint);
         if (endpoint && endpoint.redirect.length === 0) {
-            logger.error('Not exist redirects');
+            logger.error('No redirects exist');
             throw new EndpointNotFound(`${parsedUrl.pathname} not found`);
         }
 
