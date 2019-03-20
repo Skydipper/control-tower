@@ -42,9 +42,9 @@ spec:
             - name: PUBLIC_URL
               value: http://api.skydipper.org
             - name: APP_NAME
-              value: "WRI API"
+              value: "Skydipper API"
             - name: APP_LOGO
-              value: http://www.wri.org/sites/all/themes/wri/images/logo.png
+              value: http://developer.skydipper.com/images/logo-skydipper.png
             - name: APP_COLOR
               value: "#f1b319"
             - name: CT_MONGO_URI
@@ -72,31 +72,6 @@ spec:
                 secretKeyRef:
                   name: ctsecrets
                   key: SPARKPOST_KEY
-            - name: INSTAPUSH_TOKEN
-              valueFrom:
-                secretKeyRef:
-                  name: ctsecrets
-                  key: INSTAPUSH_TOKEN
-            - name: INSTAPUSH_ID
-              valueFrom:
-                secretKeyRef:
-                  name: ctsecrets
-                  key: INSTAPUSH_ID
-            - name: INSTAPUSH_SECRET
-              valueFrom:
-                secretKeyRef:
-                  name: ctsecrets
-                  key: INSTAPUSH_SECRET
-            - name: FASTLY_APIKEY
-              valueFrom:
-                secretKeyRef:
-                  name: ctsecrets
-                  key: FASTLY_APIKEY
-            - name: FASTLY_SERVICEID
-              valueFrom:
-                secretKeyRef:
-                  name: ctsecrets
-                  key: FASTLY_SERVICEID
 
           ports:
             - containerPort: 9000
