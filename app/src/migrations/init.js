@@ -13,7 +13,7 @@ module.exports = async function init() {
     }
 
     logger.info('Initializing migration');
-    await Plugin.remove({});
+    await Plugin.deleteMany({});
     logger.info('Creating new plugins');
     await new Plugin({
         name: 'timeRequest',
@@ -52,9 +52,9 @@ module.exports = async function init() {
     await new Plugin({
         name: 'statistics',
         description: 'Add statistics info',
-        mainFile: 'sd-ct-statistics-plugin',
+        mainFile: 'plugins/sd-ct-statistics-plugin',
         active: true,
-        cronFile: 'sd-ct-statistics-plugin/cron',
+        cronFile: 'plugins/sd-ct-statistics-plugin/crons/cron',
     }).save();
     await new Plugin({
         name: 'sessionMongo',
@@ -70,7 +70,7 @@ module.exports = async function init() {
     await new Plugin({
         name: 'oauth',
         description: 'Plugin oauth with passport',
-        mainFile: 'sd-ct-oauth-plugin',
+        mainFile: 'plugins/sd-ct-oauth-plugin',
         active: true,
         config: {
             defaultApp: 'gfw',
@@ -165,19 +165,6 @@ module.exports = async function init() {
     }).save();
 
     await new Plugin({
-        name: 'redisCache',
-        description: 'Cache request',
-        mainFile: 'sd-ct-redis-cache-plugin',
-        active: false,
-        config: {
-            redis: {
-                host: process.env.REDIS_PORT_6379_TCP_ADDR,
-                port: process.env.REDIS_PORT_6379_TCP_PORT,
-            },
-            timeCache: 60 * 60 * 24,
-        },
-    }).save();
-    await new Plugin({
         name: 'appKey',
         description: 'Application key authorization',
         mainFile: 'plugins/app-key',
@@ -198,8 +185,8 @@ module.exports = async function init() {
         },
     }).save();
 
-    await Microservice.remove({});
-    await Endpoint.remove({});
-    await Version.remove({});
+    await Microservice.deleteMany({});
+    await Endpoint.deleteMany({});
+    await Version.deleteMany({});
     await new Version({ name: appConstants.ENDPOINT_VERSION, version: 1 }).save();
 };

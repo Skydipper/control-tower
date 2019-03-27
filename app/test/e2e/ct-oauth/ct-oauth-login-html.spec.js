@@ -3,7 +3,7 @@ const chai = require('chai');
 
 const mongoose = require('mongoose');
 const config = require('config');
-const userModelFunc = require('sd-ct-oauth-plugin/lib/models/user.model');
+const UserModel = require('plugins/sd-ct-oauth-plugin/models/user.model');
 
 const { getTestAgent, closeTestAgent } = require('./../test-server');
 const { TOKENS } = require('./../test.constants');
@@ -15,8 +15,6 @@ let requester;
 const mongoUri = process.env.CT_MONGO_URI || `mongodb://${config.get('mongodb.host')}:${config.get('mongodb.port')}/${config.get('mongodb.database')}`;
 const connection = mongoose.createConnection(mongoUri);
 
-let UserModel;
-
 nock.disableNetConnect();
 nock.enableNetConnect(process.env.HOST_IP);
 
@@ -26,8 +24,6 @@ describe('Auth endpoints tests', () => {
         if (process.env.NODE_ENV !== 'test') {
             throw Error(`Running the test suite with NODE_ENV ${process.env.NODE_ENV} may result in permanent data loss. Please use NODE_ENV=test.`);
         }
-
-        UserModel = userModelFunc(connection);
 
         UserModel.deleteMany({}).exec();
 
@@ -71,6 +67,7 @@ describe('Auth endpoints tests', () => {
         response.redirects.should.be.an('array').and.length(3);
         response.redirects[0].should.match(/\/auth\/login$/);
         response.redirects[1].should.match(/\/auth\/success$/);
+        response.redirects[2].should.equal('https://www.wikipedia.org/');
     });
 
     it('Visiting /auth/login while not being logged in should show you the login page', async () => {
@@ -220,8 +217,6 @@ describe('Auth endpoints tests', () => {
     });
 
     after(async () => {
-        const UserModel = userModelFunc(connection);
-
         UserModel.deleteMany({}).exec();
     });
 

@@ -6,18 +6,18 @@ function init() {
 }
 
 function middleware(app) {
-    app.use(async(ctx, next) => {
+    app.use(async (ctx, next) => {
         await next();
         try {
             if (ctx.query.format) {
                 switch (ctx.query.format) {
 
-                case 'xml':
-                    ctx.body = `<?xml version="1.0" encoding="UTF-8"?>${json2xml({ root: ctx.body })}`;
-                    ctx.set('content-type', 'application/xml');
-                    break;
-                default:
-                    break;
+                    case 'xml':
+                        ctx.body = `<?xml version="1.0" encoding="UTF-8"?>${json2xml({ root: ctx.body })}`;
+                        ctx.set('content-type', 'application/xml');
+                        break;
+                    default:
+                        break;
 
                 }
             }

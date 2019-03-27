@@ -10,8 +10,14 @@ function middleware(app, plugin) {
         try {
             await next();
         } catch (error) {
-            logger.error(error);
+
             ctx.status = error.status || 500;
+
+            if (ctx.status >= 500) {
+                logger.error(error);
+            } else {
+                logger.info(error);
+            }
 
             if (process.env.NODE_ENV === 'prod' && ctx.status === 500) {
                 if (plugin.config.jsonAPIErrors) {

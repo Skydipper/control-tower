@@ -8,11 +8,8 @@
     "name": "API-Gateway-DEV",
     "level": "debug",
     "type": "console",
-    "syslog": {
-      "host": "",
-      "port": null,
-      "name": "control-tower-dev"
-    }
+    "toFile": false,
+    "stackdriver": false
   },
   "server": {
     "port": 9000,

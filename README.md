@@ -140,7 +140,6 @@ Token: `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjFhMTBkN2M2ZTBhMzcxMjY2MTF
 Core Variables
 
 - PORT => The port where control-tower listens for requests. Defaults to 9000 when not set.
-- LOGGER_TYPE => Type of logger. Possible values: console, syslog. Defaults to console.
 - NODE_ENV => Environment variable of nodejs. Required.
 - NODE_PATH => Required value. Always set it to 'app/src'.
 
