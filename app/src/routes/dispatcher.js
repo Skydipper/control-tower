@@ -172,10 +172,6 @@ class DispatcherRouter {
                 ctx.status = err.errors[0].status;
                 ctx.body = err;
             } else {
-                if (process.env.NODE_ENV === 'prod') {
-                    ctx.throw(500, 'Unexpected error');
-                    return;
-                }
                 let message = '';
                 if (err.message) {
                     message += err.message;
@@ -183,6 +179,12 @@ class DispatcherRouter {
                 if (err.exception) {
                     message += ` --- ${err.exception}`;
                 }
+                if (process.env.NODE_ENV === 'prod') {
+                    logger.error(`Unexpected error dispatching url: ${message}`);
+                    ctx.throw(500, 'Unexpected error');
+                    return;
+                }
+
                 ctx.throw(err.statusCode || 500, message);
                 return;
             }
@@ -204,7 +206,7 @@ class DispatcherRouter {
 
 async function authMicroservice(ctx, next) {
     if (ctx.headers && ctx.headers.authentication) {
-        logger.debug('Authenticated microservice with token: ', ctx.headers.authentication);
+        logger.debug('Attempting to authenticate microservice with token: ', ctx.headers.authentication);
         try {
             const service = await JWT.verify(ctx.headers.authentication, config.get('jwt.token'));
             if (service) {
@@ -215,7 +217,15 @@ async function authMicroservice(ctx, next) {
                 };
             }
         } catch (err) {
-            logger.error('Token invalid', err);
+            const errorJson = {
+                errorMessage: err.message,
+                authHeader: ctx.headers.authentication,
+                originalRequest: ctx.request.url,
+                method: ctx.request.method,
+                body: ctx.request.body
+            };
+
+            logger.error('Invalid authorization token from microservice: ', JSON.stringify(errorJson));
         }
     }
 
