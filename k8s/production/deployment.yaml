@@ -38,9 +38,9 @@ spec:
             - name: BASICAUTH_USERNAME
               value: vizzuality
             - name: CONFIRM_URL_REDIRECT
-              value: http://api.skydipper.org
+              value: http://api.skydipper.com
             - name: PUBLIC_URL
-              value: http://api.skydipper.org
+              value: http://api.skydipper.com
             - name: APP_NAME
               value: "Skydipper API"
             - name: APP_LOGO
