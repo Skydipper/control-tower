@@ -11,8 +11,16 @@ const streams = [
     },
 ];
 
+if (config.get('logger.toFile')) {
+    streams.push({
+        level: config.get('logger.level') || 'debug',
+        path: config.get('logger.dirLogFile')
+    });
+}
+
 const logger = bunyan.createLogger({
     name: config.get('logger.name'),
+    src: true,
     streams,
 });
 

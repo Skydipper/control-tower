@@ -8,6 +8,7 @@
     "name": "API-Gateway-DEV",
     "level": "debug",
     "type": "console",
+    "toFile": false,
     "stackdriver": false
   },
   "server": {
