@@ -14,6 +14,8 @@ services:
     volumes:
 #      - ./app:/opt/control-tower/app
       - /var/run/docker.sock:/var/run/docker.sock
+    extra_hosts:
+      - "mymachine:$MYMACHINE"
 
   # varnish:
   #    image: zazukoians/varnish
