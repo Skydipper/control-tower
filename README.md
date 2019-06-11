@@ -12,7 +12,6 @@ Native execution requires:
 - [MongoDB](https://www.mongodb.com/)
 - [Redis](https://redis.io/)
 
-
 Execution using Docker requires:
 - [Docker](https://www.docker.com/)
 - [Docker Compose](https://docs.docker.com/compose/)
@@ -22,7 +21,7 @@ Execution using Docker requires:
 Start by cloning the repository from github to your execution environment
 
 ```
-git clone https://github.com/control-tower/control-tower.git && cd control-tower
+git clone https://github.com/Skydipper/control-tower.git && cd control-tower
 ```
 
 After that, follow one of the instructions below:
@@ -52,12 +51,13 @@ Control Tower should now be up and accessible. To confirm, open [http://localhos
 ./controlTower.sh develop
 ```
 
-
 3 - It's recommended to add the following line to your `/etc/hosts` (if you are in Windows, the hosts file is located in `c:\Windows\System32\Drivers\etc\hosts` and you'll need to 'Run as administrator' your editor):
 
 ```
 mymachine   <yourIP>
 ```
+
+4 - If using docker for Linux, you should set an environment variable to expose this hostname to the application (e.g. by adding a line at `/etc/environment`). 
 
 Control Tower should now be up and accessible. To confirm, open [http://mymachine:9000](http://mymachine:9000/) on your browser, which should show a 404 'Endpoint not found' message.
 
@@ -112,13 +112,7 @@ A JWT token contains the following information:
   "email": "admin@control-tower.org",
   "extraUserData": {
     "apps": [
-      "rw",
-      "gfw",
-      "gfw-climate",
-      "prep",
-      "aqueduct",
-      "forest-atlas",
-      "data4sdgs"
+      "skydipper"
     ]
   }
 }
@@ -127,13 +121,13 @@ A JWT token contains the following information:
 In a dev environment, you can use the following tokens to identify as different users (generated with `mysecret` key).
 
 Role USER, registered with all Applications
-Token: `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjFhMTBkN2M2ZTBhMzcxMjY2MTFmZDdhNyIsInJvbGUiOiJVU0VSIiwicHJvdmlkZXIiOiJsb2NhbCIsImVtYWlsIjoidXNlckBjb250cm9sLXRvd2VyLm9yZyIsImV4dHJhVXNlckRhdGEiOnsiYXBwcyI6WyJydyIsImdmdyIsImdmdy1jbGltYXRlIiwicHJlcCIsImFxdWVkdWN0IiwiZm9yZXN0LWF0bGFzIiwiZGF0YTRzZGdzIl19fQ.eePyj9grA2akg2vKqmLz5Gg8hd2Afq64ZaeGLb-aLC0`
+Token: `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjFhMTBkN2M2ZTBhMzcxMjY2MTFmZDdhNyIsInJvbGUiOiJVU0VSIiwicHJvdmlkZXIiOiJsb2NhbCIsImVtYWlsIjoidXNlckBjb250cm9sLXRvd2VyLm9yZyIsImV4dHJhVXNlckRhdGEiOnsiYXBwcyI6WyJza3lkaXBwZXIiXX19.7pyeX-xJuNAomXKMFKEehI8TYdsxUTc1GLW3msRC8bw`
 
 Role MANAGER, registered with all Applications
-Token: `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjFhMTBkN2M2ZTBhMzcxMjY2MTFmZDdhNyIsInJvbGUiOiJNQU5BR0VSIiwicHJvdmlkZXIiOiJsb2NhbCIsImVtYWlsIjoibWFuYWdlckBjb250cm9sLXRvd2VyLm9yZyIsImV4dHJhVXNlckRhdGEiOnsiYXBwcyI6WyJydyIsImdmdyIsImdmdy1jbGltYXRlIiwicHJlcCIsImFxdWVkdWN0IiwiZm9yZXN0LWF0bGFzIiwiZGF0YTRzZGdzIl19fQ.ONb6dBz-pYxmXP3ECmRT7zmJHy8Dzn1GYyE6ndOR1Uw`
+Token: `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjFhMTBkN2M2ZTBhMzcxMjY2MTFmZDdhNyIsInJvbGUiOiJNQU5BR0VSIiwicHJvdmlkZXIiOiJsb2NhbCIsImVtYWlsIjoibWFuYWdlckBjb250cm9sLXRvd2VyLm9yZyIsImV4dHJhVXNlckRhdGEiOnsiYXBwcyI6WyJza3lkaXBwZXIiXX19.QSVWionzGW9bkVUZib4aiObs5-qknzUJvqougddV6Fc`
 
 Role ADMIN, registered with all Applications
-Token: `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjFhMTBkN2M2ZTBhMzcxMjY2MTFmZDdhNyIsInJvbGUiOiJBRE1JTiIsInByb3ZpZGVyIjoibG9jYWwiLCJlbWFpbCI6ImFkbWluQGNvbnRyb2wtdG93ZXIub3JnIiwiZXh0cmFVc2VyRGF0YSI6eyJhcHBzIjpbInJ3IiwiZ2Z3IiwiZ2Z3LWNsaW1hdGUiLCJwcmVwIiwiYXF1ZWR1Y3QiLCJmb3Jlc3QtYXRsYXMiLCJkYXRhNHNkZ3MiXX19.FglwGCDjeh5c3bdmV0GA6QiMd-I1AdbdHCLQQGUPRxw`
+Token: `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjFhMTBkN2M2ZTBhMzcxMjY2MTFmZDdhNyIsInJvbGUiOiJBRE1JTiIsInByb3ZpZGVyIjoibG9jYWwiLCJlbWFpbCI6ImFkbWluQGNvbnRyb2wtdG93ZXIub3JnIiwiZXh0cmFVc2VyRGF0YSI6eyJhcHBzIjpbInNreWRpcHBlciJdfX0.U49Riudd0_1iGcu4BciGxsHArXTAr7iUbJmtqPulgQg`
 
 ### Environment variables
 
@@ -183,7 +177,7 @@ Variables used for testing environments only:
 
 ### Audit and statistics
 
-Actions going through Control Tower are logged on the `statistics` (sorry about the typo) table, with the following format:
+Actions going through Control Tower are logged on the `statistics` table, with the following format:
 
 ```json
 {
@@ -198,9 +192,7 @@ Actions going through Control Tower are logged on the `statistics` (sorry about 
     "createdAt": 1542063295822,
     "extraUserData": {
       "apps": [
-        "gfw",
-        "forest-atlas",
-        "rw"
+      "skydipper"
       ]
     },
     "email": "john@doe.org",
