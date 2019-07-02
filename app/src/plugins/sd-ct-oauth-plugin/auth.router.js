@@ -166,8 +166,15 @@ module.exports = (plugin, connection, generalConfig) => {
         }
 
         async function getUserById(ctx) {
-            debug('Get User by id');
-            ctx.body = await AuthService.getUserById(ctx.params.id);
+            debug('Get User by id: ', ctx.params.id);
+
+            const user = await AuthService.getUserById(ctx.params.id);
+
+            if (!user) {
+                ctx.throw(404, 'User not found');
+                return;
+            }
+            ctx.body = user;
         }
 
         async function findByIds(ctx) {
