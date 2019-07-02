@@ -79,7 +79,7 @@ describe('Auth endpoints tests - Delete user', () => {
 
     it('Deleting a user with an id that does not match an existing user should return a 404', async () => {
         const response = await requester
-            .delete(`/auth/user/1123`)
+            .delete(`/auth/user/41224d776a326fb40f000001`)
             .set('Content-Type', 'application/json')
             .set('Authorization', `Bearer ${TOKENS.ADMIN}`)
             .send();
@@ -88,6 +88,17 @@ describe('Auth endpoints tests - Delete user', () => {
         response.body.should.have.property('errors').and.be.an('array');
         response.body.errors[0].status.should.equal(404);
         response.body.errors[0].detail.should.equal('User not found');
+    });
+
+    it('Delete user with an invalid id of a user that does not exist returns a 422', async () => {
+        const response = await requester
+            .delete(`/auth/user/1234`)
+            .set('Authorization', `Bearer ${TOKENS.MICROSERVICE}`)
+            .send();
+
+        response.status.should.equal(422);
+        response.body.should.have.property('errors').and.be.an('array');
+        response.body.errors[0].should.have.property('detail').and.equal(`Invalid id 1234 provided`);
     });
 
     it('Deleting an existing user should return a 200 and the deleted user data', async () => {
