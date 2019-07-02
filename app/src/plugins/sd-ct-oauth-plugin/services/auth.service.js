@@ -3,10 +3,12 @@ const Promise = require('bluebird');
 const JWT = Promise.promisifyAll(require('jsonwebtoken'));
 const bcrypt = require('bcrypt');
 const crypto = require('crypto');
-const { ObjectId } = require('mongoose').Types;
+const mongoose = require('mongoose');
+const { ObjectId } = mongoose.Types;
 
 const whiteListModelFunc = require('plugins/sd-ct-oauth-plugin/models/white-list.model');
 const mailServiceFunc = require('plugins/sd-ct-oauth-plugin/services/mail.service');
+const UnprocessableEntityError = require('plugins/sd-ct-oauth-plugin/errors/unprocessableEntity.error');
 
 const UserModel = require('plugins/sd-ct-oauth-plugin/models/user.model');
 const RenewModel = require('plugins/sd-ct-oauth-plugin/models/renew.model');
@@ -115,6 +117,12 @@ function authService(plugin, connection) {
         }
 
         static async getUserById(id) {
+            const isValidId = mongoose.Types.ObjectId.isValid(id);
+
+            if (!isValidId) {
+                debug(`[Auth Service - getUserById] - Invalid id ${id} provided`);
+                throw new UnprocessableEntityError(`Invalid id ${id} provided`);
+            }
             return UserModel.findById(id).select('-password -salt -userToken -__v').exec();
         }
 
@@ -151,14 +159,23 @@ function authService(plugin, connection) {
         }
 
         static async deleteUser(id) {
+            const isValidId = mongoose.Types.ObjectId.isValid(id);
+
+            if (!isValidId) {
+                debug(`[Auth Service - deleteUser] Invalid id ${id} provided`);
+                throw new UnprocessableEntityError(`Invalid id ${id} provided`);
+            }
+
             let user;
             try {
                 user = await UserModel.findById(id).exec();
             } catch (e) {
+                debug(`[Auth Service - deleteUser] Failed to load user by id '${id}'`);
                 return null;
             }
 
             if (!user) {
+                debug(`[Auth Service - deleteUser] No user found with id '${id}'`);
                 return null;
             }
 
