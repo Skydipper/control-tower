@@ -5,6 +5,24 @@ const TOKENS = {
     MICROSERVICE: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6Im1pY3Jvc2VydmljZSIsInJvbGUiOiJBRE1JTiIsInByb3ZpZGVyIjoibG9jYWwiLCJlbWFpbCI6Im1pY3Jvc2VydmljZUBjb250cm9sLXRvd2VyLm9yZyIsImV4dHJhVXNlckRhdGEiOnsiYXBwcyI6WyJydyIsImdmdyIsImdmdy1jbGltYXRlIiwicHJlcCIsImFxdWVkdWN0IiwiZm9yZXN0LWF0bGFzIiwiZGF0YTRzZGdzIl19fQ.nbC1lngIFcGgGBFwRYV54fGaGmcck-Ocotr3qDXkyTs'
 };
 
+
+const microserviceTest = {
+    name: 'dataset',
+    tags: ['dataset'],
+    url: 'http://127.0.0.1:6000',
+    endpoints: [
+        {
+            path: '/v1/dataset',
+            method: 'GET',
+            redirect: {
+                method: 'GET',
+                path: '/api/v1/dataset'
+            }
+        }
+    ]
+};
+
 module.exports = {
-    TOKENS
+    TOKENS,
+    microserviceTest
 };
