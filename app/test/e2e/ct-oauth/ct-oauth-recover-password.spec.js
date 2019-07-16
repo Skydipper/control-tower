@@ -1,17 +1,17 @@
 const nock = require('nock');
 const chai = require('chai');
 
-const mongoose = require('mongoose');
-const config = require('config');
 const UserModel = require('plugins/sd-ct-oauth-plugin/models/user.model');
 const UserTempModel = require('plugins/sd-ct-oauth-plugin/models/user-temp.model');
+const RenewModel = require('plugins/sd-ct-oauth-plugin/models/renew.model');
+const { isEqual } = require('lodash');
+
+const should = chai.should();
 
 const { getTestAgent, closeTestAgent } = require('./../test-server');
 
 let requester;
 
-const mongoUri = process.env.CT_MONGO_URI || `mongodb://${config.get('mongodb.host')}:${config.get('mongodb.port')}/${config.get('mongodb.database')}`;
-const connection = mongoose.createConnection(mongoUri);
 
 nock.disableNetConnect();
 nock.enableNetConnect(process.env.HOST_IP);
@@ -27,6 +27,15 @@ describe('OAuth endpoints tests - Recover password', () => {
 
         UserModel.deleteMany({}).exec();
         UserTempModel.deleteMany({}).exec();
+
+        nock.cleanAll();
+    });
+
+    beforeEach(async () => {
+
+        UserModel.deleteMany({}).exec();
+        UserTempModel.deleteMany({}).exec();
+        RenewModel.deleteMany({}).exec();
 
         nock.cleanAll();
     });
@@ -83,8 +92,12 @@ describe('OAuth endpoints tests - Recover password', () => {
     });
 
     it('Recover password request with correct email should return OK - HTML format', async () => {
+        process.on('unhandledRejection', (error) => {
+            should.fail(error.actual, error.expected, error.message);
+        });
+
         nock('https://api.sparkpost.com')
-            .post('/api/v1/transmissions', (body) => {
+            .post('/api/v1/transmissions', async (body) => {
                 const expectedRequestBody = {
                     content: {
                         template_id: 'recover-password'
@@ -95,14 +108,23 @@ describe('OAuth endpoints tests - Recover password', () => {
                                 email: 'potato@gmail.com'
                             }
                         }
-                    ]
+                    ],
+                    substitution_data: {
+                        fromName: 'RW API'
+                    }
                 };
 
-                return (
-                    body.substitution_data.urlRecover.match(new RegExp(`${process.env.PUBLIC_URL}\/auth\/reset\-password\/[\\w\*]`)) &&
-                    body.content.template_id === expectedRequestBody.content.template_id &&
-                    body.recipients[0].address.email === expectedRequestBody.recipients[0].address.email
-                );
+                const userTemp = await UserModel.findOne({
+                    email: 'potato@gmail.com'
+                });
+
+                const renew = await RenewModel.findOne({ userId: userTemp.id });
+
+                expectedRequestBody.substitution_data.urlRecover = `${process.env.PUBLIC_URL}/auth/reset-password/${renew.token}`;
+
+                body.should.deep.equal(expectedRequestBody);
+
+                return isEqual(body, expectedRequestBody);
             })
             .reply(200);
 
@@ -123,8 +145,12 @@ describe('OAuth endpoints tests - Recover password', () => {
     });
 
     it('Recover password request with correct email should return OK - JSON format', async () => {
+        process.on('unhandledRejection', (error) => {
+            should.fail(error.actual, error.expected, error.message);
+        });
+
         nock('https://api.sparkpost.com')
-            .post('/api/v1/transmissions', (body) => {
+            .post('/api/v1/transmissions', async (body) => {
                 const expectedRequestBody = {
                     content: {
                         template_id: 'recover-password'
@@ -135,17 +161,29 @@ describe('OAuth endpoints tests - Recover password', () => {
                                 email: 'potato@gmail.com'
                             }
                         }
-                    ]
+                    ],
+                    substitution_data: {
+                        fromName: 'RW API'
+                    }
                 };
 
-                return (
-                    body.substitution_data.urlRecover.match(new RegExp(`${process.env.PUBLIC_URL
-                        }\/auth\/reset\-password\/[\\w\*]`)) &&
-                    body.content.template_id === expectedRequestBody.content.template_id &&
-                    body.recipients[0].address.email === expectedRequestBody.recipients[0].address.email
-                );
+                const user = await UserModel.findOne({
+                    email: 'potato@gmail.com'
+                });
+
+                const renew = await RenewModel.findOne({ userId: user.id });
+
+                expectedRequestBody.substitution_data.urlRecover = `${process.env.PUBLIC_URL}/auth/reset-password/${renew.token}`;
+
+                body.should.deep.equal(expectedRequestBody);
+
+                return isEqual(body, expectedRequestBody);
             })
             .reply(200);
+
+        await new UserModel({
+            email: 'potato@gmail.com'
+        }).save();
 
         const response = await requester
             .post(`/auth/reset-password`)
@@ -162,6 +200,7 @@ describe('OAuth endpoints tests - Recover password', () => {
     after(async () => {
         UserModel.deleteMany({}).exec();
         UserTempModel.deleteMany({}).exec();
+        RenewModel.deleteMany({}).exec();
 
         closeTestAgent();
     });

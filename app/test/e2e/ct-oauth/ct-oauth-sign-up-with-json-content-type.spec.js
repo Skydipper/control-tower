@@ -3,6 +3,7 @@ const chai = require('chai');
 
 const UserModel = require('plugins/sd-ct-oauth-plugin/models/user.model');
 const UserTempModel = require('plugins/sd-ct-oauth-plugin/models/user-temp.model');
+const { isEqual } = require('lodash');
 
 const { setPluginSetting } = require('./../utils');
 const { getTestAgent, closeTestAgent } = require('./../test-server');
@@ -97,8 +98,12 @@ describe('OAuth endpoints tests - Sign up with JSON content type', () => {
     });
 
     it('Registering a user with correct data and no app returns a 200', async () => {
+        process.on('unhandledRejection', (error) => {
+            should.fail(error.actual, error.expected, error.message);
+        });
+
         nock('https://api.sparkpost.com')
-            .post('/api/v1/transmissions', (body) => {
+            .post('/api/v1/transmissions', async (body) => {
                 const expectedRequestBody = {
                     content: {
                         template_id: 'confirm-user'
@@ -109,15 +114,21 @@ describe('OAuth endpoints tests - Sign up with JSON content type', () => {
                                 email: 'someemail@gmail.com'
                             }
                         }
-                    ]
+                    ],
+                    substitution_data: {
+                        fromName: 'RW API'
+                    }
                 };
 
-                return (
-                    body.substitution_data.urlConfirm.match(new RegExp(`${process.env.PUBLIC_URL
-                        }\/auth\/confirm\/[\\w\*]`)) &&
-                    body.content.template_id === expectedRequestBody.content.template_id &&
-                    body.recipients[0].address.email === expectedRequestBody.recipients[0].address.email
-                );
+                const userTemp = await UserTempModel.findOne({
+                    email: 'someemail@gmail.com'
+                });
+
+                expectedRequestBody.substitution_data.urlConfirm = `${process.env.PUBLIC_URL}/auth/confirm/${userTemp.confirmationToken}`;
+
+                body.should.deep.equal(expectedRequestBody);
+
+                return isEqual(body, expectedRequestBody);
             })
             .reply(200);
 
@@ -222,8 +233,12 @@ describe('OAuth endpoints tests - Sign up with JSON content type', () => {
 
     // User registration - with app
     it('Registering a user with correct data and app returns a 200', async () => {
+        process.on('unhandledRejection', (error) => {
+            should.fail(error.actual, error.expected, error.message);
+        });
+
         nock('https://api.sparkpost.com')
-            .post('/api/v1/transmissions', (body) => {
+            .post('/api/v1/transmissions', async (body) => {
                 const expectedRequestBody = {
                     content: {
                         template_id: 'confirm-user'
@@ -234,14 +249,21 @@ describe('OAuth endpoints tests - Sign up with JSON content type', () => {
                                 email: 'someotheremail@gmail.com'
                             }
                         }
-                    ]
+                    ],
+                    substitution_data: {
+                        fromName: 'RW API'
+                    }
                 };
 
-                return (
-                    body.substitution_data.urlConfirm.match(new RegExp(`${process.env.PUBLIC_URL}\/auth\/confirm\/[\\w\*]`)) &&
-                    body.content.template_id === expectedRequestBody.content.template_id &&
-                    body.recipients[0].address.email === expectedRequestBody.recipients[0].address.email
-                );
+                const userTemp = await UserTempModel.findOne({
+                    email: 'someotheremail@gmail.com'
+                });
+
+                expectedRequestBody.substitution_data.urlConfirm = `${process.env.PUBLIC_URL}/auth/confirm/${userTemp.confirmationToken}`;
+
+                body.should.deep.equal(expectedRequestBody);
+
+                return isEqual(body, expectedRequestBody);
             })
             .reply(200);
 

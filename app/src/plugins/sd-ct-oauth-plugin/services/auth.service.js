@@ -217,7 +217,7 @@ function authService(plugin, connection) {
             return exist || existTemp;
         }
 
-        static async createUser(data) {
+        static async createUser(data, generalConfig) {
             const salt = bcrypt.genSaltSync();
 
             const apps = data.apps || [];
@@ -234,10 +234,14 @@ function authService(plugin, connection) {
 
             debug('Sending mail');
             try {
-                await MailService.sendConfirmationMail({
-                    email: user.email,
-                    confirmationToken: user.confirmationToken,
-                }, [{ address: user.email }]);
+                await MailService.sendConfirmationMail(
+                    {
+                        email: user.email,
+                        confirmationToken: user.confirmationToken,
+                    },
+                    [{ address: user.email }],
+                    generalConfig
+                );
             } catch (err) {
                 debug('Error', err);
                 throw err;
@@ -246,7 +250,7 @@ function authService(plugin, connection) {
             return user;
         }
 
-        static async createUserWithoutPassword(data) {
+        static async createUserWithoutPassword(data, generalConfig) {
             const salt = bcrypt.genSaltSync();
             const pass = crypto.randomBytes(8).toString('hex');
             const user = await new UserTempModel({
@@ -261,12 +265,16 @@ function authService(plugin, connection) {
 
             debug('Sending mail');
             try {
-                await MailService.sendConfirmationMailWithPassword({
-                    email: user.email,
-                    confirmationToken: user.confirmationToken,
-                    password: pass,
-                    callbackUrl: data.callbackUrl || ''
-                }, [{ address: user.email }]);
+                await MailService.sendConfirmationMailWithPassword(
+                    {
+                        email: user.email,
+                        confirmationToken: user.confirmationToken,
+                        password: pass,
+                        callbackUrl: data.callbackUrl || ''
+                    },
+                    [{ address: user.email }],
+                    generalConfig
+                );
             } catch (err) {
                 debug('Error', err);
                 throw err;
@@ -300,7 +308,7 @@ function authService(plugin, connection) {
             return renew;
         }
 
-        static async sendResetMail(email) {
+        static async sendResetMail(email, generalConfig) {
             debug('Generating token to email', email);
 
             const user = await UserModel.findOne({ email });
@@ -315,9 +323,13 @@ function authService(plugin, connection) {
                 token: crypto.randomBytes(20).toString('hex'),
             }).save();
 
-            await MailService.sendRecoverPasswordMail({
-                token: renew.token,
-            }, [{ address: user.email }]);
+            await MailService.sendRecoverPasswordMail(
+                {
+                    token: renew.token,
+                },
+                [{ address: user.email }],
+                generalConfig
+            );
 
             return renew;
         }

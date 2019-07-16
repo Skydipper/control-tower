@@ -14,11 +14,12 @@ function mailService(plugin) {
             this.publicUrl = publicUrl;
         }
 
-        sendConfirmationMail(data, recipients) {
+        sendConfirmationMail(data, recipients, generalConfig) {
             debug('Sending confirmation mail to ', recipients);
             const reqOpts = {
                 substitution_data: {
                     urlConfirm: `${this.publicUrl}/auth/confirm/${data.confirmationToken}`,
+                    fromName: generalConfig.application.emailSenderName
                 },
                 content: {
                     template_id: 'confirm-user',
@@ -44,12 +45,13 @@ function mailService(plugin) {
             });
         }
 
-        sendConfirmationMailWithPassword(data, recipients) {
+        sendConfirmationMailWithPassword(data, recipients, generalConfig) {
             debug('Sending confirmation mail to ', recipients);
             const reqOpts = {
                 substitution_data: {
                     urlConfirm: `${this.publicUrl}/auth/confirm/${data.confirmationToken}?${data.callbackUrl ? `callbackUrl=${data.callbackUrl}` : ''}`,
-                    password: data.password
+                    password: data.password,
+                    fromName: generalConfig.application.emailSenderName
                 },
                 content: {
                     template_id: 'confirm-user-with-password',
@@ -75,11 +77,12 @@ function mailService(plugin) {
             });
         }
 
-        sendRecoverPasswordMail(data, recipients) {
+        sendRecoverPasswordMail(data, recipients, generalConfig) {
             debug('Sending confirmation mail to ', recipients);
             const reqOpts = {
                 substitution_data: {
                     urlRecover: `${this.publicUrl}/auth/reset-password/${data.token}`,
+                    fromName: generalConfig.application.emailSenderName
                 },
                 content: {
                     template_id: 'recover-password',

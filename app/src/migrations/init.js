@@ -73,6 +73,20 @@ module.exports = async function init() {
         mainFile: 'plugins/sd-ct-oauth-plugin',
         active: true,
         config: {
+            resources: {
+                rw: {
+                    name: 'RW API',
+                    logo: 'https://resourcewatch.org/static/images/logo-embed.png',
+                    principalColor: '#c32d7b',
+                    sendNotifications: true
+                },
+                gfw: {
+                    name: 'GFW',
+                    logo: 'https://www.globalforestwatch.org/packs/gfw-9c5fe396ee5b15cb5f5b639a7ef771bd.png',
+                    principalColor: '#97be32',
+                    sendNotifications: true
+                }
+            },
             defaultApp: 'gfw',
             thirdParty: {
                 rw: {

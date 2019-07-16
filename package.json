@@ -35,7 +35,7 @@
   "license": "MIT",
   "devDependencies": {
     "babel-eslint": "^6.1.0",
-    "chai": "^4.1.2",
+    "chai": "^4.2.0",
     "chai-http": "^4.2.0",
     "co-mocha": "1.1.2",
     "eslint": "^2.12.0",
@@ -91,7 +91,8 @@
     "koa-passport": "^2.1.1",
     "koa-router": "^7.0.1",
     "koa-views": "^5.0.2",
-    "mongoose": "^5.4.19",
+    "lodash": "^4.17.14",
+    "mongoose": "5.6.0",
     "mongoose-regexp": "^0.0.1",
     "passport-facebook": "^2.1.1",
     "passport-facebook-token": "3.3.0",
