@@ -7,10 +7,7 @@ const UnprocessableEntityError = require('./errors/unprocessableEntity.error');
 const UnauthorizedError = require('./errors/unauthorized.error');
 const UserTempSerializer = require('./serializers/user-temp.serializer');
 const UserSerializer = require('./serializers/user.serializer');
-
-function getUser(ctx) {
-    return ctx.req.user || ctx.state.user || ctx.state.microservice;
-}
+const { cloneDeep } = require('lodash');
 
 module.exports = (plugin, connection, generalConfig) => {
     const ApiRouter = new Router({
@@ -20,52 +17,63 @@ module.exports = (plugin, connection, generalConfig) => {
     debug('Initializing services');
     const AuthService = authServiceFunc(plugin, connection);
 
+    const getUser = ctx => ctx.req.user || ctx.state.user || ctx.state.microservice;
+
+    const getOriginApp = (ctx, plugin) => (ctx.session && ctx.session.originApplication ? ctx.session.originApplication : plugin.config.defaultApp);
+
+    const getResourcesConfig = (ctx, plugin) => {
+        const app = getOriginApp(ctx, plugin);
+        const resourcesConfig = plugin.config.resources && plugin.config.resources[app];
+
+        return resourcesConfig;
+    };
+
     const API = (function api() {
         const twitter = async (ctx) => {
-            const app = ctx.session.originApplication;
+            const app = getOriginApp(ctx, plugin);
             await passport.authenticate(`twitter:${app}`)(ctx);
         };
 
         const twitterCallback = async (ctx, next) => {
-            const app = ctx.session.originApplication;
+            const app = getOriginApp(ctx, plugin);
             await passport.authenticate(`twitter:${app}`, {
                 failureRedirect: '/auth/fail',
             })(ctx, next);
         };
 
         const facebook = async (ctx) => {
-            const app = ctx.session.originApplication;
+            const app = getOriginApp(ctx, plugin);
             await passport.authenticate(`facebook:${app}`, {
                 scope: plugin.config.thirdParty[app] ? plugin.config.thirdParty[app].facebook.scope : [],
             })(ctx);
         };
 
         const facebookToken = async (ctx, next) => {
-            const app = ctx.session && ctx.session.originApplication ? ctx.session.originApplication : plugin.config.defaultApp;
+            const app = getOriginApp(ctx, plugin);
             await passport.authenticate(`facebook-token:${app}`)(ctx, next);
         };
 
         const facebookCallback = async (ctx, next) => {
-            const app = ctx.session.originApplication;
+            const app = getOriginApp(ctx, plugin);
             await passport.authenticate(`facebook:${app}`, {
                 failureRedirect: '/auth/fail',
             })(ctx, next);
         };
 
         const google = async (ctx) => {
-            const app = ctx.session.originApplication;
+            const app = getOriginApp(ctx, plugin);
             await passport.authenticate(`google:${app}`, {
                 scope: (plugin.config.thirdParty[app] && plugin.config.thirdParty[app].google.scope) ? plugin.config.thirdParty[app].google.scope : ['openid'],
             })(ctx);
         };
 
         const googleToken = async (ctx, next) => {
-            const app = ctx.session && ctx.session.originApplication ? ctx.session.originApplication : plugin.config.defaultApp;
+            const app = getOriginApp(ctx, plugin);
             await passport.authenticate(`google-token:${app}`)(ctx, next);
         };
 
         const googleCallback = async (ctx, next) => {
-            const app = ctx.session.originApplication;
+            const app = getOriginApp(ctx, plugin);
             await passport.authenticate(`google:${app}`, {
                 failureRedirect: '/auth/fail',
             })(ctx, next);
@@ -269,7 +277,7 @@ module.exports = (plugin, connection, generalConfig) => {
                 }
             }
 
-            await AuthService.createUserWithoutPassword(ctx.request.body);
+            await AuthService.createUserWithoutPassword(ctx.request.body, ctx.state.generalConfig);
             ctx.body = {};
 
         }
@@ -296,13 +304,13 @@ module.exports = (plugin, connection, generalConfig) => {
             ctx.session.generateToken = null;
             await ctx.render('login-correct', {
                 error: false,
-                generalConfig,
+                generalConfig: ctx.state.generalConfig,
             });
         }
 
         async function failAuth(ctx) {
             debug('Not authenticated');
-            const originApp = ctx.session.originApplication || plugin.config.defaultApp;
+            const originApp = getOriginApp(ctx, plugin);
             const appConfig = plugin.config.thirdParty[originApp];
 
             const thirdParty = {
@@ -333,7 +341,7 @@ module.exports = (plugin, connection, generalConfig) => {
                 await ctx.render('login', {
                     error: true,
                     thirdParty,
-                    generalConfig,
+                    generalConfig: ctx.state.generalConfig,
                     allowPublicRegistration
                 });
             } else {
@@ -366,7 +374,7 @@ module.exports = (plugin, connection, generalConfig) => {
                     await ctx.render('sign-up', {
                         error,
                         email: ctx.request.body.email,
-                        generalConfig,
+                        generalConfig: ctx.state.generalConfig,
                     });
 
                 }
@@ -374,13 +382,13 @@ module.exports = (plugin, connection, generalConfig) => {
             }
 
             try {
-                const data = await AuthService.createUser(ctx.request.body);
+                const data = await AuthService.createUser(ctx.request.body, ctx.state.generalConfig);
                 if (ctx.request.type === 'application/json') {
                     ctx.response.type = 'application/json';
                     ctx.body = UserTempSerializer.serialize(data);
                 } else {
                     await ctx.render('sign-up-correct', {
-                        generalConfig
+                        generalConfig: ctx.state.generalConfig,
                     });
                 }
             } catch (err) {
@@ -388,7 +396,7 @@ module.exports = (plugin, connection, generalConfig) => {
                 await ctx.render('sign-up', {
                     error: 'Error creating user.',
                     email: ctx.request.body.email,
-                    generalConfig,
+                    generalConfig: ctx.state.generalConfig,
                 });
             }
         }
@@ -397,7 +405,7 @@ module.exports = (plugin, connection, generalConfig) => {
             await ctx.render('sign-up', {
                 error: null,
                 email: null,
-                generalConfig
+                generalConfig: ctx.state.generalConfig,
             });
         }
 
@@ -445,7 +453,7 @@ module.exports = (plugin, connection, generalConfig) => {
                 throw new UnauthorizedError('Not logged in');
             }
 
-            const originApp = ctx.session.originApplication;
+            const originApp = getOriginApp(ctx, plugin);
             const thirdParty = {
                 twitter: false,
                 google: false,
@@ -474,7 +482,7 @@ module.exports = (plugin, connection, generalConfig) => {
             await ctx.render('login', {
                 error: false,
                 thirdParty,
-                generalConfig,
+                generalConfig: ctx.state.generalConfig,
                 allowPublicRegistration
             });
         }
@@ -484,7 +492,7 @@ module.exports = (plugin, connection, generalConfig) => {
                 error: null,
                 info: null,
                 email: null,
-                generalConfig,
+                generalConfig: ctx.state.generalConfig,
             });
         }
 
@@ -501,7 +509,7 @@ module.exports = (plugin, connection, generalConfig) => {
             await ctx.render('reset-password', {
                 error,
                 token: renew ? renew.token : null,
-                generalConfig,
+                generalConfig: ctx.state.generalConfig,
             });
         }
 
@@ -515,13 +523,13 @@ module.exports = (plugin, connection, generalConfig) => {
                         error: 'Mail required',
                         info: null,
                         email: ctx.request.body.email,
-                        generalConfig,
+                        generalConfig: ctx.state.generalConfig,
                     });
 
                     return;
                 }
             }
-            const renew = await AuthService.sendResetMail(ctx.request.body.email);
+            const renew = await AuthService.sendResetMail(ctx.request.body.email, ctx.state.generalConfig);
             if (!renew) {
                 if (ctx.request.type === 'application/json') {
                     throw new UnprocessableEntityError('User not found');
@@ -530,7 +538,7 @@ module.exports = (plugin, connection, generalConfig) => {
                         error: 'User not found',
                         info: null,
                         email: ctx.request.body.email,
-                        generalConfig,
+                        generalConfig: ctx.state.generalConfig,
                     });
 
                     return;
@@ -544,7 +552,7 @@ module.exports = (plugin, connection, generalConfig) => {
                     info: 'Email sent!!',
                     error: null,
                     email: ctx.request.body.email,
-                    generalConfig,
+                    generalConfig: ctx.state.generalConfig,
                 });
             }
         }
@@ -598,7 +606,7 @@ module.exports = (plugin, connection, generalConfig) => {
                 await ctx.render('reset-password', {
                     error,
                     token: ctx.params.token,
-                    generalConfig,
+                    generalConfig: ctx.state.generalConfig,
                 });
                 return;
             }
@@ -613,7 +621,7 @@ module.exports = (plugin, connection, generalConfig) => {
                 await ctx.render('reset-password', {
                     error: 'Error updating user',
                     token: ctx.params.token,
-                    generalConfig,
+                    generalConfig: ctx.state.generalConfig,
                 });
             }
 
@@ -761,6 +769,19 @@ module.exports = (plugin, connection, generalConfig) => {
         await next();
     }
 
+    async function loadApplicationGeneralConfig(ctx, next) {
+        const Plugin = connection.model('Plugin');
+        const oauthPlugin = await Plugin.findOne({ name: 'oauth' });
+
+        ctx.state.generalConfig = cloneDeep(generalConfig); // avoiding a bug when changes in DB are not applied
+        const applicationConfig = getResourcesConfig(ctx, oauthPlugin);
+
+        if (applicationConfig) {
+            ctx.state.generalConfig.application = Object.assign({}, ctx.state.generalConfig.application, applicationConfig);
+        }
+
+        await next();
+    }
 
     ApiRouter.get('/', setCallbackUrl, API.redirectLogin);
     ApiRouter.get('/twitter', setCallbackUrl, API.twitter);
@@ -772,25 +793,25 @@ module.exports = (plugin, connection, generalConfig) => {
     ApiRouter.get('/facebook', setCallbackUrl, API.facebook);
     ApiRouter.get('/facebook/callback', API.facebookCallback, API.updateApplications);
     ApiRouter.get('/basic', passport.authenticate('basic'), API.success);
-    ApiRouter.get('/login', setCallbackUrl, API.loginView);
+    ApiRouter.get('/login', setCallbackUrl, loadApplicationGeneralConfig, API.loginView);
     ApiRouter.post('/login', API.localCallback);
-    ApiRouter.get('/fail', API.failAuth);
+    ApiRouter.get('/fail', loadApplicationGeneralConfig, API.failAuth);
     ApiRouter.get('/check-logged', API.checkLogged);
-    ApiRouter.get('/success', API.success);
+    ApiRouter.get('/success', loadApplicationGeneralConfig, API.success);
     ApiRouter.get('/logout', setCallbackUrlOnlyWithQueryParam, API.logout);
-    ApiRouter.get('/sign-up', hasSignUpPermissions, API.getSignUp);
-    ApiRouter.post('/sign-up', hasSignUpPermissions, API.signUp);
+    ApiRouter.get('/sign-up', hasSignUpPermissions, loadApplicationGeneralConfig, API.getSignUp);
+    ApiRouter.post('/sign-up', hasSignUpPermissions, loadApplicationGeneralConfig, API.signUp);
     ApiRouter.get('/confirm/:token', API.confirmUser);
-    ApiRouter.get('/reset-password/:token', API.resetPasswordView);
-    ApiRouter.post('/reset-password/:token', API.resetPassword);
-    ApiRouter.post('/reset-password', API.sendResetMail);
-    ApiRouter.get('/reset-password', API.requestEmailResetView);
+    ApiRouter.get('/reset-password/:token', loadApplicationGeneralConfig, API.resetPasswordView);
+    ApiRouter.post('/reset-password/:token', loadApplicationGeneralConfig, API.resetPassword);
+    ApiRouter.post('/reset-password', loadApplicationGeneralConfig, API.sendResetMail);
+    ApiRouter.get('/reset-password', loadApplicationGeneralConfig, API.requestEmailResetView);
     ApiRouter.get('/generate-token', isLogged, API.generateJWT);
     ApiRouter.get('/user', isLogged, isAdmin, API.getUsers);
     ApiRouter.get('/user/:id', isLogged, isAdmin, API.getUserById);
     ApiRouter.post('/user/find-by-ids', isLogged, isMicroservice, API.findByIds);
     ApiRouter.get('/user/ids/:role', isLogged, isMicroservice, API.getIdsByRole);
-    ApiRouter.post('/user', isLogged, isAdminOrManager, API.createUser);
+    ApiRouter.post('/user', isLogged, isAdminOrManager, loadApplicationGeneralConfig, API.createUser);
     ApiRouter.patch('/user/me', isLogged, API.updateMe);
     ApiRouter.patch('/user/:id', isLogged, isAdmin, API.updateUser);
     ApiRouter.delete('/user/:id', isLogged, isAdmin, API.deleteUser);
