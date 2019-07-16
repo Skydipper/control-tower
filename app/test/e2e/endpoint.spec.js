@@ -37,7 +37,7 @@ describe('GET Endpoints', () => {
     });
 
     it('Getting a list of endpoints should return those endpoints (happy case)', async () => {
-        await new Endpoint(endpointTest).save();
+        await new Endpoint({ ...endpointTest, authenticated: true }).save();
 
         const resEndpoints = await getListEndpoints();
         resEndpoints.status.should.equal(200);
