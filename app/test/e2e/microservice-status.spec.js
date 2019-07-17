@@ -45,16 +45,14 @@ describe('Microservice status calls', () => {
         list.body.should.instanceof(Array).and.length.above(0);
     });
 
-    afterEach(() => {
+    afterEach(async () => {
+        Microservice.deleteMany({}).exec();
+        Endpoint.deleteMany({}).exec();
+
         if (!nock.isDone()) {
             throw new Error(`Not all nock interceptors were used: ${nock.pendingMocks()}`);
         }
     });
 
-    after(async () => {
-        Microservice.deleteMany({}).exec();
-        Endpoint.deleteMany({}).exec();
-
-        closeTestAgent();
-    });
+    after(closeTestAgent);
 });

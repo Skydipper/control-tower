@@ -22,7 +22,32 @@ const microserviceTest = {
     ]
 };
 
+const endpointTest = {
+    pathKeys: [],
+    authenticated: true,
+    applicationRequired: false,
+    binary: false,
+    cache: [],
+    uncache: [],
+    toDelete: false,
+    _id: '5d2eeae405314b1645baadaf',
+    path: '/v1/dataset',
+    method: 'POST',
+    pathRegex: '',
+    redirect: [
+        {
+            filters: null,
+            _id: '5d2eeae405314b1645baadb0',
+            method: 'POST',
+            path: '/api/v1/dataset',
+            url: 'http://mymachine:6001'
+        }
+    ],
+    version: 1
+};
+
 module.exports = {
     TOKENS,
-    microserviceTest
+    microserviceTest,
+    endpointTest
 };

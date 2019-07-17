@@ -33,12 +33,19 @@ const initHelpers = () => {
             .set('Authorization', `Bearer ${token}`)
             .send();
 
+        const validate = res => {
+            res.status.should.equal(403);
+            res.body.errors[0].should.have.property('detail').and.equal('Not authorized');
+        };
+
         const responses = await Promise.all([request(USER), request(MANAGER)]);
-        responses.map(res => res.status.should.equal(403));
+        responses.map(validate);
     };
 
     const isTokenRequired = (method, url) => async () => {
         const response = await requester[method](`/api/v1/${url}`).send();
+
+        response.body.errors[0].should.have.property('detail').and.equal('Not authenticated');
         response.status.should.equal(401);
     };
 

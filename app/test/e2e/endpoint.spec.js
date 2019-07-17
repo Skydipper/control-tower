@@ -1,5 +1,5 @@
 const nock = require('nock');
-const { TOKENS, microserviceTest } = require('./test.constants');
+const { TOKENS, microserviceTest, endpointTest } = require('./test.constants');
 const { initHelpers } = require('./utils');
 const { getTestAgent, closeTestAgent } = require('./test-server');
 const Microservice = require('models/microservice.model');
@@ -42,29 +42,37 @@ describe('Endpoints calls', () => {
         response.status.should.equal(200);
         response.body.should.instanceof(Array).and.lengthOf(0);
     });
-    it('Getting a list of endpoints with created microservice should return the result', async () => {
+
+    it('Create microservice using an API call, validate that endpoints are created using Mongoose.', async () => {
         await createMicroservice();
 
         const resEndpoints = await getListEndpoints();
         resEndpoints.status.should.equal(200);
         resEndpoints.body.should.instanceof(Array).and.length.above(0);
     });
-    it('Created endpoint should open', async () => {
+    it('Create microservice using an API call, validate that endpoints are opening.', async () => {
+        await createMicroservice();
+
         const resEndpoints = await getListEndpoints();
         const result = await openEnpoint(resEndpoints.body[0].path);
         result.status.should.equal(200);
     });
+    it('Create endpoints using mongoose, validate that the GET endpoint returns those endpoints', async () => {
+        await new Endpoint(endpointTest).save();
+
+        const resEndpoints = await getListEndpoints();
+        resEndpoints.status.should.equal(200);
+        resEndpoints.body.should.instanceof(Array).and.length.above(0);
+    });
 
     afterEach(() => {
+        Microservice.deleteMany({}).exec();
+        Endpoint.deleteMany({}).exec();
+
         if (!nock.isDone()) {
             throw new Error(`Not all nock interceptors were used: ${nock.pendingMocks()}`);
         }
     });
 
-    after(async () => {
-        Microservice.deleteMany({}).exec();
-        Endpoint.deleteMany({}).exec();
-
-        closeTestAgent();
-    });
+    after(closeTestAgent);
 });
