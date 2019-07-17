@@ -18,6 +18,8 @@ services:
       PUBLIC_URL: http://localhost:9000
       SPARKPOST_KEY: fakeSparkpostKey
       MONGO_PORT_27017_TCP_ADDR: mongo
+      FASTLY_APIKEY: foo
+      FASTLY_SERVICEID: bar
     command: test
     depends_on:
       - mongo
