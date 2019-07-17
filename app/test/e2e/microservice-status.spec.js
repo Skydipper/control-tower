@@ -1,3 +1,4 @@
+const logger = require('logger');
 const nock = require('nock');
 const { TOKENS, microserviceTest } = require('./test.constants');
 const { initHelpers } = require('./utils');
@@ -9,10 +10,22 @@ const helpers = initHelpers(getTestAgent);
 
 let requester;
 
-const createMicroservice = () => requester
-    .post('/api/v1/microservice')
-    .set('Authorization', `Bearer ${TOKENS.ADMIN}`)
-    .send(microserviceTest);
+const createMicroservice = () => {
+    const testMicroserviceOne = {
+        name: `test-microservice-one`,
+        url: 'http://test-microservice-one:8000',
+        active: true
+    };
+
+    nock('http://test-microservice-one:8000')
+        .get((uri) => {
+            logger.info('Uri', uri);
+            return uri.startsWith('/info');
+        })
+        .reply(200, microserviceTest);
+
+    return requester.post('/api/v1/microservice').send(testMicroserviceOne);
+}
 
 const getListStatus = async () => requester
     .get('/api/v1/microservice/status')

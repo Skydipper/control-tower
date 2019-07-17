@@ -7,19 +7,24 @@ const TOKENS = {
 
 
 const microserviceTest = {
-    name: 'dataset',
-    tags: ['dataset'],
-    url: 'http://127.0.0.1:6000',
-    endpoints: [
-        {
-            path: '/v1/dataset',
+    swagger: {},
+    name: 'test-microservice-one',
+    tags: ['test'],
+    endpoints: [{
+        path: '/v1/testOne',
+        method: 'GET',
+        redirect: {
             method: 'GET',
-            redirect: {
-                method: 'GET',
-                path: '/api/v1/dataset'
-            }
+            path: '/api/v1/testOne'
         }
-    ]
+    }, {
+        path: '/v1/testTwo',
+        method: 'GET',
+        redirect: {
+            method: 'GET',
+            path: '/api/v1/testTwo'
+        }
+    }]
 };
 
 const endpointTest = {

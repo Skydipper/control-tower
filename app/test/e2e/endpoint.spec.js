@@ -4,6 +4,7 @@ const { initHelpers } = require('./utils');
 const { getTestAgent, closeTestAgent } = require('./test-server');
 const Microservice = require('models/microservice.model');
 const Endpoint = require('models/endpoint.model');
+const logger = require('logger');
 
 const helpers = initHelpers(getTestAgent);
 
@@ -14,14 +15,22 @@ const getListEndpoints = () => requester
     .set('Authorization', `Bearer ${TOKENS.ADMIN}`)
     .send();
 
-const createMicroservice = () => requester
-    .post('/api/v1/microservice')
-    .set('Authorization', `Bearer ${TOKENS.ADMIN}`)
-    .send(microserviceTest);
+const createMicroservice = () => {
+    const testMicroserviceOne = {
+        name: `test-microservice-one`,
+        url: 'http://test-microservice-one:8000',
+        active: true
+    };
 
-const openEnpoint = endpoint => requester
-    .get(endpoint)
-    .send();
+    nock('http://test-microservice-one:8000')
+        .get((uri) => {
+            logger.info('Uri', uri);
+            return uri.startsWith('/info');
+        })
+        .reply(200, microserviceTest);
+
+    return requester.post('/api/v1/microservice').send(testMicroserviceOne);
+};
 
 describe('Endpoints calls', () => {
     before(async () => {
@@ -49,13 +58,6 @@ describe('Endpoints calls', () => {
         const resEndpoints = await getListEndpoints();
         resEndpoints.status.should.equal(200);
         resEndpoints.body.should.instanceof(Array).and.length.above(0);
-    });
-    it('Create microservice using an API call, validate that endpoints are opening.', async () => {
-        await createMicroservice();
-
-        const resEndpoints = await getListEndpoints();
-        const result = await openEnpoint(resEndpoints.body[0].path);
-        result.status.should.equal(200);
     });
     it('Create endpoints using mongoose, validate that the GET endpoint returns those endpoints', async () => {
         await new Endpoint(endpointTest).save();
