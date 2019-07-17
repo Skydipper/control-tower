@@ -19,6 +19,7 @@ const updatePlugin = data => requester
     .send(data);
 
 describe('Plugins calls', () => {
+
     before(async () => {
         if (process.env.NODE_ENV !== 'test') {
             throw Error(`Running the test suite with NODE_ENV ${process.env.NODE_ENV} may result in permanent data loss. Please use NODE_ENV=test.`);
@@ -29,17 +30,21 @@ describe('Plugins calls', () => {
         nock.cleanAll();
     });
 
-    it('Getting a list of plugins without being authenticated should fail', helpers.isTokenRequired('get', 'plugin'));
-    it('Getting a list of plugins authenticated not as admin fail', helpers.isAdminOnly('get', 'plugin'));
+    it('Getting a list of plugins without being authenticated should fail with a 401 error', helpers.isTokenRequired('get', 'plugin'));
+
+    it('Getting a list of plugins authenticated without ADMIN role should fail with a 403 error', helpers.isAdminOnly('get', 'plugin'));
+
     it('Getting a list of plugins should return the result by default', async () => {
         const response = await getListPlugins();
 
-        response.body.should.instanceof(Array).and.length.above(0);
+        response.body.should.be.an('array').and.length.above(0);
         pluginId = response.body[0]._id; // set plugin id for future update requests
     });
 
-    it('Update plugin without being authenticated should fail', () => helpers.isTokenRequired('patch', `plugin/${pluginId}`)());
-    it('Update plugin authenticated not as admin fail', () => helpers.isAdminOnly('patch', `plugin/${pluginId}`)());
+    it('Update plugin without being authenticated should fail with a 401 error', () => helpers.isTokenRequired('patch', `plugin/${pluginId}`)());
+
+    it('Update plugin authenticated without ADMIN role should fail with a 403 error', () => helpers.isAdminOnly('patch', `plugin/${pluginId}`)());
+
     it('Update plugin authenticated should update', async () => {
         const newData = {
             active: false,
