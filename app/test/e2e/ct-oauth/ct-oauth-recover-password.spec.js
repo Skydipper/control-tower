@@ -110,7 +110,9 @@ describe('OAuth endpoints tests - Recover password', () => {
                         }
                     ],
                     substitution_data: {
-                        fromName: 'RW API'
+                        fromName: 'RW API',
+                        appName: 'WRI API',
+                        logo: 'http://www.wri.org/sites/all/themes/wri/images/logo.png'
                     }
                 };
 
@@ -163,7 +165,9 @@ describe('OAuth endpoints tests - Recover password', () => {
                         }
                     ],
                     substitution_data: {
-                        fromName: 'RW API'
+                        fromName: 'RW API',
+                        appName: 'WRI API',
+                        logo: 'http://www.wri.org/sites/all/themes/wri/images/logo.png'
                     }
                 };
 

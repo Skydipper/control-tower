@@ -19,7 +19,9 @@ function mailService(plugin) {
             const reqOpts = {
                 substitution_data: {
                     urlConfirm: `${this.publicUrl}/auth/confirm/${data.confirmationToken}`,
-                    fromName: generalConfig.application.emailSenderName
+                    fromName: generalConfig.application.emailSenderName,
+                    appName: generalConfig.application.name,
+                    logo: generalConfig.application.logo
                 },
                 content: {
                     template_id: 'confirm-user',
@@ -51,7 +53,9 @@ function mailService(plugin) {
                 substitution_data: {
                     urlConfirm: `${this.publicUrl}/auth/confirm/${data.confirmationToken}?${data.callbackUrl ? `callbackUrl=${data.callbackUrl}` : ''}`,
                     password: data.password,
-                    fromName: generalConfig.application.emailSenderName
+                    fromName: generalConfig.application.emailSenderName,
+                    appName: generalConfig.application.name,
+                    logo: generalConfig.application.logo
                 },
                 content: {
                     template_id: 'confirm-user-with-password',
@@ -82,7 +86,9 @@ function mailService(plugin) {
             const reqOpts = {
                 substitution_data: {
                     urlRecover: `${this.publicUrl}/auth/reset-password/${data.token}`,
-                    fromName: generalConfig.application.emailSenderName
+                    fromName: generalConfig.application.emailSenderName,
+                    appName: generalConfig.application.name,
+                    logo: generalConfig.application.logo
                 },
                 content: {
                     template_id: 'recover-password',
