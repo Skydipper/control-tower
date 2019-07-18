@@ -98,12 +98,8 @@ describe('OAuth endpoints tests - Sign up with JSON content type', () => {
     });
 
     it('Registering a user with correct data and no app returns a 200', async () => {
-        process.on('unhandledRejection', (error) => {
-            should.fail(error.actual, error.expected, error.message);
-        });
-
         nock('https://api.sparkpost.com')
-            .post('/api/v1/transmissions', async (body) => {
+            .post('/api/v1/transmissions', (body) => {
                 const expectedRequestBody = {
                     content: {
                         template_id: 'confirm-user'
@@ -122,13 +118,10 @@ describe('OAuth endpoints tests - Sign up with JSON content type', () => {
                     }
                 };
 
-                const userTemp = await UserTempModel.findOne({
-                    email: 'someemail@gmail.com'
-                });
+                body.should.have.property('substitution_data').and.be.an('object');
+                body.substitution_data.should.have.property('urlConfirm').and.include(`${process.env.PUBLIC_URL}/auth/confirm/`);
 
-                expectedRequestBody.substitution_data.urlConfirm = `${process.env.PUBLIC_URL}/auth/confirm/${userTemp.confirmationToken}`;
-
-                body.should.deep.equal(expectedRequestBody);
+                delete body.substitution_data.urlConfirm;
 
                 return isEqual(body, expectedRequestBody);
             })
@@ -235,12 +228,8 @@ describe('OAuth endpoints tests - Sign up with JSON content type', () => {
 
     // User registration - with app
     it('Registering a user with correct data and app returns a 200', async () => {
-        process.on('unhandledRejection', (error) => {
-            should.fail(error.actual, error.expected, error.message);
-        });
-
         nock('https://api.sparkpost.com')
-            .post('/api/v1/transmissions', async (body) => {
+            .post('/api/v1/transmissions', (body) => {
                 const expectedRequestBody = {
                     content: {
                         template_id: 'confirm-user'
@@ -259,13 +248,10 @@ describe('OAuth endpoints tests - Sign up with JSON content type', () => {
                     }
                 };
 
-                const userTemp = await UserTempModel.findOne({
-                    email: 'someotheremail@gmail.com'
-                });
+                body.should.have.property('substitution_data').and.be.an('object');
+                body.substitution_data.should.have.property('urlConfirm').and.include(`${process.env.PUBLIC_URL}/auth/confirm/`);
 
-                expectedRequestBody.substitution_data.urlConfirm = `${process.env.PUBLIC_URL}/auth/confirm/${userTemp.confirmationToken}`;
-
-                body.should.deep.equal(expectedRequestBody);
+                delete body.substitution_data.urlConfirm;
 
                 return isEqual(body, expectedRequestBody);
             })
