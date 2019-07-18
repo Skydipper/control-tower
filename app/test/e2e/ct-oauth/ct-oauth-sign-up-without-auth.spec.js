@@ -97,14 +97,10 @@ describe('OAuth endpoints tests - Sign up without auth', () => {
         const tempUser = await UserTempModel.findOne({ email: 'someemail@gmail.com' }).exec();
         should.not.exist(tempUser);
     });
-    // User registration - no app
-    it('Registering a user with correct data and no app returns a 200', async () => {
-        process.on('unhandledRejection', (error) => {
-            should.fail(error.actual, error.expected, error.message);
-        });
 
+    it('Registering a user with correct data and no app returns a 200', async () => {
         nock('https://api.sparkpost.com')
-            .post('/api/v1/transmissions', async (body) => {
+            .post('/api/v1/transmissions', (body) => {
                 const expectedRequestBody = {
                     content: {
                         template_id: 'confirm-user'
@@ -117,22 +113,22 @@ describe('OAuth endpoints tests - Sign up without auth', () => {
                         }
                     ],
                     substitution_data: {
-                        fromName: 'RW API'
+                        fromName: 'RW API',
+                        appName: 'RW API',
+                        logo: 'https://resourcewatch.org/static/images/logo-embed.png'
                     }
                 };
 
-                const userTemp = await UserTempModel.findOne({
-                    email: 'someemail@gmail.com'
-                });
+                body.should.have.property('substitution_data').and.be.an('object');
+                body.substitution_data.should.have.property('urlConfirm').and.include(`${process.env.PUBLIC_URL}/auth/confirm/`);
 
-                expectedRequestBody.substitution_data.urlConfirm = `${process.env.PUBLIC_URL}/auth/confirm/${userTemp.confirmationToken}`;
+                delete body.substitution_data.urlConfirm;
 
                 body.should.deep.equal(expectedRequestBody);
 
                 return isEqual(body, expectedRequestBody);
             })
             .reply(200);
-
 
         const missingUser = await UserTempModel.findOne({ email: 'someemail@gmail.com' }).exec();
         should.not.exist(missingUser);
@@ -147,8 +143,8 @@ describe('OAuth endpoints tests - Sign up without auth', () => {
             });
 
         response.status.should.equal(200);
-        response.text.should.include('Register correct');
-        response.text.should.include('Check your email and confirm your account');
+        response.text.should.include('Registration successful');
+        response.text.should.include('We\'ve sent you an email. Click the link in it to confirm your account.');
 
         const user = await UserTempModel.findOne({ email: 'someemail@gmail.com' }).exec();
         should.exist(user);
@@ -219,12 +215,8 @@ describe('OAuth endpoints tests - Sign up without auth', () => {
 
     // User registration - with app
     it('Registering a user with correct data and app returns a 200', async () => {
-        process.on('unhandledRejection', (error) => {
-            should.fail(error.actual, error.expected, error.message);
-        });
-
         nock('https://api.sparkpost.com')
-            .post('/api/v1/transmissions', async (body) => {
+            .post('/api/v1/transmissions', (body) => {
                 const expectedRequestBody = {
                     content: {
                         template_id: 'confirm-user'
@@ -237,15 +229,16 @@ describe('OAuth endpoints tests - Sign up without auth', () => {
                         }
                     ],
                     substitution_data: {
-                        fromName: 'RW API'
+                        fromName: 'RW API',
+                        appName: 'RW API',
+                        logo: 'https://resourcewatch.org/static/images/logo-embed.png'
                     }
                 };
 
-                const userTemp = await UserTempModel.findOne({
-                    email: 'someotheremail@gmail.com'
-                });
+                body.should.have.property('substitution_data').and.be.an('object');
+                body.substitution_data.should.have.property('urlConfirm').and.include(`${process.env.PUBLIC_URL}/auth/confirm/`);
 
-                expectedRequestBody.substitution_data.urlConfirm = `${process.env.PUBLIC_URL}/auth/confirm/${userTemp.confirmationToken}`;
+                delete body.substitution_data.urlConfirm;
 
                 body.should.deep.equal(expectedRequestBody);
 
@@ -267,8 +260,8 @@ describe('OAuth endpoints tests - Sign up without auth', () => {
             });
 
         response.status.should.equal(200);
-        response.text.should.include('Register correct');
-        response.text.should.include('Check your email and confirm your account');
+        response.text.should.include('Registration successful');
+        response.text.should.include('We\'ve sent you an email. Click the link in it to confirm your account.');
 
         const user = await UserTempModel.findOne({ email: 'someotheremail@gmail.com' }).exec();
         should.exist(user);

@@ -92,12 +92,8 @@ describe('OAuth endpoints tests - Recover password', () => {
     });
 
     it('Recover password request with correct email should return OK - HTML format', async () => {
-        process.on('unhandledRejection', (error) => {
-            should.fail(error.actual, error.expected, error.message);
-        });
-
         nock('https://api.sparkpost.com')
-            .post('/api/v1/transmissions', async (body) => {
+            .post('/api/v1/transmissions', (body) => {
                 const expectedRequestBody = {
                     content: {
                         template_id: 'recover-password'
@@ -110,23 +106,29 @@ describe('OAuth endpoints tests - Recover password', () => {
                         }
                     ],
                     substitution_data: {
-                        fromName: 'RW API'
+                        fromName: 'RW API',
+                        appName: 'RW API',
+                        logo: 'https://resourcewatch.org/static/images/logo-embed.png'
                     }
                 };
 
-                const userTemp = await UserModel.findOne({
-                    email: 'potato@gmail.com'
-                });
+                body.should.have.property('substitution_data').and.be.an('object');
+                body.substitution_data.should.have.property('urlRecover').and.include(`${process.env.PUBLIC_URL}/auth/reset-password/`);
 
-                const renew = await RenewModel.findOne({ userId: userTemp.id });
-
-                expectedRequestBody.substitution_data.urlRecover = `${process.env.PUBLIC_URL}/auth/reset-password/${renew.token}`;
+                delete body.substitution_data.urlRecover;
 
                 body.should.deep.equal(expectedRequestBody);
 
                 return isEqual(body, expectedRequestBody);
             })
-            .reply(200);
+            .once()
+            .reply(200, {
+                results: {
+                    total_rejected_recipients: 0,
+                    total_accepted_recipients: 1,
+                    id: 11668787484950529
+                }
+            });
 
         await new UserModel({
             email: 'potato@gmail.com'
@@ -145,12 +147,8 @@ describe('OAuth endpoints tests - Recover password', () => {
     });
 
     it('Recover password request with correct email should return OK - JSON format', async () => {
-        process.on('unhandledRejection', (error) => {
-            should.fail(error.actual, error.expected, error.message);
-        });
-
         nock('https://api.sparkpost.com')
-            .post('/api/v1/transmissions', async (body) => {
+            .post('/api/v1/transmissions', (body) => {
                 const expectedRequestBody = {
                     content: {
                         template_id: 'recover-password'
@@ -163,22 +161,22 @@ describe('OAuth endpoints tests - Recover password', () => {
                         }
                     ],
                     substitution_data: {
-                        fromName: 'RW API'
+                        fromName: 'RW API',
+                        appName: 'RW API',
+                        logo: 'https://resourcewatch.org/static/images/logo-embed.png'
                     }
                 };
 
-                const user = await UserModel.findOne({
-                    email: 'potato@gmail.com'
-                });
+                body.should.have.property('substitution_data').and.be.an('object');
+                body.substitution_data.should.have.property('urlRecover').and.include(`${process.env.PUBLIC_URL}/auth/reset-password/`);
 
-                const renew = await RenewModel.findOne({ userId: user.id });
-
-                expectedRequestBody.substitution_data.urlRecover = `${process.env.PUBLIC_URL}/auth/reset-password/${renew.token}`;
+                delete body.substitution_data.urlRecover;
 
                 body.should.deep.equal(expectedRequestBody);
 
                 return isEqual(body, expectedRequestBody);
             })
+            .once()
             .reply(200);
 
         await new UserModel({

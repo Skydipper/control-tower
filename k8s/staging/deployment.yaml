@@ -41,7 +41,7 @@ spec:
             - name: PUBLIC_URL
               value: http://production-api.globalforestwatch.org
             - name: APP_NAME
-              value: "WRI API"
+              value: "RW API"
             - name: APP_LOGO
               value: http://www.wri.org/sites/all/themes/wri/images/logo.png
             - name: APP_COLOR

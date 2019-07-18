@@ -24,7 +24,7 @@
     "overrideDuplicated": true
   },
   "application": {
-    "name": "WRI API",
+    "name": "RW API",
     "logo": "http://www.wri.org/sites/all/themes/wri/images/logo.png",
     "principalColor": "#f1b319",
     "sendNotifications": false,
