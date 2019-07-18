@@ -115,7 +115,7 @@ describe('OAuth endpoints tests - Sign up without auth', () => {
                     substitution_data: {
                         fromName: 'RW API',
                         appName: 'RW API',
-                        logo: 'http://www.wri.org/sites/all/themes/wri/images/logo.png'
+                        logo: 'https://resourcewatch.org/static/images/logo-embed.png'
                     }
                 };
 
@@ -231,7 +231,7 @@ describe('OAuth endpoints tests - Sign up without auth', () => {
                     substitution_data: {
                         fromName: 'RW API',
                         appName: 'RW API',
-                        logo: 'http://www.wri.org/sites/all/themes/wri/images/logo.png'
+                        logo: 'https://resourcewatch.org/static/images/logo-embed.png'
                     }
                 };
 
