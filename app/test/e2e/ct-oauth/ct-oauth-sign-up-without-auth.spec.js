@@ -97,7 +97,7 @@ describe('OAuth endpoints tests - Sign up without auth', () => {
         const tempUser = await UserTempModel.findOne({ email: 'someemail@gmail.com' }).exec();
         should.not.exist(tempUser);
     });
-    // User registration - no app
+
     it('Registering a user with correct data and no app returns a 200', async () => {
         nock('https://api.sparkpost.com')
             .post('/api/v1/transmissions', (body) => {
@@ -114,7 +114,7 @@ describe('OAuth endpoints tests - Sign up without auth', () => {
                     ],
                     substitution_data: {
                         fromName: 'RW API',
-                        appName: 'WRI API',
+                        appName: 'RW API',
                         logo: 'http://www.wri.org/sites/all/themes/wri/images/logo.png'
                     }
                 };
@@ -127,7 +127,6 @@ describe('OAuth endpoints tests - Sign up without auth', () => {
                 return isEqual(body, expectedRequestBody);
             })
             .reply(200);
-
 
         const missingUser = await UserTempModel.findOne({ email: 'someemail@gmail.com' }).exec();
         should.not.exist(missingUser);
@@ -229,7 +228,7 @@ describe('OAuth endpoints tests - Sign up without auth', () => {
                     ],
                     substitution_data: {
                         fromName: 'RW API',
-                        appName: 'WRI API',
+                        appName: 'RW API',
                         logo: 'http://www.wri.org/sites/all/themes/wri/images/logo.png'
                     }
                 };

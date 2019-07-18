@@ -101,7 +101,6 @@ describe('OAuth endpoints tests - Sign up without auth', () => {
         response.text.should.include('Password and Repeat password not equal');
     });
 
-    // User registration - no app
     it('Registering a user with correct data and no app returns a 200', async () => {
         nock('https://api.sparkpost.com')
             .post('/api/v1/transmissions', (body) => {
@@ -118,7 +117,7 @@ describe('OAuth endpoints tests - Sign up without auth', () => {
                     ],
                     substitution_data: {
                         fromName: 'RW API',
-                        appName: 'WRI API',
+                        appName: 'RW API',
                         logo: 'http://www.wri.org/sites/all/themes/wri/images/logo.png'
                     }
                 };
@@ -234,7 +233,7 @@ describe('OAuth endpoints tests - Sign up without auth', () => {
                     ],
                     substitution_data: {
                         fromName: 'RW API',
-                        appName: 'WRI API',
+                        appName: 'RW API',
                         logo: 'http://www.wri.org/sites/all/themes/wri/images/logo.png'
                     }
                 };
