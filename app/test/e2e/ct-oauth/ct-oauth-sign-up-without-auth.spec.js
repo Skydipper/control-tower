@@ -124,6 +124,8 @@ describe('OAuth endpoints tests - Sign up without auth', () => {
 
                 delete body.substitution_data.urlConfirm;
 
+                body.should.deep.equal(expectedRequestBody);
+
                 return isEqual(body, expectedRequestBody);
             })
             .reply(200);
@@ -237,6 +239,8 @@ describe('OAuth endpoints tests - Sign up without auth', () => {
                 body.substitution_data.should.have.property('urlConfirm').and.include(`${process.env.PUBLIC_URL}/auth/confirm/`);
 
                 delete body.substitution_data.urlConfirm;
+
+                body.should.deep.equal(expectedRequestBody);
 
                 return isEqual(body, expectedRequestBody);
             })
