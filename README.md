@@ -22,7 +22,7 @@ Execution using Docker requires:
 Start by cloning the repository from github to your execution environment
 
 ```
-git clone https://github.com/control-tower/control-tower.git && cd control-tower
+git clone https://github.com/skydipper/control-tower.git && cd control-tower
 ```
 
 After that, follow one of the instructions below:
