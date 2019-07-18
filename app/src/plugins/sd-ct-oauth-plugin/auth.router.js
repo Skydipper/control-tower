@@ -21,11 +21,11 @@ module.exports = (plugin, connection, generalConfig) => {
 
     const getOriginApp = (ctx, plugin) => (ctx.session && ctx.session.originApplication ? ctx.session.originApplication : plugin.config.defaultApp);
 
-    const getResourcesConfig = (ctx, plugin) => {
+    const getApplicationsConfig = (ctx, plugin) => {
         const app = getOriginApp(ctx, plugin);
-        const resourcesConfig = plugin.config.resources && plugin.config.resources[app];
+        const applicationConfig = plugin.config.applications && plugin.config.applications[app];
 
-        return resourcesConfig;
+        return applicationConfig;
     };
 
     const API = (function api() {
@@ -774,7 +774,7 @@ module.exports = (plugin, connection, generalConfig) => {
         const oauthPlugin = await Plugin.findOne({ name: 'oauth' });
 
         ctx.state.generalConfig = cloneDeep(generalConfig); // avoiding a bug when changes in DB are not applied
-        const applicationConfig = getResourcesConfig(ctx, oauthPlugin);
+        const applicationConfig = getApplicationsConfig(ctx, oauthPlugin);
 
         if (applicationConfig) {
             ctx.state.generalConfig.application = Object.assign({}, ctx.state.generalConfig.application, applicationConfig);
