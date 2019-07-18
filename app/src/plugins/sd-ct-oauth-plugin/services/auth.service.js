@@ -3,10 +3,12 @@ const Promise = require('bluebird');
 const JWT = Promise.promisifyAll(require('jsonwebtoken'));
 const bcrypt = require('bcrypt');
 const crypto = require('crypto');
-const { ObjectId } = require('mongoose').Types;
+const mongoose = require('mongoose');
+const { ObjectId } = mongoose.Types;
 
 const whiteListModelFunc = require('plugins/sd-ct-oauth-plugin/models/white-list.model');
 const mailServiceFunc = require('plugins/sd-ct-oauth-plugin/services/mail.service');
+const UnprocessableEntityError = require('plugins/sd-ct-oauth-plugin/errors/unprocessableEntity.error');
 
 const UserModel = require('plugins/sd-ct-oauth-plugin/models/user.model');
 const RenewModel = require('plugins/sd-ct-oauth-plugin/models/renew.model');
@@ -115,6 +117,12 @@ function authService(plugin, connection) {
         }
 
         static async getUserById(id) {
+            const isValidId = mongoose.Types.ObjectId.isValid(id);
+
+            if (!isValidId) {
+                debug(`[Auth Service - getUserById] - Invalid id ${id} provided`);
+                throw new UnprocessableEntityError(`Invalid id ${id} provided`);
+            }
             return UserModel.findById(id).select('-password -salt -userToken -__v').exec();
         }
 
@@ -151,14 +159,23 @@ function authService(plugin, connection) {
         }
 
         static async deleteUser(id) {
+            const isValidId = mongoose.Types.ObjectId.isValid(id);
+
+            if (!isValidId) {
+                debug(`[Auth Service - deleteUser] Invalid id ${id} provided`);
+                throw new UnprocessableEntityError(`Invalid id ${id} provided`);
+            }
+
             let user;
             try {
                 user = await UserModel.findById(id).exec();
             } catch (e) {
+                debug(`[Auth Service - deleteUser] Failed to load user by id '${id}'`);
                 return null;
             }
 
             if (!user) {
+                debug(`[Auth Service - deleteUser] No user found with id '${id}'`);
                 return null;
             }
 
@@ -200,7 +217,7 @@ function authService(plugin, connection) {
             return exist || existTemp;
         }
 
-        static async createUser(data) {
+        static async createUser(data, generalConfig) {
             const salt = bcrypt.genSaltSync();
 
             const apps = data.apps || [];
@@ -217,10 +234,14 @@ function authService(plugin, connection) {
 
             debug('Sending mail');
             try {
-                await MailService.sendConfirmationMail({
-                    email: user.email,
-                    confirmationToken: user.confirmationToken,
-                }, [{ address: user.email }]);
+                await MailService.sendConfirmationMail(
+                    {
+                        email: user.email,
+                        confirmationToken: user.confirmationToken,
+                    },
+                    [{ address: user.email }],
+                    generalConfig
+                );
             } catch (err) {
                 debug('Error', err);
                 throw err;
@@ -229,7 +250,7 @@ function authService(plugin, connection) {
             return user;
         }
 
-        static async createUserWithoutPassword(data) {
+        static async createUserWithoutPassword(data, generalConfig) {
             const salt = bcrypt.genSaltSync();
             const pass = crypto.randomBytes(8).toString('hex');
             const user = await new UserTempModel({
@@ -244,12 +265,16 @@ function authService(plugin, connection) {
 
             debug('Sending mail');
             try {
-                await MailService.sendConfirmationMailWithPassword({
-                    email: user.email,
-                    confirmationToken: user.confirmationToken,
-                    password: pass,
-                    callbackUrl: data.callbackUrl || ''
-                }, [{ address: user.email }]);
+                await MailService.sendConfirmationMailWithPassword(
+                    {
+                        email: user.email,
+                        confirmationToken: user.confirmationToken,
+                        password: pass,
+                        callbackUrl: data.callbackUrl || ''
+                    },
+                    [{ address: user.email }],
+                    generalConfig
+                );
             } catch (err) {
                 debug('Error', err);
                 throw err;
@@ -283,7 +308,7 @@ function authService(plugin, connection) {
             return renew;
         }
 
-        static async sendResetMail(email) {
+        static async sendResetMail(email, generalConfig) {
             debug('Generating token to email', email);
 
             const user = await UserModel.findOne({ email });
@@ -298,9 +323,13 @@ function authService(plugin, connection) {
                 token: crypto.randomBytes(20).toString('hex'),
             }).save();
 
-            await MailService.sendRecoverPasswordMail({
-                token: renew.token,
-            }, [{ address: user.email }]);
+            await MailService.sendRecoverPasswordMail(
+                {
+                    token: renew.token,
+                },
+                [{ address: user.email }],
+                generalConfig
+            );
 
             return renew;
         }

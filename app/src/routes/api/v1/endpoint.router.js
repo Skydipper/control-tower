@@ -32,7 +32,7 @@ class EndpointRouter {
             fastlyPurge.service(SERVICE_ID, (err) => {
                 if (err) {
                     logger.error('Error purging', err);
-                    reject();
+                    reject({ message: err.message });
                 }
                 resolve();
             });

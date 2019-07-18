@@ -360,6 +360,12 @@ class Dispatcher {
             let formData = {}; // eslint-disable-line prefer-const
             for (const key in files) { // eslint-disable-line no-restricted-syntax
                 if ({}.hasOwnProperty.call(files, key)) {
+
+                    if (files[key].size < 1000) {
+                        const contents = fs.readFileSync(files[key].path, 'utf8');
+                        logger.debug('File content: ', contents);
+                    }
+
                     formData[key] = {
                         value: fs.createReadStream(files[key].path),
                         options: {

@@ -26,6 +26,8 @@ spec:
               value: "9000"
             - name: LOGGER_TYPE
               value: console
+            - name: LOGGER_LEVEL
+              value: debug
             - name: DEBUG
               value: "oauth-plugin"
             - name: NODE_ENV
