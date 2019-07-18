@@ -121,7 +121,9 @@ describe('OAuth endpoints tests - Sign up without auth', () => {
                         }
                     ],
                     substitution_data: {
-                        fromName: 'RW API'
+                        fromName: 'RW API',
+                        appName: 'WRI API',
+                        logo: 'http://www.wri.org/sites/all/themes/wri/images/logo.png'
                     }
                 };
 
@@ -151,8 +153,8 @@ describe('OAuth endpoints tests - Sign up without auth', () => {
             });
 
         response.status.should.equal(200);
-        response.text.should.include('Register correct');
-        response.text.should.include('Check your email and confirm your account');
+        response.text.should.include('Registration successful');
+        response.text.should.include('We\'ve sent you an email. Click the link in it to confirm your account.');
 
         const user = await UserTempModel.findOne({ email: 'someemail@gmail.com' }).exec();
         should.exist(user);
@@ -242,7 +244,9 @@ describe('OAuth endpoints tests - Sign up without auth', () => {
                         }
                     ],
                     substitution_data: {
-                        fromName: 'RW API'
+                        fromName: 'RW API',
+                        appName: 'WRI API',
+                        logo: 'http://www.wri.org/sites/all/themes/wri/images/logo.png'
                     }
                 };
 
@@ -273,8 +277,8 @@ describe('OAuth endpoints tests - Sign up without auth', () => {
             });
 
         response.status.should.equal(200);
-        response.text.should.include('Register correct');
-        response.text.should.include('Check your email and confirm your account');
+        response.text.should.include('Registration successful');
+        response.text.should.include('We\'ve sent you an email. Click the link in it to confirm your account.');
 
         const user = await UserTempModel.findOne({ email: 'someotheremail@gmail.com' }).exec();
         should.exist(user);
