@@ -539,7 +539,10 @@ module.exports = (plugin, connection, generalConfig) => {
                     return;
                 }
             }
-            const renew = await AuthService.sendResetMail(ctx.request.body.email, ctx.state.generalConfig);
+
+            const originApp = getOriginApp(ctx, plugin);
+
+            const renew = await AuthService.sendResetMail(ctx.request.body.email, ctx.state.generalConfig, originApp);
             if (!renew) {
                 if (ctx.request.type === 'application/json') {
                     throw new UnprocessableEntityError('User not found');
