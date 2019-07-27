@@ -81,11 +81,11 @@ function mailService(plugin) {
             });
         }
 
-        sendRecoverPasswordMail(data, recipients, generalConfig) {
+        sendRecoverPasswordMail(data, recipients, generalConfig, originApp) {
             debug('Sending confirmation mail to ', recipients);
             const reqOpts = {
                 substitution_data: {
-                    urlRecover: `${this.publicUrl}/auth/reset-password/${data.token}`,
+                    urlRecover: `${this.publicUrl}/auth/reset-password/${data.token}?origin=${originApp}`,
                     fromName: generalConfig.application.emailSenderName,
                     appName: generalConfig.application.name,
                     logo: generalConfig.application.logo

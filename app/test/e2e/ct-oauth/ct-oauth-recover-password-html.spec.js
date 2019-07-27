@@ -87,6 +87,7 @@ describe('OAuth endpoints tests - Recover password - HTML version', () => {
 
                 body.should.have.property('substitution_data').and.be.an('object');
                 body.substitution_data.should.have.property('urlRecover').and.include(`${process.env.PUBLIC_URL}/auth/reset-password/`);
+                body.substitution_data.should.have.property('urlRecover').and.include('origin=rw');
 
                 delete body.substitution_data.urlRecover;
 
@@ -142,6 +143,7 @@ describe('OAuth endpoints tests - Recover password - HTML version', () => {
 
                 body.should.have.property('substitution_data').and.be.an('object');
                 body.substitution_data.should.have.property('urlRecover').and.include(`${process.env.PUBLIC_URL}/auth/reset-password/`);
+                body.substitution_data.should.have.property('urlRecover').and.include('origin=gfw');
 
                 delete body.substitution_data.urlRecover;
 
