@@ -7,6 +7,7 @@ const loader = require('loader');
 const path = require('path');
 const convert = require('koa-convert');
 const sleep = require('sleep');
+const cors = require('@koa/cors');
 
 // const nock = require('nock');
 // nock.recorder.rec();
@@ -58,6 +59,9 @@ async function init() {
             }
 
             const app = new Koa();
+            app.use(cors({
+                credentials: true
+            }));
 
             app.use(convert(koaBody));
             await loader.loadPlugins(app);

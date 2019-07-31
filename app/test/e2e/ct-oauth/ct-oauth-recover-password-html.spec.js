@@ -16,7 +16,7 @@ let requester;
 nock.disableNetConnect();
 nock.enableNetConnect(process.env.HOST_IP);
 
-describe('OAuth endpoints tests - Recover password', () => {
+describe('OAuth endpoints tests - Recover password - HTML version', () => {
 
     before(async () => {
         if (process.env.NODE_ENV !== 'test') {
@@ -51,19 +51,6 @@ describe('OAuth endpoints tests - Recover password', () => {
         response.text.should.include(`Mail required`);
     });
 
-    it('Recover password request with no email should return an error - JSON format', async () => {
-        const response = await requester
-            .post(`/auth/reset-password`)
-            .set('Content-Type', 'application/json')
-            .send();
-
-
-        response.status.should.equal(422);
-        response.header['content-type'].should.equal('application/json; charset=utf-8');
-        response.body.should.have.property('errors').and.be.an('array');
-        response.body.errors[0].should.have.property('detail').and.equal(`Mail required`);
-    });
-
     it('Recover password request with non-existing email should return an error - HTML format', async () => {
         const response = await requester
             .post(`/auth/reset-password`)
@@ -75,20 +62,6 @@ describe('OAuth endpoints tests - Recover password', () => {
         response.status.should.equal(200);
         response.header['content-type'].should.equal('text/html; charset=utf-8');
         response.text.should.include(`User not found`);
-    });
-
-    it('Recover password request with non-existing email should return a 422 error - JSON format', async () => {
-        const response = await requester
-            .post(`/auth/reset-password`)
-            .set('Content-Type', 'application/json')
-            .send({
-                email: 'pepito@gmail.com'
-            });
-
-        response.status.should.equal(422);
-        response.header['content-type'].should.equal('application/json; charset=utf-8');
-        response.body.should.have.property('errors').and.be.an('array');
-        response.body.errors[0].should.have.property('detail').and.equal(`User not found`);
     });
 
     it('Recover password request with correct email should return OK - HTML format', async () => {
@@ -114,6 +87,7 @@ describe('OAuth endpoints tests - Recover password', () => {
 
                 body.should.have.property('substitution_data').and.be.an('object');
                 body.substitution_data.should.have.property('urlRecover').and.include(`${process.env.PUBLIC_URL}/auth/reset-password/`);
+                body.substitution_data.should.have.property('urlRecover').and.include('origin=rw');
 
                 delete body.substitution_data.urlRecover;
 
@@ -146,7 +120,7 @@ describe('OAuth endpoints tests - Recover password', () => {
         response.text.should.include(`Email sent`);
     });
 
-    it('Recover password request with correct email should return OK - JSON format', async () => {
+    it('Recover password request with correct email should return OK - HTML format', async () => {
         nock('https://api.sparkpost.com')
             .post('/api/v1/transmissions', (body) => {
                 const expectedRequestBody = {
@@ -161,14 +135,15 @@ describe('OAuth endpoints tests - Recover password', () => {
                         }
                     ],
                     substitution_data: {
-                        fromName: 'RW API',
-                        appName: 'RW API',
-                        logo: 'https://resourcewatch.org/static/images/logo-embed.png'
+                        fromName: 'GFW',
+                        appName: 'GFW',
+                        logo: 'https://www.globalforestwatch.org/packs/gfw-9c5fe396ee5b15cb5f5b639a7ef771bd.png'
                     }
                 };
 
                 body.should.have.property('substitution_data').and.be.an('object');
                 body.substitution_data.should.have.property('urlRecover').and.include(`${process.env.PUBLIC_URL}/auth/reset-password/`);
+                body.substitution_data.should.have.property('urlRecover').and.include('origin=gfw');
 
                 delete body.substitution_data.urlRecover;
 
@@ -177,22 +152,28 @@ describe('OAuth endpoints tests - Recover password', () => {
                 return isEqual(body, expectedRequestBody);
             })
             .once()
-            .reply(200);
+            .reply(200, {
+                results: {
+                    total_rejected_recipients: 0,
+                    total_accepted_recipients: 1,
+                    id: 11668787484950529
+                }
+            });
 
         await new UserModel({
             email: 'potato@gmail.com'
         }).save();
 
         const response = await requester
-            .post(`/auth/reset-password`)
-            .set('Content-Type', 'application/json')
+            .post(`/auth/reset-password?origin=gfw`)
+            .type('form')
             .send({
                 email: 'potato@gmail.com'
             });
 
         response.status.should.equal(200);
-        response.header['content-type'].should.equal('application/json; charset=utf-8');
-        response.body.should.have.property('message').and.equal(`Email sent`);
+        response.header['content-type'].should.equal('text/html; charset=utf-8');
+        response.text.should.include(`Email sent`);
     });
 
     after(async () => {

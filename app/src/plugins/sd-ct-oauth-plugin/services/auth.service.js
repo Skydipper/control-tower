@@ -308,7 +308,7 @@ function authService(plugin, connection) {
             return renew;
         }
 
-        static async sendResetMail(email, generalConfig) {
+        static async sendResetMail(email, generalConfig, originApp) {
             debug('Generating token to email', email);
 
             const user = await UserModel.findOne({ email });
@@ -328,7 +328,8 @@ function authService(plugin, connection) {
                     token: renew.token,
                 },
                 [{ address: user.email }],
-                generalConfig
+                generalConfig,
+                originApp
             );
 
             return renew;
