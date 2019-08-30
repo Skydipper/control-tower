@@ -344,7 +344,7 @@ class Dispatcher {
 
         if (redirectEndpoint.data) {
             logger.debug('Adding data');
-            if (configRequest.method === 'GET') {
+            if (configRequest.method === 'GET' || configRequest.method === 'DELETE') {
                 configRequest.qs = configRequest.qs || {};
                 const keys = Object.keys(redirectEndpoint.data);
                 for (let i = 0, length = keys.length; i < length; i++) {
