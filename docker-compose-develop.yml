@@ -27,7 +27,7 @@ services:
   #     - ./varnish/default.vcl:/etc/varnish/default.vcl
 
   mongo:
-    image: mongo
+    image: mongo:3.6.13
     container_name: control-tower-mongo
     ports:
       - "27017"
