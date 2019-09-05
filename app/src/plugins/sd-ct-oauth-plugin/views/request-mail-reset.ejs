@@ -64,7 +64,7 @@
                       </button>
                     </div>
                     <% } %>
-                    <form action="/auth/reset-password" method="POST">
+                    <form action="/auth/reset-password?origin=<%= app %>" method="POST">
                     <label for="email">
                       <input type="email" name="email" placeholder="Email" value="<%= email %>" required>
                     </label>
