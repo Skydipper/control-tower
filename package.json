@@ -71,7 +71,7 @@
     "config": "^1.21.0",
     "cron": "^1.1.0",
     "debug": "^2.2.0",
-    "dotenv": "^2.0.0",
+    "dotenv": "^8.1.0",
     "ejs": "^2.4.2",
     "fastly-purge": "1.0.1",
     "geoip-lite": "^1.1.8",
