@@ -502,6 +502,7 @@ module.exports = (plugin, connection, generalConfig) => {
                 error: null,
                 info: null,
                 email: null,
+                app: getOriginApp(ctx, plugin),
                 generalConfig: ctx.state.generalConfig,
             });
         }
@@ -533,6 +534,7 @@ module.exports = (plugin, connection, generalConfig) => {
                         error: 'Mail required',
                         info: null,
                         email: ctx.request.body.email,
+                        app: getOriginApp(ctx, plugin),
                         generalConfig: ctx.state.generalConfig,
                     });
 
@@ -551,6 +553,7 @@ module.exports = (plugin, connection, generalConfig) => {
                         error: 'User not found',
                         info: null,
                         email: ctx.request.body.email,
+                        app: getOriginApp(ctx, plugin),
                         generalConfig: ctx.state.generalConfig,
                     });
 
@@ -565,6 +568,7 @@ module.exports = (plugin, connection, generalConfig) => {
                     info: 'Email sent!!',
                     error: null,
                     email: ctx.request.body.email,
+                    app: getOriginApp(ctx, plugin),
                     generalConfig: ctx.state.generalConfig,
                 });
             }
@@ -796,30 +800,38 @@ module.exports = (plugin, connection, generalConfig) => {
         await next();
     }
 
-    ApiRouter.get('/', setCallbackUrl, API.redirectLogin);
     ApiRouter.get('/twitter', setCallbackUrl, API.twitter);
     ApiRouter.get('/twitter/callback', API.twitterCallback, API.updateApplications);
+
     ApiRouter.get('/google', setCallbackUrl, API.google);
     ApiRouter.get('/google/callback', API.googleCallback, API.updateApplications);
     ApiRouter.get('/google/token', API.googleToken, API.generateJWT);
+
     ApiRouter.get('/facebook/token', API.facebookToken, API.generateJWT);
     ApiRouter.get('/facebook', setCallbackUrl, API.facebook);
     ApiRouter.get('/facebook/callback', API.facebookCallback, API.updateApplications);
+
+    ApiRouter.get('/', setCallbackUrl, API.redirectLogin);
     ApiRouter.get('/basic', passport.authenticate('basic'), API.success);
     ApiRouter.get('/login', setCallbackUrl, loadApplicationGeneralConfig, API.loginView);
     ApiRouter.post('/login', API.localCallback);
     ApiRouter.get('/fail', loadApplicationGeneralConfig, API.failAuth);
+
     ApiRouter.get('/check-logged', API.checkLogged);
     ApiRouter.get('/success', loadApplicationGeneralConfig, API.success);
     ApiRouter.get('/logout', setCallbackUrlOnlyWithQueryParam, API.logout);
+
     ApiRouter.get('/sign-up', hasSignUpPermissions, loadApplicationGeneralConfig, API.getSignUp);
     ApiRouter.post('/sign-up', hasSignUpPermissions, loadApplicationGeneralConfig, API.signUp);
+
     ApiRouter.get('/confirm/:token', API.confirmUser);
+    ApiRouter.get('/reset-password', loadApplicationGeneralConfig, API.requestEmailResetView);
+    ApiRouter.post('/reset-password', loadApplicationGeneralConfig, API.sendResetMail);
     ApiRouter.get('/reset-password/:token', loadApplicationGeneralConfig, API.resetPasswordView);
     ApiRouter.post('/reset-password/:token', loadApplicationGeneralConfig, API.resetPassword);
-    ApiRouter.post('/reset-password', loadApplicationGeneralConfig, API.sendResetMail);
-    ApiRouter.get('/reset-password', loadApplicationGeneralConfig, API.requestEmailResetView);
+
     ApiRouter.get('/generate-token', isLogged, API.generateJWT);
+
     ApiRouter.get('/user', isLogged, isAdmin, API.getUsers);
     ApiRouter.get('/user/:id', isLogged, isAdmin, API.getUserById);
     ApiRouter.post('/user/find-by-ids', isLogged, isMicroservice, API.findByIds);

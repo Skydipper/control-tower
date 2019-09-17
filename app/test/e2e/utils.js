@@ -2,7 +2,10 @@ const Plugin = require('models/plugin.model');
 const mongoose = require('mongoose');
 const config = require('config');
 const ObjectId = require('mongoose').Types.ObjectId;
-const { TOKENS } = require('./test.constants');
+const { TOKENS, endpointTest } = require('./test.constants');
+const Endpoint = require('models/endpoint.model');
+const Version = require('models/version.model');
+const appConstants = require('app.constants');
 
 const mongoUri = process.env.CT_MONGO_URI || `mongodb://${config.get('mongodb.host')}:${config.get('mongodb.port')}/${config.get('mongodb.database')}`;
 const getUUID = () => Math.random().toString(36).substring(7);
@@ -56,6 +59,22 @@ const initHelpers = () => {
     };
 };
 
+const ensureCorrectError = ({ body }, errMessage, expectedStatus) => {
+    body.should.have.property('errors').and.be.an('array');
+    body.errors[0].should.have.property('detail').and.equal(errMessage);
+    body.errors[0].should.have.property('status').and.equal(expectedStatus);
+};
+
+const updateVersion = () => Version.update({
+    name: appConstants.ENDPOINT_VERSION,
+}, {
+    $set: {
+        lastUpdated: new Date(),
+    }
+});
+
+const createEndpoint = endpoint => new Endpoint({ ...endpointTest, ...endpoint }).save();
+
 async function setPluginSetting(pluginName, settingKey, settingValue) {
     return new Promise((resolve, reject) => {
         async function onDbReady(err) {
@@ -82,6 +101,9 @@ async function setPluginSetting(pluginName, settingKey, settingValue) {
 module.exports = {
     createUser,
     setPluginSetting,
+    updateVersion,
     getUUID,
+    ensureCorrectError,
     initHelpers,
+    createEndpoint
 };
