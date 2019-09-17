@@ -59,7 +59,7 @@ const initHelpers = () => {
     };
 };
 
-const ensureCorrectError = ({ body, status }, errMessage, expectedStatus) => {
+const ensureCorrectError = ({ body }, errMessage, expectedStatus) => {
     body.should.have.property('errors').and.be.an('array');
     body.errors[0].should.have.property('detail').and.equal(errMessage);
     body.errors[0].should.have.property('status').and.equal(expectedStatus);
