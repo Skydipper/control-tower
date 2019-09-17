@@ -816,7 +816,7 @@ module.exports = (plugin, connection, generalConfig) => {
     ApiRouter.get('/login', setCallbackUrl, loadApplicationGeneralConfig, API.loginView);
     ApiRouter.post('/login', API.localCallback);
     ApiRouter.get('/fail', loadApplicationGeneralConfig, API.failAuth);
-    
+
     ApiRouter.get('/check-logged', API.checkLogged);
     ApiRouter.get('/success', loadApplicationGeneralConfig, API.success);
     ApiRouter.get('/logout', setCallbackUrlOnlyWithQueryParam, API.logout);
