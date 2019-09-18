@@ -38,8 +38,7 @@ describe('OAuth endpoints tests - Sign up with JSON content type', () => {
     it('Registering a user without being logged in returns a 422 error - JSON version', async () => {
         const response = await requester
             .post(`/auth/sign-up`)
-            .set('Content-Type', 'application/json')
-            .send();
+            .set('Content-Type', 'application/json');
 
         response.status.should.equal(422);
         response.header['content-type'].should.equal('application/json; charset=utf-8');
@@ -51,8 +50,7 @@ describe('OAuth endpoints tests - Sign up with JSON content type', () => {
     it('Registering a user without the actual data returns a 422 error - JSON version', async () => {
         const response = await requester
             .post(`/auth/sign-up`)
-            .set('Content-Type', 'application/json')
-            .send();
+            .set('Content-Type', 'application/json');
 
         response.status.should.equal(422);
         response.header['content-type'].should.equal('application/json; charset=utf-8');
@@ -190,8 +188,7 @@ describe('OAuth endpoints tests - Sign up with JSON content type', () => {
 
         const response = await requester
             .get(`/auth/confirm/${tempUser.confirmationToken}`)
-            .set('Content-Type', 'application/json')
-            .send();
+            .set('Content-Type', 'application/json');
 
         response.status.should.equal(200);
 
@@ -302,8 +299,7 @@ describe('OAuth endpoints tests - Sign up with JSON content type', () => {
 
         const response = await requester
             .get(`/auth/confirm/${tempUser.confirmationToken}`)
-            .set('Content-Type', 'application/json')
-            .send();
+            .set('Content-Type', 'application/json');
 
         response.status.should.equal(200);
 

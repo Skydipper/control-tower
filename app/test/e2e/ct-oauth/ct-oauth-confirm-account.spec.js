@@ -44,8 +44,7 @@ describe('OAuth endpoints tests - Confirm account', () => {
     it('Confirm account request with invalid token should return an error', async () => {
         const response = await requester
             .get(`/auth/confirm/fakeToken`)
-            .set('Content-Type', 'application/json')
-            .send();
+            .set('Content-Type', 'application/json');
 
 
         response.status.should.equal(400);
@@ -66,8 +65,7 @@ describe('OAuth endpoints tests - Confirm account', () => {
 
         const response = await requester
             .get(`/auth/confirm/${confirmationToken}`)
-            .set('Content-Type', 'application/json')
-            .send();
+            .set('Content-Type', 'application/json');
 
 
         response.status.should.equal(200);
@@ -92,8 +90,7 @@ describe('OAuth endpoints tests - Confirm account', () => {
         }).save();
 
         const response = await requester
-            .get(`/auth/confirm/${confirmationToken}`)
-            .send();
+            .get(`/auth/confirm/${confirmationToken}`);
 
 
         response.status.should.equal(200);
@@ -132,8 +129,7 @@ describe('OAuth endpoints tests - Confirm account', () => {
         }).save();
 
         const response = await requester
-            .get(`/auth/confirm/${confirmationToken}`)
-            .send();
+            .get(`/auth/confirm/${confirmationToken}`);
 
 
         response.status.should.equal(200);
@@ -170,8 +166,7 @@ describe('OAuth endpoints tests - Confirm account', () => {
         }).save();
 
         const response = await requester
-            .get(`/auth/confirm/${confirmationToken}`)
-            .send();
+            .get(`/auth/confirm/${confirmationToken}`);
 
 
         response.status.should.equal(200);
@@ -208,8 +203,7 @@ describe('OAuth endpoints tests - Confirm account', () => {
         }).save();
 
         const response = await requester
-            .get(`/auth/confirm/${confirmationToken}`)
-            .send();
+            .get(`/auth/confirm/${confirmationToken}`);
 
 
         response.status.should.equal(200);
@@ -246,8 +240,7 @@ describe('OAuth endpoints tests - Confirm account', () => {
         }).save();
 
         const response = await requester
-            .get(`/auth/confirm/${confirmationToken}?callbackUrl=http://vizzuality.com/`)
-            .send();
+            .get(`/auth/confirm/${confirmationToken}?callbackUrl=http://vizzuality.com/`);
 
 
         response.status.should.equal(200);

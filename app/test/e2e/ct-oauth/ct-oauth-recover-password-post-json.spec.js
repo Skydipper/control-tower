@@ -41,8 +41,7 @@ describe('OAuth endpoints tests - Recover password post - JSON version', () => {
     it('Recover password post with fake token returns a 422 error - JSON format', async () => {
         const response = await requester
             .post(`/auth/reset-password/token`)
-            .set('Content-Type', 'application/json')
-            .send();
+            .set('Content-Type', 'application/json');
 
 
         response.status.should.equal(422);
@@ -59,8 +58,7 @@ describe('OAuth endpoints tests - Recover password post - JSON version', () => {
 
         const response = await requester
             .post(`/auth/reset-password/myToken`)
-            .set('Content-Type', 'application/json')
-            .send();
+            .set('Content-Type', 'application/json');
 
         response.status.should.equal(422);
         response.header['content-type'].should.equal('application/json; charset=utf-8');

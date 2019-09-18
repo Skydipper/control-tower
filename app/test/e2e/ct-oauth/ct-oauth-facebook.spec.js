@@ -56,8 +56,7 @@ describe('Facebook auth endpoint tests', () => {
         }
 
         const response = await requester
-            .get(`/auth/facebook`)
-            .send();
+            .get(`/auth/facebook`);
 
         response.status.should.equal(200);
         response.header['content-type'].should.equal('application/xhtml+xml; charset=utf-8');
@@ -112,12 +111,10 @@ describe('Facebook auth endpoint tests', () => {
 
 
         await requester
-            .get(`/auth`)
-            .send();
+            .get(`/auth`);
 
         const response = await requester
-            .get(`/auth/facebook/callback?code=TEST_FACEBOOK_OAUTH2_CALLBACK_CODE`)
-            .send();
+            .get(`/auth/facebook/callback?code=TEST_FACEBOOK_OAUTH2_CALLBACK_CODE`);
 
         response.status.should.equal(200);
         response.header['content-type'].should.equal('text/html; charset=utf-8');
@@ -173,8 +170,7 @@ describe('Facebook auth endpoint tests', () => {
 
 
         const response = await requester
-            .get(`/auth/facebook/token?access_token=TEST_FACEBOOK_OAUTH2_ACCESS_TOKEN`)
-            .send();
+            .get(`/auth/facebook/token?access_token=TEST_FACEBOOK_OAUTH2_ACCESS_TOKEN`);
 
         response.status.should.equal(200);
         response.header['content-type'].should.equal('application/json; charset=utf-8');

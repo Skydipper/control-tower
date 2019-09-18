@@ -33,8 +33,7 @@ const initHelpers = () => {
         const { USER, MANAGER } = TOKENS;
         const request = token => requester
             [method](`/api/v1/${url}`)
-            .set('Authorization', `Bearer ${token}`)
-            .send();
+            .set('Authorization', `Bearer ${token}`);
 
         const validate = res => {
             res.status.should.equal(403);
@@ -46,7 +45,7 @@ const initHelpers = () => {
     };
 
     const isTokenRequired = (method, url) => async () => {
-        const response = await requester[method](`/api/v1/${url}`).send();
+        const response = await requester[method](`/api/v1/${url}`);
 
         response.body.errors[0].should.have.property('detail').and.equal('Not authenticated');
         response.status.should.equal(401);

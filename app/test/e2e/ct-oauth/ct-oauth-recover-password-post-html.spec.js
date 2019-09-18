@@ -40,8 +40,7 @@ describe('OAuth endpoints tests - Recover password post - HTML version', () => {
 
     it('Recover password post with fake token should return an error - HTML format (TODO: this should return a 422)', async () => {
         const response = await requester
-            .post(`/auth/reset-password/token`)
-            .send();
+            .post(`/auth/reset-password/token`);
 
 
         response.status.should.equal(200);
@@ -57,8 +56,7 @@ describe('OAuth endpoints tests - Recover password post - HTML version', () => {
 
         const response = await requester
             .post(`/auth/reset-password/myToken`)
-            .type('form')
-            .send();
+            .type('form');
 
         response.status.should.equal(200);
         response.header['content-type'].should.equal('text/html; charset=utf-8');

@@ -31,8 +31,7 @@ describe('Headers', () => {
             .set('Access-Control-Request-Method', 'POST')
             .set('Access-Control-Request-Headers', 'content-type')
             .set('Origin', 'https://staging.resourcewatch.org')
-            .set('Authorization', `Bearer ${TOKENS.ADMIN}`)
-            .send();
+            .set('Authorization', `Bearer ${TOKENS.ADMIN}`);
 
         response.should.have.header('access-control-allow-origin', 'https://staging.resourcewatch.org');
         response.should.have.header('access-control-allow-credentials', 'true');

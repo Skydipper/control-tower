@@ -42,8 +42,7 @@ describe('OAuth endpoints tests - Recover password request - HTML version', () =
 
     it('Recover password request with no email should return an error - HTML format (TODO: this should return a 422)', async () => {
         const response = await requester
-            .post(`/auth/reset-password`)
-            .send();
+            .post(`/auth/reset-password`);
 
 
         response.status.should.equal(200);

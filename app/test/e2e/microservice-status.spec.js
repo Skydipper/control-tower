@@ -29,8 +29,7 @@ const createMicroservice = () => {
 
 const getListStatus = async () => requester
     .get('/api/v1/microservice/status')
-    .set('Authorization', `Bearer ${TOKENS.ADMIN}`)
-    .send();
+    .set('Authorization', `Bearer ${TOKENS.ADMIN}`);
 
 describe('Microservice status calls', () => {
 
