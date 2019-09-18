@@ -157,10 +157,10 @@ describe('OAuth endpoints tests - Recover password post - JSON version', () => {
         closeTestAgent();
     });
 
-    afterEach(() => {
-        UserModel.deleteMany({}).exec();
-        UserTempModel.deleteMany({}).exec();
-        RenewModel.deleteMany({}).exec();
+    afterEach(async () => {
+        await UserModel.deleteMany({}).exec();
+        await UserTempModel.deleteMany({}).exec();
+        await RenewModel.deleteMany({}).exec();
 
         if (!nock.isDone()) {
             throw new Error(`Not all nock interceptors were used: ${nock.pendingMocks()}`);
