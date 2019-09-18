@@ -30,8 +30,7 @@ describe('Auth endpoints tests', () => {
     it('Visiting /auth while not logged in should redirect to the login page', async () => {
         const response = await requester
             .get(`/auth`)
-            .set('Content-Type', 'application/json')
-            .send();
+            .set('Content-Type', 'application/json');
 
         response.status.should.equal(200);
         response.header['content-type'].should.equal('text/html; charset=utf-8');
@@ -44,8 +43,7 @@ describe('Auth endpoints tests', () => {
         const response = await requester
             .get(`/auth`)
             .set('Content-Type', 'application/json')
-            .set('Authorization', `Bearer ${TOKENS.ADMIN}`)
-            .send();
+            .set('Authorization', `Bearer ${TOKENS.ADMIN}`);
 
         response.status.should.equal(200);
         response.redirects.should.be.an('array').and.length(2);
@@ -58,8 +56,7 @@ describe('Auth endpoints tests', () => {
         const response = await requester
             .get(`/auth?callbackUrl=https://www.wikipedia.org`)
             .set('Content-Type', 'application/json')
-            .set('Authorization', `Bearer ${TOKENS.ADMIN}`)
-            .send();
+            .set('Authorization', `Bearer ${TOKENS.ADMIN}`);
 
         response.status.should.equal(200);
         response.redirects.should.be.an('array').and.length(3);
@@ -71,8 +68,7 @@ describe('Auth endpoints tests', () => {
     it('Visiting /auth/login while not being logged in should show you the login page', async () => {
         const response = await requester
             .get(`/auth/login`)
-            .set('Content-Type', 'application/json')
-            .send();
+            .set('Content-Type', 'application/json');
 
         response.status.should.equal(401);
         response.header['content-type'].should.equal('application/json; charset=utf-8');
@@ -84,8 +80,7 @@ describe('Auth endpoints tests', () => {
     it('Logging in at /auth/login with no credentials should display the error messages', async () => {
         const response = await requester
             .post(`/auth/login`)
-            .set('Content-Type', 'application/json')
-            .send();
+            .set('Content-Type', 'application/json');
 
         response.status.should.equal(401);
         response.header['content-type'].should.equal('application/json; charset=utf-8');
@@ -168,8 +163,7 @@ describe('Auth endpoints tests', () => {
         const response = await requester
             .get(`/auth/login?callbackUrl=https://www.wikipedia.org`)
             .set('Content-Type', 'application/json')
-            .set('Authorization', `Bearer ${TOKENS.ADMIN}`)
-            .send();
+            .set('Authorization', `Bearer ${TOKENS.ADMIN}`);
 
         response.status.should.equal(200);
         response.redirects.should.be.an('array').and.length(0);

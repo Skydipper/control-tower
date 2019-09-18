@@ -29,8 +29,7 @@ describe('GET users by id', () => {
 
     it('Get user without being logged in returns a 401', async () => {
         const response = await requester
-            .get(`/auth/user/41224d776a326fb40f000001`)
-            .send();
+            .get(`/auth/user/41224d776a326fb40f000001`);
 
         response.status.should.equal(401);
     });
@@ -38,8 +37,7 @@ describe('GET users by id', () => {
     it('Get user while being logged in as a regular user returns a 400 error', async () => {
         const response = await requester
             .get(`/auth/user/41224d776a326fb40f000001`)
-            .set('Authorization', `Bearer ${TOKENS.USER}`)
-            .send();
+            .set('Authorization', `Bearer ${TOKENS.USER}`);
 
         response.status.should.equal(403);
         response.body.should.have.property('errors').and.be.an('array');
@@ -49,8 +47,7 @@ describe('GET users by id', () => {
     it('Get user with an invalid id of a user that does not exist returns a 422', async () => {
         const response = await requester
             .get(`/auth/user/1234`)
-            .set('Authorization', `Bearer ${TOKENS.MICROSERVICE}`)
-            .send();
+            .set('Authorization', `Bearer ${TOKENS.MICROSERVICE}`);
 
         response.status.should.equal(422);
         response.body.should.have.property('errors').and.be.an('array');
@@ -61,8 +58,7 @@ describe('GET users by id', () => {
     it('Get user with id of a user that does not exist returns a 404', async () => {
         const response = await requester
             .get(`/auth/user/41224d776a326fb40f000001`)
-            .set('Authorization', `Bearer ${TOKENS.MICROSERVICE}`)
-            .send();
+            .set('Authorization', `Bearer ${TOKENS.MICROSERVICE}`);
 
         response.status.should.equal(404);
         response.body.errors[0].should.have.property('detail').and.equal(`User not found`);
@@ -73,8 +69,7 @@ describe('GET users by id', () => {
 
         const response = await requester
             .get(`/auth/user/${userOne.id}`)
-            .set('Authorization', `Bearer ${TOKENS.MICROSERVICE}`)
-            .send();
+            .set('Authorization', `Bearer ${TOKENS.MICROSERVICE}`);
 
         response.status.should.equal(200);
 

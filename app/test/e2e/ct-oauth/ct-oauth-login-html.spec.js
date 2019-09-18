@@ -36,8 +36,7 @@ describe('Auth endpoints tests', () => {
 
     it('Visiting /auth while not logged in should redirect to the login page', async () => {
         const response = await requester
-            .get(`/auth`)
-            .send();
+            .get(`/auth`);
 
         response.status.should.equal(200);
         response.header['content-type'].should.equal('text/html; charset=utf-8');
@@ -48,8 +47,7 @@ describe('Auth endpoints tests', () => {
     it('Visiting /auth while logged in should redirect to the success page', async () => {
         const response = await requester
             .get(`/auth`)
-            .set('Authorization', `Bearer ${TOKENS.ADMIN}`)
-            .send();
+            .set('Authorization', `Bearer ${TOKENS.ADMIN}`);
 
         response.status.should.equal(200);
         response.redirects.should.be.an('array').and.length(2);
@@ -60,8 +58,7 @@ describe('Auth endpoints tests', () => {
     it('Visiting /auth with callbackUrl while being logged in should redirect to the callback page', async () => {
         const response = await requester
             .get(`/auth?callbackUrl=https://www.wikipedia.org`)
-            .set('Authorization', `Bearer ${TOKENS.ADMIN}`)
-            .send();
+            .set('Authorization', `Bearer ${TOKENS.ADMIN}`);
 
         response.status.should.equal(200);
         response.redirects.should.be.an('array').and.length(3);
@@ -72,8 +69,7 @@ describe('Auth endpoints tests', () => {
 
     it('Visiting /auth/login while not being logged in should show you the login page', async () => {
         const response = await requester
-            .get(`/auth/login`)
-            .send();
+            .get(`/auth/login`);
 
         response.status.should.equal(200);
         response.redirects.should.be.an('array').and.length(0);
@@ -84,8 +80,7 @@ describe('Auth endpoints tests', () => {
     it('Logging in at /auth/login with no credentials should display the error messages', async () => {
         const response = await requester
             .post(`/auth/login`)
-            .type('form')
-            .send();
+            .type('form');
 
         response.status.should.equal(200);
         response.redirects.should.be.an('array').and.length(1);
@@ -154,8 +149,7 @@ describe('Auth endpoints tests', () => {
     it('Visiting /auth/login with callbackUrl while being logged in should redirect to the callback page', async () => {
         const response = await requester
             .get(`/auth/login?callbackUrl=https://www.wikipedia.org`)
-            .set('Authorization', `Bearer ${TOKENS.ADMIN}`)
-            .send();
+            .set('Authorization', `Bearer ${TOKENS.ADMIN}`);
 
         response.status.should.equal(200);
         response.redirects.should.be.an('array').and.length(2);
@@ -165,8 +159,7 @@ describe('Auth endpoints tests', () => {
 
     it('Logging in successfully with /auth/login with callbackUrl should redirect to the callback page', async () => {
         await requester
-            .get(`/auth/login?callbackUrl=https://www.wikipedia.org`)
-            .send();
+            .get(`/auth/login?callbackUrl=https://www.wikipedia.org`);
 
         const response = await requester
             .post(`/auth/login`)
@@ -184,8 +177,7 @@ describe('Auth endpoints tests', () => {
 
     it('Logging in successfully with /auth/login with callbackUrl and token=true should redirect to the callback page and pass the token', async () => {
         await requester
-            .get(`/auth/login?callbackUrl=https://www.wikipedia.org&token=true`)
-            .send();
+            .get(`/auth/login?callbackUrl=https://www.wikipedia.org&token=true`);
 
         const response = await requester
             .post(`/auth/login`)

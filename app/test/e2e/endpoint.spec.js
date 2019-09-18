@@ -11,8 +11,7 @@ let requester;
 
 const getListEndpoints = () => requester
     .get('/api/v1/endpoint')
-    .set('Authorization', `Bearer ${TOKENS.ADMIN}`)
-    .send();
+    .set('Authorization', `Bearer ${TOKENS.ADMIN}`);
 
 describe('GET Endpoints', () => {
     before(async () => {

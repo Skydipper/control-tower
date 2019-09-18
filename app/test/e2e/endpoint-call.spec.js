@@ -25,7 +25,7 @@ describe('Endpoint calls', () => {
     });
 
     it('Getting an endpoint that doesn\'t exist should return a 404', async () => {
-        const response = await requester.get(`/api/v1/foo`).send();
+        const response = await requester.get(`/api/v1/foo`);
 
         response.status.should.equal(404);
         response.body.should.have.property('errors').and.be.an('array');
@@ -34,7 +34,7 @@ describe('Endpoint calls', () => {
     });
 
     it('Getting an authenticated endpoint without an auth token should return a 401', async () => {
-        const response = await requester.get(`/api/v1/microservice`).send();
+        const response = await requester.get(`/api/v1/microservice`);
 
         response.status.should.equal(401);
         response.body.should.have.property('errors').and.be.an('array');
@@ -45,8 +45,7 @@ describe('Endpoint calls', () => {
     it('Getting an ADMIN endpoint with a USER token should return a 401', async () => {
         const response = await requester
             .get(`/api/v1/microservice`)
-            .set('Authorization', `Bearer ${TOKENS.USER}`)
-            .send();
+            .set('Authorization', `Bearer ${TOKENS.USER}`);
 
         response.status.should.equal(403);
         response.body.should.have.property('errors').and.be.an('array');

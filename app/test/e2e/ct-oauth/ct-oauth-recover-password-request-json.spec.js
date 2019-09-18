@@ -43,8 +43,7 @@ describe('OAuth endpoints tests - Recover password request - JSON version', () =
     it('Recover password request with no email should return an error - JSON format', async () => {
         const response = await requester
             .post(`/auth/reset-password`)
-            .set('Content-Type', 'application/json')
-            .send();
+            .set('Content-Type', 'application/json');
 
 
         response.status.should.equal(422);

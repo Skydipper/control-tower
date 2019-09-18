@@ -10,8 +10,7 @@ let pluginId;
 
 const getListPlugins = async () => requester
     .get('/api/v1/plugin')
-    .set('Authorization', `Bearer ${TOKENS.ADMIN}`)
-    .send();
+    .set('Authorization', `Bearer ${TOKENS.ADMIN}`);
 
 const updatePlugin = data => requester
     .patch(`/api/v1/plugin/${pluginId}`)

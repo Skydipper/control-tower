@@ -38,8 +38,7 @@ describe('OAuth endpoints tests - Sign up without auth', () => {
 
     it('Registering a user without being logged in returns an 401 error (JSON format)', async () => {
         const response = await requester
-            .post(`/auth/sign-up`)
-            .send();
+            .post(`/auth/sign-up`);
 
         response.status.should.equal(401);
         response.header['content-type'].should.equal('application/json; charset=utf-8');
@@ -51,8 +50,7 @@ describe('OAuth endpoints tests - Sign up without auth', () => {
         const response = await requester
             .post(`/auth/sign-up`)
             .type('form')
-            .set('Authorization', `Bearer ${TOKENS.ADMIN}`)
-            .send();
+            .set('Authorization', `Bearer ${TOKENS.ADMIN}`);
 
         response.status.should.equal(200);
         response.text.should.include('Email, Password and Repeat password are required');
@@ -183,8 +181,7 @@ describe('OAuth endpoints tests - Sign up without auth', () => {
         const tempUser = await UserTempModel.findOne({ email: 'someemail@gmail.com' }).exec();
 
         const response = await requester
-            .get(`/auth/confirm/${tempUser.confirmationToken}`)
-            .send();
+            .get(`/auth/confirm/${tempUser.confirmationToken}`);
 
         response.status.should.equal(200);
 
@@ -283,8 +280,7 @@ describe('OAuth endpoints tests - Sign up without auth', () => {
         const tempUser = await UserTempModel.findOne({ email: 'someotheremail@gmail.com' }).exec();
 
         const response = await requester
-            .get(`/auth/confirm/${tempUser.confirmationToken}`)
-            .send();
+            .get(`/auth/confirm/${tempUser.confirmationToken}`);
 
         response.status.should.equal(200);
 
