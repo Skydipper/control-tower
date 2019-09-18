@@ -16,7 +16,7 @@ let requester;
 nock.disableNetConnect();
 nock.enableNetConnect(process.env.HOST_IP);
 
-describe('OAuth endpoints tests - Recover password - HTML version', () => {
+describe('OAuth endpoints tests - Recover password request - HTML version', () => {
 
     before(async () => {
         if (process.env.NODE_ENV !== 'test') {
@@ -177,14 +177,14 @@ describe('OAuth endpoints tests - Recover password - HTML version', () => {
     });
 
     after(async () => {
-        UserModel.deleteMany({}).exec();
-        UserTempModel.deleteMany({}).exec();
-        RenewModel.deleteMany({}).exec();
-
         closeTestAgent();
     });
 
     afterEach(() => {
+        UserModel.deleteMany({}).exec();
+        UserTempModel.deleteMany({}).exec();
+        RenewModel.deleteMany({}).exec();
+
         if (!nock.isDone()) {
             throw new Error(`Not all nock interceptors were used: ${nock.pendingMocks()}`);
         }

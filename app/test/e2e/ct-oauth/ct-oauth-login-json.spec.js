@@ -161,8 +161,8 @@ describe('Auth endpoints tests', () => {
         responseUser.should.have.property('role').and.equal('USER');
         responseUser.should.have.property('extraUserData').and.be.an('object');
         responseUser.should.have.property('token').and.be.a('string').and.not.be.empty;
-        // eslint-disable-next-line
-        responseUser.extraUserData.should.have.property('apps').and.be.an('array').and.contain    });
+        responseUser.extraUserData.should.have.property('apps').and.be.an('array').and.contain('rw');
+    });
 
     it('Visiting GET /auth/login with callbackUrl while being logged in should return a 200', async () => {
         const response = await requester

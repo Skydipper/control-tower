@@ -16,7 +16,7 @@ let requester;
 nock.disableNetConnect();
 nock.enableNetConnect(process.env.HOST_IP);
 
-describe('OAuth endpoints tests - Recover password - JSON version', () => {
+describe('OAuth endpoints tests - Recover password request - JSON version', () => {
 
     before(async () => {
         if (process.env.NODE_ENV !== 'test') {
