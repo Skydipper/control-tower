@@ -53,9 +53,19 @@ const endpointTest = {
     version: 1
 };
 
+const testFilter = (compareData, additionalData) => ({
+    name: 'dataset',
+    path: '/api/v1/test1/test',
+    pathRegex: new RegExp('/api/v1/test1/test'),
+    method: 'POST',
+    compare: { data: compareData },
+    ...additionalData,
+});
+
 module.exports = {
     TOKENS,
     microserviceTest,
     endpointTest,
-    testAppKey
+    testAppKey,
+    testFilter
 };

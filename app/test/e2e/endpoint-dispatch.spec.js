@@ -2,7 +2,7 @@ const chai = require('chai');
 const nock = require('nock');
 const Endpoint = require('models/endpoint.model');
 const { getTestAgent } = require('./test-server');
-const { testAppKey, endpointTest } = require('./test.constants');
+const { testAppKey, endpointTest, testFilter } = require('./test.constants');
 const { createEndpoint, ensureCorrectError, updateVersion } = require('./utils');
 const { createMockEndpoint, createMockEndpointWithBody, createMockEndpointWithHeaders } = require('./mock');
 
@@ -187,12 +187,96 @@ describe('Endpoint dispatch tests', () => {
         result.text.should.equal('ok');
     });
 
-    it('Endpoint with pathRegex are matched to external requests and return a 200 HTTP code (negative test)', async () => {
+    it('Endpoint with pathRegex are not matched to external requests and return a 404 HTTP code (negative test)', async () => {
         await updateVersion();
         // eslint-disable-next-line no-useless-escape
         await createEndpoint({ pathRegex: new RegExp('^/api/v1/dataset/[0-9]*$') });
         const result = await microservice.post('/api/v1/dataset/sadasd');
         result.status.should.equal(404);
+    });
+
+    it('Endpoint with filters which are not created return not found and return a 404 HTTP code (negative test)', async () => {
+        await updateVersion();
+        // eslint-disable-next-line no-useless-escape
+        await createEndpoint({
+            ...endpointTest,
+            pathRegex: new RegExp('^/api/v1/dataset$'),
+            redirect: [{ ...endpointTest.redirect[0], filters: testFilter({ test1: 'test2' }) }]
+        });
+        const result = await microservice.post('/api/v1/dataset').send({ test1: 'test2' });
+        ensureCorrectError(result, 'Endpoint not found', 404);
+    });
+
+    it('Endpoint with filters are matched to returned body and return a 200 HTTP code (positive test)', async () => {
+        await updateVersion();
+        // eslint-disable-next-line no-useless-escape
+        await createEndpoint({
+            pathRegex: new RegExp('^/api/v1/dataset$'),
+            redirect: [{ ...endpointTest.redirect[0], filters: testFilter({ foo: 'bar' }) }]
+        });
+        await createEndpoint({
+            _id: '507f191e810c19729de860ea',
+            path: '/api/v1/test1/test',
+        });
+        createMockEndpointWithBody('/api/v1/dataset', { body: { loggedUser: null }, response: { body: { data: { foo: 'bar' } } } });
+        createMockEndpointWithBody('/api/v1/dataset', {
+            body: {
+                foo: 'bar',
+                loggedUser: null,
+                dataset: { body: { data: { foo: 'bar' } } },
+            }
+        });
+        const result = await microservice.post('/api/v1/dataset').send({ foo: 'bar' });
+        result.status.should.equal(200);
+        result.text.should.equal('ok');
+    });
+
+    it('Endpoint with filters are not matched to returned body and return a 404 HTTP code (negative test)', async () => {
+        await updateVersion();
+        // eslint-disable-next-line no-useless-escape
+        await createEndpoint({
+            pathRegex: new RegExp('^/api/v1/dataset$'),
+            redirect: [{ ...endpointTest.redirect[0], filters: testFilter({ test: 'trest1' }) }]
+        });
+        await createEndpoint({
+            _id: '507f191e810c19729de860ea',
+            path: '/api/v1/test1/test',
+        });
+        createMockEndpointWithBody('/api/v1/dataset', { body: { loggedUser: null }, response: { data: { test: 'bar' } } });
+        const result = await microservice.post('/api/v1/dataset').send({ test: 'bar' });
+        ensureCorrectError(result, 'Endpoint not found', 404);
+    });
+
+    it('Endpoint with filters returned 404 so the request is fall with a 404 HTTP code (negative test)', async () => {
+        await updateVersion();
+        // eslint-disable-next-line no-useless-escape
+        await createEndpoint({
+            pathRegex: new RegExp('^/api/v1/dataset$'),
+            redirect: [{ ...endpointTest.redirect[0], filters: testFilter({ test: 'trest1' }) }]
+        });
+        await createEndpoint({
+            _id: '507f191e810c19729de860ea',
+            path: '/api/v1/test1/test',
+        });
+        createMockEndpointWithBody('/api/v1/dataset', { body: { loggedUser: null }, response: { data: { test: 'bar' } }, replyStatus: 404 });
+        const result = await microservice.post('/api/v1/dataset').send({ test: 'bar' });
+        ensureCorrectError(result, 'Endpoint not found', 404);
+    });
+
+    it('Endpoint with filters are not matched with method and return a 404 HTTP code (negative test)', async () => {
+        await updateVersion();
+        // eslint-disable-next-line no-useless-escape
+        await createEndpoint({
+            pathRegex: new RegExp('^/api/v1/dataset$'),
+            redirect: [{ ...endpointTest.redirect[0], filters: testFilter({ test: 'trest1', method: 'GET' }) }]
+        });
+        await createEndpoint({
+            _id: '507f191e810c19729de860ea',
+            path: '/api/v1/test1/test',
+        });
+        createMockEndpointWithBody('/api/v1/dataset', { body: { loggedUser: null }, response: { data: { test: 'bar' } }, replyStatus: 404 });
+        const result = await microservice.post('/api/v1/dataset').send({ test: 'bar' });
+        ensureCorrectError(result, 'Endpoint not found', 404);
     });
 
     afterEach(async () => {
