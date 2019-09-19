@@ -9,7 +9,7 @@ const { createMockEndpoint, createMockEndpointWithBody, createMockEndpointWithHe
 const should = chai.should();
 let microservice;
 
-const changeMethod = method => ({ ...endpointTest, method, redirect: [{ ...endpointTest.redirect[0], method }] });
+const changeMethod = (method) => ({ ...endpointTest, method, redirect: [{ ...endpointTest.redirect[0], method }] });
 
 describe('Endpoint dispatch tests', () => {
     before(async () => {

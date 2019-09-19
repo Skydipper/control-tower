@@ -50,7 +50,7 @@ describe('Endpoint purge all', () => {
         response.body.should.have.property('errors').and.be.an('array');
         response.body.errors[0].status.should.equal(403);
         response.body.errors[0].should.have.property('detail').and.equal(`Not authorized`);
-    })
+    });
 
     it('Purging endpoints as MANAGER should fail', async () => {
         const response = await requester.delete(`/api/v1/endpoint/purge-all`)
@@ -60,7 +60,7 @@ describe('Endpoint purge all', () => {
         response.body.should.have.property('errors').and.be.an('array');
         response.body.errors[0].status.should.equal(403);
         response.body.errors[0].should.have.property('detail').and.equal(`Not authorized`);
-    })
+    });
 
     it('Purging endpoints as ADMIN should succeed (happy case)', async () => {
         nock('https://api.fastly.com')

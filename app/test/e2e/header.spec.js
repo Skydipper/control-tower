@@ -1,10 +1,10 @@
 const nock = require('nock');
 const chai = require('chai');
+const Microservice = require('models/microservice.model');
+const Endpoint = require('models/endpoint.model');
 const { TOKENS } = require('./test.constants');
 const { initHelpers } = require('./utils');
 const { getTestAgent, closeTestAgent } = require('./test-server');
-const Microservice = require('models/microservice.model');
-const Endpoint = require('models/endpoint.model');
 
 const should = chai.should();
 

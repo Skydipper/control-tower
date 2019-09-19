@@ -143,7 +143,7 @@ describe('Auth endpoints tests - Delete user', () => {
 
 
     after(async () => {
-        const WhiteListModel = whiteListModelFunc(connection);
+        WhiteListModel = whiteListModelFunc(connection);
 
         UserModel.deleteMany({}).exec();
         WhiteListModel.deleteMany({}).exec();

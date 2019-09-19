@@ -139,7 +139,7 @@ describe('List users', () => {
 
         response.status.should.equal(200);
         response.body.should.be.an('array').and.length(2);
-        response.body.map(e => e.email).should.include('rw-user-two@example.com').and.to.include('rw-user-one@example.com');
+        response.body.map((e) => e.email).should.include('rw-user-two@example.com').and.to.include('rw-user-one@example.com');
 
     });
 
@@ -151,7 +151,7 @@ describe('List users', () => {
 
         response.status.should.equal(200);
         response.body.should.be.an('array').and.length(1);
-        response.body.map(e => e.email).should.include('rw-user-two@example.com');
+        response.body.map((e) => e.email).should.include('rw-user-two@example.com');
 
     });
 
@@ -163,7 +163,7 @@ describe('List users', () => {
 
         responseOne.status.should.equal(200);
         responseOne.body.should.be.an('array').and.length(1);
-        responseOne.body.map(e => e.email).should.include('rw-user-one@example.com');
+        responseOne.body.map((e) => e.email).should.include('rw-user-one@example.com');
 
         const responseTwo = await requester
             .get(`/auth/user?provider=google`)
@@ -172,7 +172,7 @@ describe('List users', () => {
 
         responseTwo.status.should.equal(200);
         responseTwo.body.should.be.an('array').and.length(1);
-        responseTwo.body.map(e => e.email).should.include('rw-user-two@example.com');
+        responseTwo.body.map((e) => e.email).should.include('rw-user-two@example.com');
 
     });
 
@@ -184,7 +184,7 @@ describe('List users', () => {
 
         responseOne.status.should.equal(200);
         responseOne.body.should.be.an('array').and.length(1);
-        responseOne.body.map(e => e.email).should.include('rw-user-one@example.com');
+        responseOne.body.map((e) => e.email).should.include('rw-user-one@example.com');
 
         const responseTwo = await requester
             .get(`/auth/user?name=user two`)
@@ -193,7 +193,7 @@ describe('List users', () => {
 
         responseTwo.status.should.equal(200);
         responseTwo.body.should.be.an('array').and.length(1);
-        responseTwo.body.map(e => e.email).should.include('rw-user-two@example.com');
+        responseTwo.body.map((e) => e.email).should.include('rw-user-two@example.com');
 
     });
 
@@ -205,7 +205,7 @@ describe('List users', () => {
 
         responseOne.status.should.equal(200);
         responseOne.body.should.be.an('array').and.length(1);
-        responseOne.body.map(e => e.email).should.include('rw-user-one@example.com');
+        responseOne.body.map((e) => e.email).should.include('rw-user-one@example.com');
 
         const responseTwo = await requester
             .get(`/auth/user?role=MANAGER`)
@@ -214,7 +214,7 @@ describe('List users', () => {
 
         responseTwo.status.should.equal(200);
         responseTwo.body.should.be.an('array').and.length(1);
-        responseTwo.body.map(e => e.email).should.include('rw-user-two@example.com');
+        responseTwo.body.map((e) => e.email).should.include('rw-user-two@example.com');
 
         const responseThree = await requester
             .get(`/auth/user?role=ADMIN`)
@@ -234,7 +234,7 @@ describe('List users', () => {
 
         response.status.should.equal(200);
         response.body.should.be.an('array').and.length(2);
-        response.body.map(e => e.email).should.include('rw-user-two@example.com').and.to.include('rw-user-one@example.com');
+        response.body.map((e) => e.email).should.include('rw-user-two@example.com').and.to.include('rw-user-one@example.com');
     });
 
     after(async () => {

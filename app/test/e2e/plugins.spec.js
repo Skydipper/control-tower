@@ -12,7 +12,7 @@ const getListPlugins = async () => requester
     .get('/api/v1/plugin')
     .set('Authorization', `Bearer ${TOKENS.ADMIN}`);
 
-const updatePlugin = data => requester
+const updatePlugin = (data) => requester
     .patch(`/api/v1/plugin/${pluginId}`)
     .set('Authorization', `Bearer ${TOKENS.ADMIN}`)
     .send(data);
@@ -29,9 +29,15 @@ describe('Plugins calls', () => {
         nock.cleanAll();
     });
 
-    it('Getting a list of plugins without being authenticated should fail with a 401 error', helpers.isTokenRequired('get', 'plugin'));
+    it(
+        'Getting a list of plugins without being authenticated should fail with a 401 error',
+        helpers.isTokenRequired('get', 'plugin')
+    );
 
-    it('Getting a list of plugins authenticated without ADMIN role should fail with a 403 error', helpers.isAdminOnly('get', 'plugin'));
+    it(
+        'Getting a list of plugins authenticated without ADMIN role should fail with a 403 error',
+        helpers.isAdminOnly('get', 'plugin')
+    );
 
     it('Getting a list of plugins should return the result by default', async () => {
         const response = await getListPlugins();
@@ -40,9 +46,13 @@ describe('Plugins calls', () => {
         pluginId = response.body[0]._id; // set plugin id for future update requests
     });
 
-    it('Update plugin without being authenticated should fail with a 401 error', () => helpers.isTokenRequired('patch', `plugin/${pluginId}`)());
+    it('Update plugin without being authenticated should fail with a 401 error', () => {
+        return helpers.isTokenRequired('patch', `plugin/${pluginId}`)();
+    });
 
-    it('Update plugin authenticated without ADMIN role should fail with a 403 error', () => helpers.isAdminOnly('patch', `plugin/${pluginId}`)());
+    it('Update plugin authenticated without ADMIN role should fail with a 403 error', () => {
+        return helpers.isAdminOnly('patch', `plugin/${pluginId}`)();
+    });
 
     it('Update plugin authenticated should update', async () => {
         const newData = {
