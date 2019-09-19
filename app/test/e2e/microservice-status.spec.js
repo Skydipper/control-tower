@@ -1,10 +1,10 @@
 const logger = require('logger');
 const nock = require('nock');
+const Microservice = require('models/microservice.model');
+const Endpoint = require('models/endpoint.model');
 const { TOKENS, microserviceTest } = require('./test.constants');
 const { initHelpers } = require('./utils');
 const { getTestAgent, closeTestAgent } = require('./test-server');
-const Microservice = require('models/microservice.model');
-const Endpoint = require('models/endpoint.model');
 
 const helpers = initHelpers(getTestAgent);
 
