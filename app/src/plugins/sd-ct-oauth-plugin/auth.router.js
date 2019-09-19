@@ -607,7 +607,7 @@ module.exports = (plugin, connection, generalConfig) => {
         }
 
         async function resetPassword(ctx) {
-            debug('Reseting password');
+            debug('Resetting password');
             let error = null;
             if (!ctx.request.body.password || !ctx.request.body.repeatPassword) {
                 error = 'Password and Repeat password are required';
@@ -620,20 +620,30 @@ module.exports = (plugin, connection, generalConfig) => {
                 error = 'Token expired';
             }
             if (error) {
-                await ctx.render('reset-password', {
-                    error,
-                    token: ctx.params.token,
-                    generalConfig: ctx.state.generalConfig,
-                });
+                if (ctx.request.type === 'application/json') {
+                    throw new UnprocessableEntityError(error);
+                } else {
+                    await ctx.render('reset-password', {
+                        error,
+                        token: ctx.params.token,
+                        generalConfig: ctx.state.generalConfig,
+                    });
+                }
+
                 return;
             }
             const user = await AuthService.updatePassword(ctx.params.token, ctx.request.body.password);
             if (user) {
-                if (plugin.config.local.confirmUrlRedirect) {
-                    ctx.redirect(plugin.config.local.confirmUrlRedirect);
-                    return;
+                if (ctx.request.type === 'application/json') {
+                    ctx.response.type = 'application/json';
+                    ctx.body = UserTempSerializer.serialize(user);
+                } else {
+                    if (plugin.config.local.confirmUrlRedirect) {
+                        ctx.redirect(plugin.config.local.confirmUrlRedirect);
+                        return;
+                    }
+                    ctx.body = user;
                 }
-                ctx.body = user;
             } else {
                 await ctx.render('reset-password', {
                     error: 'Error updating user',

@@ -1,10 +1,10 @@
 const nock = require('nock');
 const chai = require('chai');
+const Microservice = require('models/microservice.model');
+const Endpoint = require('models/endpoint.model');
 const { TOKENS } = require('./test.constants');
 const { initHelpers } = require('./utils');
 const { getTestAgent, closeTestAgent } = require('./test-server');
-const Microservice = require('models/microservice.model');
-const Endpoint = require('models/endpoint.model');
 
 const should = chai.should();
 
@@ -31,8 +31,7 @@ describe('Headers', () => {
             .set('Access-Control-Request-Method', 'POST')
             .set('Access-Control-Request-Headers', 'content-type')
             .set('Origin', 'https://staging.resourcewatch.org')
-            .set('Authorization', `Bearer ${TOKENS.ADMIN}`)
-            .send();
+            .set('Authorization', `Bearer ${TOKENS.ADMIN}`);
 
         response.should.have.header('access-control-allow-origin', 'https://staging.resourcewatch.org');
         response.should.have.header('access-control-allow-credentials', 'true');

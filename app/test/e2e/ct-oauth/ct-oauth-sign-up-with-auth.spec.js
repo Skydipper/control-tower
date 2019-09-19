@@ -4,10 +4,10 @@ const chai = require('chai');
 const UserModel = require('plugins/sd-ct-oauth-plugin/models/user.model');
 const UserTempModel = require('plugins/sd-ct-oauth-plugin/models/user-temp.model');
 
+const { isEqual } = require('lodash');
 const { setPluginSetting } = require('./../utils');
 const { getTestAgent, closeTestAgent } = require('./../test-server');
 const { TOKENS } = require('./../test.constants');
-const { isEqual } = require('lodash');
 
 const should = chai.should();
 
@@ -38,8 +38,7 @@ describe('OAuth endpoints tests - Sign up without auth', () => {
 
     it('Registering a user without being logged in returns an 401 error (JSON format)', async () => {
         const response = await requester
-            .post(`/auth/sign-up`)
-            .send();
+            .post(`/auth/sign-up`);
 
         response.status.should.equal(401);
         response.header['content-type'].should.equal('application/json; charset=utf-8');
@@ -51,8 +50,7 @@ describe('OAuth endpoints tests - Sign up without auth', () => {
         const response = await requester
             .post(`/auth/sign-up`)
             .type('form')
-            .set('Authorization', `Bearer ${TOKENS.ADMIN}`)
-            .send();
+            .set('Authorization', `Bearer ${TOKENS.ADMIN}`);
 
         response.status.should.equal(200);
         response.text.should.include('Email, Password and Repeat password are required');
@@ -183,8 +181,7 @@ describe('OAuth endpoints tests - Sign up without auth', () => {
         const tempUser = await UserTempModel.findOne({ email: 'someemail@gmail.com' }).exec();
 
         const response = await requester
-            .get(`/auth/confirm/${tempUser.confirmationToken}`)
-            .send();
+            .get(`/auth/confirm/${tempUser.confirmationToken}`);
 
         response.status.should.equal(200);
 
@@ -277,26 +274,6 @@ describe('OAuth endpoints tests - Sign up without auth', () => {
         user.should.have.property('confirmationToken').and.not.be.empty;
         user.should.have.property('extraUserData').and.be.an('object');
         user.extraUserData.apps.should.be.an('array').and.contain('rw');
-    });
-
-    it('Confirming a user\'s account using the email token should be successful', async () => {
-        const tempUser = await UserTempModel.findOne({ email: 'someotheremail@gmail.com' }).exec();
-
-        const response = await requester
-            .get(`/auth/confirm/${tempUser.confirmationToken}`)
-            .send();
-
-        response.status.should.equal(200);
-
-        const missingTempUser = await UserTempModel.findOne({ email: 'someotheremail@gmail.com' }).exec();
-        should.not.exist(missingTempUser);
-
-        const confirmedUser = await UserModel.findOne({ email: 'someotheremail@gmail.com' }).exec();
-        should.exist(confirmedUser);
-        confirmedUser.should.have.property('email').and.equal('someotheremail@gmail.com');
-        confirmedUser.should.have.property('role').and.equal('USER');
-        confirmedUser.should.have.property('extraUserData').and.be.an('object');
-        confirmedUser.extraUserData.apps.should.be.an('array').and.contain('rw');
     });
 
     after(async () => {

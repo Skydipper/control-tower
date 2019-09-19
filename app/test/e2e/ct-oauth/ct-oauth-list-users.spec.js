@@ -36,8 +36,7 @@ describe('List users', () => {
     it('Visiting /auth/user while not logged in should return a 401 error', async () => {
         const response = await requester
             .get(`/auth/user`)
-            .set('Content-Type', 'application/json')
-            .send();
+            .set('Content-Type', 'application/json');
 
         response.status.should.equal(401);
         response.header['content-type'].should.equal('application/json; charset=utf-8');
@@ -50,8 +49,7 @@ describe('List users', () => {
         const response = await requester
             .get(`/auth/user`)
             .set('Content-Type', 'application/json')
-            .set('Authorization', `Bearer ${TOKENS.USER}`)
-            .send();
+            .set('Authorization', `Bearer ${TOKENS.USER}`);
 
         response.status.should.equal(403);
         response.header['content-type'].should.equal('application/json; charset=utf-8');
@@ -63,8 +61,7 @@ describe('List users', () => {
         const response = await requester
             .get(`/auth/user`)
             .set('Content-Type', 'application/json')
-            .set('Authorization', `Bearer ${TOKENS.MANAGER}`)
-            .send();
+            .set('Authorization', `Bearer ${TOKENS.MANAGER}`);
 
         response.status.should.equal(403);
         response.body.errors[0].should.have.property('detail').and.equal(`Not authorized`);
@@ -74,8 +71,7 @@ describe('List users', () => {
         const response = await requester
             .get(`/auth/user`)
             .set('Content-Type', 'application/json')
-            .set('Authorization', `Bearer ${TOKENS.ADMIN}`)
-            .send();
+            .set('Authorization', `Bearer ${TOKENS.ADMIN}`);
 
         response.status.should.equal(200);
         response.body.should.be.an('array').and.length(0);
@@ -99,8 +95,7 @@ describe('List users', () => {
         const response = await requester
             .get(`/auth/user`)
             .set('Content-Type', 'application/json')
-            .set('Authorization', `Bearer ${TOKENS.ADMIN}`)
-            .send();
+            .set('Authorization', `Bearer ${TOKENS.ADMIN}`);
 
         response.status.should.equal(200);
         response.body.should.be.an('array').and.length(0);
@@ -140,12 +135,11 @@ describe('List users', () => {
         const response = await requester
             .get(`/auth/user`)
             .set('Content-Type', 'application/json')
-            .set('Authorization', `Bearer ${TOKENS.ADMIN}`)
-            .send();
+            .set('Authorization', `Bearer ${TOKENS.ADMIN}`);
 
         response.status.should.equal(200);
         response.body.should.be.an('array').and.length(2);
-        response.body.map(e => e.email).should.include('rw-user-two@example.com').and.to.include('rw-user-one@example.com');
+        response.body.map((e) => e.email).should.include('rw-user-two@example.com').and.to.include('rw-user-one@example.com');
 
     });
 
@@ -153,12 +147,11 @@ describe('List users', () => {
         const response = await requester
             .get(`/auth/user?email=rw-user-two@example.com`)
             .set('Content-Type', 'application/json')
-            .set('Authorization', `Bearer ${TOKENS.ADMIN}`)
-            .send();
+            .set('Authorization', `Bearer ${TOKENS.ADMIN}`);
 
         response.status.should.equal(200);
         response.body.should.be.an('array').and.length(1);
-        response.body.map(e => e.email).should.include('rw-user-two@example.com');
+        response.body.map((e) => e.email).should.include('rw-user-two@example.com');
 
     });
 
@@ -166,22 +159,20 @@ describe('List users', () => {
         const responseOne = await requester
             .get(`/auth/user?provider=local`)
             .set('Content-Type', 'application/json')
-            .set('Authorization', `Bearer ${TOKENS.ADMIN}`)
-            .send();
+            .set('Authorization', `Bearer ${TOKENS.ADMIN}`);
 
         responseOne.status.should.equal(200);
         responseOne.body.should.be.an('array').and.length(1);
-        responseOne.body.map(e => e.email).should.include('rw-user-one@example.com');
+        responseOne.body.map((e) => e.email).should.include('rw-user-one@example.com');
 
         const responseTwo = await requester
             .get(`/auth/user?provider=google`)
             .set('Content-Type', 'application/json')
-            .set('Authorization', `Bearer ${TOKENS.ADMIN}`)
-            .send();
+            .set('Authorization', `Bearer ${TOKENS.ADMIN}`);
 
         responseTwo.status.should.equal(200);
         responseTwo.body.should.be.an('array').and.length(1);
-        responseTwo.body.map(e => e.email).should.include('rw-user-two@example.com');
+        responseTwo.body.map((e) => e.email).should.include('rw-user-two@example.com');
 
     });
 
@@ -189,22 +180,20 @@ describe('List users', () => {
         const responseOne = await requester
             .get(`/auth/user?name=user one`)
             .set('Content-Type', 'application/json')
-            .set('Authorization', `Bearer ${TOKENS.ADMIN}`)
-            .send();
+            .set('Authorization', `Bearer ${TOKENS.ADMIN}`);
 
         responseOne.status.should.equal(200);
         responseOne.body.should.be.an('array').and.length(1);
-        responseOne.body.map(e => e.email).should.include('rw-user-one@example.com');
+        responseOne.body.map((e) => e.email).should.include('rw-user-one@example.com');
 
         const responseTwo = await requester
             .get(`/auth/user?name=user two`)
             .set('Content-Type', 'application/json')
-            .set('Authorization', `Bearer ${TOKENS.ADMIN}`)
-            .send();
+            .set('Authorization', `Bearer ${TOKENS.ADMIN}`);
 
         responseTwo.status.should.equal(200);
         responseTwo.body.should.be.an('array').and.length(1);
-        responseTwo.body.map(e => e.email).should.include('rw-user-two@example.com');
+        responseTwo.body.map((e) => e.email).should.include('rw-user-two@example.com');
 
     });
 
@@ -212,28 +201,25 @@ describe('List users', () => {
         const responseOne = await requester
             .get(`/auth/user?role=USER`)
             .set('Content-Type', 'application/json')
-            .set('Authorization', `Bearer ${TOKENS.ADMIN}`)
-            .send();
+            .set('Authorization', `Bearer ${TOKENS.ADMIN}`);
 
         responseOne.status.should.equal(200);
         responseOne.body.should.be.an('array').and.length(1);
-        responseOne.body.map(e => e.email).should.include('rw-user-one@example.com');
+        responseOne.body.map((e) => e.email).should.include('rw-user-one@example.com');
 
         const responseTwo = await requester
             .get(`/auth/user?role=MANAGER`)
             .set('Content-Type', 'application/json')
-            .set('Authorization', `Bearer ${TOKENS.ADMIN}`)
-            .send();
+            .set('Authorization', `Bearer ${TOKENS.ADMIN}`);
 
         responseTwo.status.should.equal(200);
         responseTwo.body.should.be.an('array').and.length(1);
-        responseTwo.body.map(e => e.email).should.include('rw-user-two@example.com');
+        responseTwo.body.map((e) => e.email).should.include('rw-user-two@example.com');
 
         const responseThree = await requester
             .get(`/auth/user?role=ADMIN`)
             .set('Content-Type', 'application/json')
-            .set('Authorization', `Bearer ${TOKENS.ADMIN}`)
-            .send();
+            .set('Authorization', `Bearer ${TOKENS.ADMIN}`);
 
         responseThree.status.should.equal(200);
         responseThree.body.should.be.an('array').and.length(0);
@@ -244,12 +230,11 @@ describe('List users', () => {
         const response = await requester
             .get(`/auth/user?password=%242b%2410%241wDgP5YCStyvZndwDu2GwuC6Ie9wj7yRZ3BNaaI.p9JqV8CnetdPK`)
             .set('Content-Type', 'application/json')
-            .set('Authorization', `Bearer ${TOKENS.ADMIN}`)
-            .send();
+            .set('Authorization', `Bearer ${TOKENS.ADMIN}`);
 
         response.status.should.equal(200);
         response.body.should.be.an('array').and.length(2);
-        response.body.map(e => e.email).should.include('rw-user-two@example.com').and.to.include('rw-user-one@example.com');
+        response.body.map((e) => e.email).should.include('rw-user-two@example.com').and.to.include('rw-user-one@example.com');
     });
 
     after(async () => {

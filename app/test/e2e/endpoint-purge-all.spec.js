@@ -34,7 +34,7 @@ describe('Endpoint purge all', () => {
     });
 
     it('Purging endpoints without being logged in should fail', async () => {
-        const response = await requester.delete(`/api/v1/endpoint/purge-all`).send();
+        const response = await requester.delete(`/api/v1/endpoint/purge-all`);
 
         response.status.should.equal(401);
         response.body.should.have.property('errors').and.be.an('array');
@@ -44,25 +44,23 @@ describe('Endpoint purge all', () => {
 
     it('Purging endpoints as USER should fail', async () => {
         const response = await requester.delete(`/api/v1/endpoint/purge-all`)
-            .set('Authorization', `Bearer ${TOKENS.USER}`)
-            .send();
+            .set('Authorization', `Bearer ${TOKENS.USER}`);
 
         response.status.should.equal(403);
         response.body.should.have.property('errors').and.be.an('array');
         response.body.errors[0].status.should.equal(403);
         response.body.errors[0].should.have.property('detail').and.equal(`Not authorized`);
-    })
+    });
 
     it('Purging endpoints as MANAGER should fail', async () => {
         const response = await requester.delete(`/api/v1/endpoint/purge-all`)
-            .set('Authorization', `Bearer ${TOKENS.MANAGER}`)
-            .send();
+            .set('Authorization', `Bearer ${TOKENS.MANAGER}`);
 
         response.status.should.equal(403);
         response.body.should.have.property('errors').and.be.an('array');
         response.body.errors[0].status.should.equal(403);
         response.body.errors[0].should.have.property('detail').and.equal(`Not authorized`);
-    })
+    });
 
     it('Purging endpoints as ADMIN should succeed (happy case)', async () => {
         nock('https://api.fastly.com')
@@ -70,8 +68,7 @@ describe('Endpoint purge all', () => {
             .reply(200, { status: 'ok' });
 
         const response = await requester.delete(`/api/v1/endpoint/purge-all`)
-            .set('Authorization', `Bearer ${TOKENS.ADMIN}`)
-            .send();
+            .set('Authorization', `Bearer ${TOKENS.ADMIN}`);
 
         response.status.should.equal(200);
     });

@@ -1,10 +1,10 @@
 const logger = require('logger');
 const nock = require('nock');
+const Microservice = require('models/microservice.model');
+const Endpoint = require('models/endpoint.model');
 const { TOKENS, microserviceTest } = require('./test.constants');
 const { initHelpers } = require('./utils');
 const { getTestAgent, closeTestAgent } = require('./test-server');
-const Microservice = require('models/microservice.model');
-const Endpoint = require('models/endpoint.model');
 
 const helpers = initHelpers(getTestAgent);
 
@@ -29,8 +29,7 @@ const createMicroservice = () => {
 
 const getListStatus = async () => requester
     .get('/api/v1/microservice/status')
-    .set('Authorization', `Bearer ${TOKENS.ADMIN}`)
-    .send();
+    .set('Authorization', `Bearer ${TOKENS.ADMIN}`);
 
 describe('Microservice status calls', () => {
 

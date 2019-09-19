@@ -72,18 +72,6 @@ describe('Find users by id', () => {
         response.body.should.have.property('data').and.be.an('array').and.length(0);
     });
 
-    it('Find users with id list containing user that does not exist returns an empty list (empty db)', async () => {
-        const response = await requester
-            .post(`/auth/user/find-by-ids`)
-            .set('Authorization', `Bearer ${TOKENS.MICROSERVICE}`)
-            .send({
-                ids: ['58333dcfd9f39b189ca44c75']
-            });
-
-        response.status.should.equal(200);
-        response.body.should.have.property('data').and.be.an('array').and.length(0);
-    });
-
     it('Find users with id list containing a user that exists returns only the listed user', async () => {
         userOne = await new UserModel(createUser()).save();
         userTwo = await new UserModel(createUser()).save();

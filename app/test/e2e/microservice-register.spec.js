@@ -129,8 +129,7 @@ describe('Microservices endpoints', () => {
         (await Endpoint.find({ toDelete: true })).should.have.lengthOf(1);
 
         const existingMicroservice = await requester.get(`/api/v1/microservice`)
-            .set('Authorization', `Bearer ${TOKENS.ADMIN}`)
-            .send();
+            .set('Authorization', `Bearer ${TOKENS.ADMIN}`);
 
         const response = await requester.delete(`/api/v1/microservice/${existingMicroservice.body[0]._id}`)
             .send()

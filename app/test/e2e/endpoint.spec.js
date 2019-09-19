@@ -1,9 +1,9 @@
 const nock = require('nock');
+const Microservice = require('models/microservice.model');
+const Endpoint = require('models/endpoint.model');
 const { TOKENS, endpointTest } = require('./test.constants');
 const { initHelpers } = require('./utils');
 const { getTestAgent, closeTestAgent } = require('./test-server');
-const Microservice = require('models/microservice.model');
-const Endpoint = require('models/endpoint.model');
 
 const helpers = initHelpers(getTestAgent);
 
@@ -11,8 +11,7 @@ let requester;
 
 const getListEndpoints = () => requester
     .get('/api/v1/endpoint')
-    .set('Authorization', `Bearer ${TOKENS.ADMIN}`)
-    .send();
+    .set('Authorization', `Bearer ${TOKENS.ADMIN}`);
 
 describe('GET Endpoints', () => {
     before(async () => {

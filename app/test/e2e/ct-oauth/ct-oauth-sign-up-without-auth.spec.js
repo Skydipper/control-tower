@@ -38,8 +38,7 @@ describe('OAuth endpoints tests - Sign up without auth', () => {
     it('Registering a user without being logged in returns a 200 error (TODO: this should return a 422)', async () => {
         const response = await requester
             .post(`/auth/sign-up`)
-            .type('form')
-            .send();
+            .type('form');
 
         response.status.should.equal(200);
         response.text.should.include('Email, Password and Repeat password are required');
@@ -48,8 +47,7 @@ describe('OAuth endpoints tests - Sign up without auth', () => {
     it('Registering a user without the actual data returns a 200 error (TODO: this should return a 422)', async () => {
         const response = await requester
             .post(`/auth/sign-up`)
-            .type('form')
-            .send();
+            .type('form');
 
         response.status.should.equal(200);
         response.text.should.include('Email, Password and Repeat password are required');
@@ -65,20 +63,6 @@ describe('OAuth endpoints tests - Sign up without auth', () => {
 
         response.status.should.equal(200);
         response.text.should.include('Email, Password and Repeat password are required');
-    });
-
-    it('Registering a user with different passwords returns a 200 error (TODO: this should return a 422)', async () => {
-        const response = await requester
-            .post(`/auth/sign-up`)
-            .type('form')
-            .send({
-                email: 'someemail@gmail.com',
-                password: 'somepassword',
-                repeatPassword: 'anotherpassword'
-            });
-
-        response.status.should.equal(200);
-        response.text.should.include('Password and Repeat password not equal');
     });
 
     it('Registering a user with different passwords returns a 200 error (TODO: this should return a 422)', async () => {
@@ -178,8 +162,7 @@ describe('OAuth endpoints tests - Sign up without auth', () => {
         const tempUser = await UserTempModel.findOne({ email: 'someemail@gmail.com' }).exec();
 
         const response = await requester
-            .get(`/auth/confirm/${tempUser.confirmationToken}`)
-            .send();
+            .get(`/auth/confirm/${tempUser.confirmationToken}`);
 
         response.status.should.equal(200);
 
@@ -277,8 +260,7 @@ describe('OAuth endpoints tests - Sign up without auth', () => {
         const tempUser = await UserTempModel.findOne({ email: 'someotheremail@gmail.com' }).exec();
 
         const response = await requester
-            .get(`/auth/confirm/${tempUser.confirmationToken}`)
-            .send();
+            .get(`/auth/confirm/${tempUser.confirmationToken}`);
 
         response.status.should.equal(200);
 

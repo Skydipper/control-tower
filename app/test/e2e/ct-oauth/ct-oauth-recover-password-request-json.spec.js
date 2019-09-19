@@ -16,7 +16,7 @@ let requester;
 nock.disableNetConnect();
 nock.enableNetConnect(process.env.HOST_IP);
 
-describe('OAuth endpoints tests - Recover password - JSON version', () => {
+describe('OAuth endpoints tests - Recover password request - JSON version', () => {
 
     before(async () => {
         if (process.env.NODE_ENV !== 'test') {
@@ -43,8 +43,7 @@ describe('OAuth endpoints tests - Recover password - JSON version', () => {
     it('Recover password request with no email should return an error - JSON format', async () => {
         const response = await requester
             .post(`/auth/reset-password`)
-            .set('Content-Type', 'application/json')
-            .send();
+            .set('Content-Type', 'application/json');
 
 
         response.status.should.equal(422);
@@ -174,14 +173,14 @@ describe('OAuth endpoints tests - Recover password - JSON version', () => {
     });
 
     after(async () => {
-        UserModel.deleteMany({}).exec();
-        UserTempModel.deleteMany({}).exec();
-        RenewModel.deleteMany({}).exec();
-
         closeTestAgent();
     });
 
-    afterEach(() => {
+    afterEach(async () => {
+        await UserModel.deleteMany({}).exec();
+        await UserTempModel.deleteMany({}).exec();
+        await RenewModel.deleteMany({}).exec();
+
         if (!nock.isDone()) {
             throw new Error(`Not all nock interceptors were used: ${nock.pendingMocks()}`);
         }

@@ -1,11 +1,11 @@
 const Plugin = require('models/plugin.model');
 const mongoose = require('mongoose');
 const config = require('config');
-const ObjectId = require('mongoose').Types.ObjectId;
-const { TOKENS, endpointTest } = require('./test.constants');
+const { ObjectId } = require('mongoose').Types;
 const Endpoint = require('models/endpoint.model');
 const Version = require('models/version.model');
 const appConstants = require('app.constants');
+const { TOKENS, endpointTest } = require('./test.constants');
 
 const mongoUri = process.env.CT_MONGO_URI || `mongodb://${config.get('mongodb.host')}:${config.get('mongodb.port')}/${config.get('mongodb.database')}`;
 const getUUID = () => Math.random().toString(36).substring(7);
@@ -27,16 +27,14 @@ const createUser = (apps = ['rw']) => ({
 const initHelpers = () => {
     let requester;
 
-    const setRequester = req => (requester = req);
+    const setRequester = (req) => (requester = req);
 
     const isAdminOnly = (method, url) => async () => {
         const { USER, MANAGER } = TOKENS;
-        const request = token => requester
-            [method](`/api/v1/${url}`)
-            .set('Authorization', `Bearer ${token}`)
-            .send();
+        const request = (token) => requester[method](`/api/v1/${url}`)
+            .set('Authorization', `Bearer ${token}`);
 
-        const validate = res => {
+        const validate = (res) => {
             res.status.should.equal(403);
             res.body.errors[0].should.have.property('detail').and.equal('Not authorized');
         };
@@ -46,7 +44,7 @@ const initHelpers = () => {
     };
 
     const isTokenRequired = (method, url) => async () => {
-        const response = await requester[method](`/api/v1/${url}`).send();
+        const response = await requester[method](`/api/v1/${url}`);
 
         response.body.errors[0].should.have.property('detail').and.equal('Not authenticated');
         response.status.should.equal(401);
@@ -73,7 +71,7 @@ const updateVersion = () => Version.update({
     }
 });
 
-const createEndpoint = endpoint => new Endpoint({ ...endpointTest, ...endpoint }).save();
+const createEndpoint = (endpoint) => new Endpoint({ ...endpointTest, ...endpoint }).save();
 
 async function setPluginSetting(pluginName, settingKey, settingValue) {
     return new Promise((resolve, reject) => {
@@ -84,7 +82,7 @@ async function setPluginSetting(pluginName, settingKey, settingValue) {
 
             const plugin = await Plugin.findOne({ name: pluginName }).exec();
             if (!plugin) {
-                reject(`Plugin '${pluginName}' could not be found.`);
+                reject(new Error(`Plugin '${pluginName}' could not be found.`));
             }
 
             const newConfig = {};

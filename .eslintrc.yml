@@ -1,5 +1,5 @@
 ---
-extends: airbnb
+extends: [airbnb, plugin:mocha/recommended]
 env:
   node: true
   es6: true
@@ -7,6 +7,7 @@ parser: babel-eslint
 parserOptions:
   sourceType: module
   ecmaVersion: 6
+plugins: [mocha]
 globals:
   describe: true
   it: true
@@ -15,7 +16,7 @@ globals:
   beforeEach: true
   afterEach: true
 rules:
-  max-len: [1, 120, 2, {"ignoreUrls":true}]
+  max-len: [0, 120, 2, {"ignoreUrls":true}]
   curly: [2, "multi-line"]
   comma-dangle: [0, always-multiline]
   eqeqeq: [2, "allow-null"]
@@ -28,6 +29,8 @@ rules:
     - single
     - allowTemplateLiterals: true
   no-underscore-dangle: ["error", { "allow": ["_id"] }]
+  import/no-extraneous-dependencies: ["error", { devDependencies: ['app/test/**']}]
+  mocha/no-mocha-arrows: [0]
 settings:
   import/resolver:
     node:

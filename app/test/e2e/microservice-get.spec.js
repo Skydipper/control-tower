@@ -28,15 +28,14 @@ describe('Microservices endpoints - GET endpoints', () => {
     });
 
     it('Getting a list of microservices without being authenticated should fail', async () => {
-        const response = await requester.get(`/api/v1/microservice`).send();
+        const response = await requester.get(`/api/v1/microservice`);
         response.status.should.equal(401);
     });
 
     it('Getting a list of microservices should return empty if no services are registered', async () => {
         const response = await requester
             .get(`/api/v1/microservice`)
-            .set('Authorization', `Bearer ${TOKENS.ADMIN}`)
-            .send();
+            .set('Authorization', `Bearer ${TOKENS.ADMIN}`);
 
         response.status.should.equal(200);
         response.body.should.be.an('array').and.have.lengthOf(0);

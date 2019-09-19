@@ -42,8 +42,7 @@ describe('Auth endpoints tests - Delete user', () => {
     it('Deleting a user while not logged in should return a 401', async () => {
         const response = await requester
             .delete(`/auth/user/1`)
-            .set('Content-Type', 'application/json')
-            .send();
+            .set('Content-Type', 'application/json');
 
         response.status.should.equal(401);
         response.body.should.have.property('errors').and.be.an('array');
@@ -55,8 +54,7 @@ describe('Auth endpoints tests - Delete user', () => {
         const response = await requester
             .delete(`/auth/user/1`)
             .set('Content-Type', 'application/json')
-            .set('Authorization', `Bearer ${TOKENS.USER}`)
-            .send();
+            .set('Authorization', `Bearer ${TOKENS.USER}`);
 
         response.status.should.equal(403);
         response.body.should.have.property('errors').and.be.an('array');
@@ -68,8 +66,7 @@ describe('Auth endpoints tests - Delete user', () => {
         const response = await requester
             .delete(`/auth/user/1`)
             .set('Content-Type', 'application/json')
-            .set('Authorization', `Bearer ${TOKENS.MANAGER}`)
-            .send();
+            .set('Authorization', `Bearer ${TOKENS.MANAGER}`);
 
         response.status.should.equal(403);
         response.body.should.have.property('errors').and.be.an('array');
@@ -81,8 +78,7 @@ describe('Auth endpoints tests - Delete user', () => {
         const response = await requester
             .delete(`/auth/user/41224d776a326fb40f000001`)
             .set('Content-Type', 'application/json')
-            .set('Authorization', `Bearer ${TOKENS.ADMIN}`)
-            .send();
+            .set('Authorization', `Bearer ${TOKENS.ADMIN}`);
 
         response.status.should.equal(404);
         response.body.should.have.property('errors').and.be.an('array');
@@ -93,8 +89,7 @@ describe('Auth endpoints tests - Delete user', () => {
     it('Delete user with an invalid id of a user that does not exist returns a 422', async () => {
         const response = await requester
             .delete(`/auth/user/1234`)
-            .set('Authorization', `Bearer ${TOKENS.MICROSERVICE}`)
-            .send();
+            .set('Authorization', `Bearer ${TOKENS.MICROSERVICE}`);
 
         response.status.should.equal(422);
         response.body.should.have.property('errors').and.be.an('array');
@@ -127,8 +122,7 @@ describe('Auth endpoints tests - Delete user', () => {
         const response = await requester
             .delete(`/auth/user/${user.id}`)
             .set('Content-Type', 'application/json')
-            .set('Authorization', `Bearer ${TOKENS.ADMIN}`)
-            .send();
+            .set('Authorization', `Bearer ${TOKENS.ADMIN}`);
 
         response.status.should.equal(200);
 
@@ -149,7 +143,7 @@ describe('Auth endpoints tests - Delete user', () => {
 
 
     after(async () => {
-        const WhiteListModel = whiteListModelFunc(connection);
+        WhiteListModel = whiteListModelFunc(connection);
 
         UserModel.deleteMany({}).exec();
         WhiteListModel.deleteMany({}).exec();

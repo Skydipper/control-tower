@@ -54,8 +54,7 @@ describe('Google auth endpoint tests', () => {
         }
 
         const response = await requester
-            .get(`/auth/google`)
-            .send();
+            .get(`/auth/google`);
 
         response.status.should.equal(200);
         response.header['content-type'].should.equal('text/html; charset=UTF-8');
@@ -106,12 +105,10 @@ describe('Google auth endpoint tests', () => {
 
 
         await requester
-            .get(`/auth`)
-            .send();
+            .get(`/auth`);
 
         const response = await requester
-            .get(`/auth/google/callback?code=TEST_GOOGLE_OAUTH2_CALLBACK_CODE&scope=openid%20email%20https://www.googleapis.com/auth/userinfo.email`)
-            .send();
+            .get(`/auth/google/callback?code=TEST_GOOGLE_OAUTH2_CALLBACK_CODE&scope=openid%20email%20https://www.googleapis.com/auth/userinfo.email`);
 
         response.status.should.equal(200);
         response.header['content-type'].should.equal('text/html; charset=utf-8');
@@ -165,8 +162,7 @@ describe('Google auth endpoint tests', () => {
             });
 
         const response = await requester
-            .get(`/auth/google/token?access_token=TEST_GOOGLE_OAUTH2_ACCESS_TOKEN`)
-            .send();
+            .get(`/auth/google/token?access_token=TEST_GOOGLE_OAUTH2_ACCESS_TOKEN`);
 
         response.status.should.equal(200);
         response.header['content-type'].should.equal('application/json; charset=utf-8');
