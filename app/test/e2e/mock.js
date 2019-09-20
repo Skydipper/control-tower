@@ -16,7 +16,9 @@ const createMockEndpointWithHeaders = (path, params = {}) => {
 
 // eslint-disable-next-line arrow-body-style
 const createMockEndpointWithBody = (path, params) => {
-    const { method = 'post', host = 'http://mymachine:6001', body = {}, response = 'ok', replyStatus = 200 } = params;
+    const {
+        method = 'post', host = 'http://mymachine:6001', body = {}, response = 'ok', replyStatus = 200
+    } = params;
 
     return nock(host)[method](path, body).reply(replyStatus, response);
 };

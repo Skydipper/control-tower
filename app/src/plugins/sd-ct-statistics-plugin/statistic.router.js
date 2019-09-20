@@ -1,6 +1,7 @@
 const debug = require('debug')('statistics-plugin');
 const Router = require('koa-router');
 const StatisticModel = require('plugins/sd-ct-statistics-plugin/models/statistic.model');
+
 const ApiRouter = new Router({
     prefix: '/api/v1/statistic',
 });

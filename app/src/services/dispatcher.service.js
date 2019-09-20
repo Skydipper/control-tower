@@ -30,7 +30,7 @@ class Dispatcher {
         if (ctx.state) {
             if (ctx.state.user) {
                 return ctx.state.user;
-            } else if (ctx.state.microservice) {
+            } if (ctx.state.microservice) {
                 return ctx.state.microservice;
             }
         }
@@ -70,14 +70,14 @@ class Dispatcher {
         logger.debug('Searching filterValue to filter', filter.name);
 
         if (filterValues) {
-            for (let i = 0, length = filterValues.length; i < length; i++) {
-                if (filterValues[i].name === filter.name && filterValues[i].path === filter.path &&
-                    filterValues[i].method === filter.method && filterValues[i].result.correct) {
+            for (let i = 0, { length } = filterValues; i < length; i++) {
+                if (filterValues[i].name === filter.name && filterValues[i].path === filter.path
+                    && filterValues[i].method === filter.method && filterValues[i].result.correct) {
                     return filterValues[i].result.data;
                 }
             }
         }
-        logger.warn('Not find filter value to filter', filter.name);
+        logger.warn('Could not find filter value to filter', filter.name);
         return null;
     }
 
@@ -90,14 +90,14 @@ class Dispatcher {
                     const match = Dispatcher.checkCompare(compare[j], dataFilter, condition);
                     if (match && condition === 'OR') {
                         return true;
-                    } else if (!match && condition === 'AND') {
+                    } if (!match && condition === 'AND') {
                         return false;
                     }
                 }
             } else {
                 const compareKeys = Object.keys(compare);
 
-                for (let i = 0, length = compareKeys.length; i < length; i++) {
+                for (let i = 0, { length } = compareKeys; i < length; i++) {
                     const key = compareKeys[i];
                     if (typeof compare[key] === 'object') {
                         logger.debug('IS A OBJECT');
@@ -114,7 +114,7 @@ class Dispatcher {
         }
         if (condition === 'OR') {
             return false;
-        } else if (condition === 'AND') {
+        } if (condition === 'AND') {
             return true;
         }
         return false;
@@ -123,7 +123,7 @@ class Dispatcher {
     static checkValidRedirects(redirects, filters) {
         logger.debug('Checking redirects with filters');
         const validRedirects = [];
-        for (let i = 0, length = redirects.length; i < length; i++) {
+        for (let i = 0, { length } = redirects; i < length; i++) {
             const redirect = redirects[i];
             let valid = true;
             if (redirect.filters) {
@@ -148,10 +148,10 @@ class Dispatcher {
     }
 
     static cloneEndpoint(endpoint) {
-        const newObject = Object.assign({}, endpoint);
+        const newObject = { ...endpoint };
         newObject.redirect = [];
-        for (let i = 0, length = endpoint.redirect.length; i < length; i++) {
-            newObject.redirect.push(Object.assign({}, endpoint.redirect[i]));
+        for (let i = 0, { length } = endpoint.redirect; i < length; i++) {
+            newObject.redirect.push({ ...endpoint.redirect[i] });
         }
         return newObject;
     }
@@ -160,7 +160,7 @@ class Dispatcher {
         logger.debug('Checking filters in endpoint', endpoint);
         const newEndpoint = Dispatcher.cloneEndpoint(endpoint);
         let filters = [];
-        for (let i = 0, length = newEndpoint.redirect.length; i < length; i++) {
+        for (let i = 0, { length } = newEndpoint.redirect; i < length; i++) {
             if (newEndpoint.redirect[i].filters) {
                 filters = filters.concat(newEndpoint.redirect[i].filters);
             }
@@ -173,7 +173,7 @@ class Dispatcher {
         const promisesRequest = [];
         let filter = null;
         let path = null;
-        for (let i = 0, length = filters.length; i < length; i++) {
+        for (let i = 0, { length } = filters; i < length; i++) {
             filter = filters[i];
             path = await Dispatcher.buildPathFilter(sourcePath, filter, newEndpoint);
             const request = await Dispatcher.getRequest({
@@ -195,7 +195,7 @@ class Dispatcher {
             logger.debug('Doing requests');
             const results = await Promise.all(promisesRequest);
             // TODO: Add support for several filter in each newEndpoint
-            for (let i = 0, length = results.length; i < length; i++) {
+            for (let i = 0, { length } = results; i < length; i++) {
                 if (results[i].statusCode === 200) {
                     filters[i].result = {
                         data: results[i].body,
@@ -220,7 +220,7 @@ class Dispatcher {
     static getHeadersFromRequest(headers) {
         const validHeaders = {};
         const keys = Object.keys(headers);
-        for (let i = 0, length = keys.length; i < length; i++) {
+        for (let i = 0, { length } = keys; i < length; i++) {
             if (ALLOWED_HEADERS.indexOf(keys[i].toLowerCase()) > -1) {
                 validHeaders[keys[i]] = headers[keys[i]];
             }
@@ -256,7 +256,7 @@ class Dispatcher {
             logger.fatal('Endpoints is empty');
             return null;
         }
-        const endpoint = CACHE.endpoints.find(endpoint => {
+        const endpoint = CACHE.endpoints.find((endpoint) => {
             endpoint.pathRegex.lastIndex = 0;
             return endpoint.method === method && endpoint.pathRegex && endpoint.pathRegex.test(pathname);
         });
@@ -327,8 +327,8 @@ class Dispatcher {
         }
 
         logger.debug('Create request to %s', configRequest.uri);
-        if (configRequest.method === 'POST' || configRequest.method === 'PATCH' ||
-            configRequest.method === 'PUT') {
+        if (configRequest.method === 'POST' || configRequest.method === 'PATCH'
+            || configRequest.method === 'PUT') {
             logger.debug('Method is %s. Adding body', configRequest.method);
             if (ctx.request.body.fields) {
                 logger.debug('Is a form-data request');
@@ -338,25 +338,23 @@ class Dispatcher {
             }
         }
         logger.debug('Adding logged user if it is logged');
-        redirectEndpoint.data = Object.assign({}, redirectEndpoint.data, {
-            loggedUser: Dispatcher.getLoggedUser(ctx),
-        });
+        redirectEndpoint.data = { ...redirectEndpoint.data, loggedUser: Dispatcher.getLoggedUser(ctx), };
 
         if (redirectEndpoint.data) {
             logger.debug('Adding data');
             if (configRequest.method === 'GET' || configRequest.method === 'DELETE') {
                 configRequest.qs = configRequest.qs || {};
                 const keys = Object.keys(redirectEndpoint.data);
-                for (let i = 0, length = keys.length; i < length; i++) {
+                for (let i = 0, { length } = keys; i < length; i++) {
                     configRequest.qs[keys[i]] = JSON.stringify(redirectEndpoint.data[keys[i]]);
                 }
             } else {
-                configRequest.body = Object.assign({}, configRequest.body, redirectEndpoint.data);
+                configRequest.body = { ...configRequest.body, ...redirectEndpoint.data };
             }
         }
         if (ctx.request.body.files) {
             logger.debug('Adding files', ctx.request.body.files);
-            const files = ctx.request.body.files;
+            const { files } = ctx.request.body;
             let formData = {}; // eslint-disable-line prefer-const
             for (const key in files) { // eslint-disable-line no-restricted-syntax
                 if ({}.hasOwnProperty.call(files, key)) {

@@ -158,7 +158,7 @@ describe('OAuth endpoints tests - Sign up without auth', () => {
         response.text.should.include('Email exist');
     });
 
-    it('Confirming a user\'s account using the email token should be successful', async () => {
+    it('Confirming a user\'s account using the email token should be successful (user without app)', async () => {
         const tempUser = await UserTempModel.findOne({ email: 'someemail@gmail.com' }).exec();
 
         const response = await requester
@@ -195,8 +195,6 @@ describe('OAuth endpoints tests - Sign up without auth', () => {
         response.text.should.include('Email exist');
     });
 
-
-    // User registration - with app
     it('Registering a user with correct data and app returns a 200', async () => {
         nock('https://api.sparkpost.com')
             .post('/api/v1/transmissions', (body) => {
@@ -256,7 +254,7 @@ describe('OAuth endpoints tests - Sign up without auth', () => {
         user.extraUserData.apps.should.be.an('array').and.contain('rw');
     });
 
-    it('Confirming a user\'s account using the email token should be successful', async () => {
+    it('Confirming a user\'s account using the email token should be successful (user with app)', async () => {
         const tempUser = await UserTempModel.findOne({ email: 'someotheremail@gmail.com' }).exec();
 
         const response = await requester

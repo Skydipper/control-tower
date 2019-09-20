@@ -8,6 +8,8 @@ const { createUser } = require('./../utils');
 const { getTestAgent, closeTestAgent } = require('./../test-server');
 const { TOKENS } = require('./../test.constants');
 
+const should = chai.should();
+
 let requester;
 
 let userOne;

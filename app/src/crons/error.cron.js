@@ -1,4 +1,4 @@
-const CronJob = require('cron').CronJob;
+const { CronJob } = require('cron');
 const logger = require('logger');
 const MicroserviceService = require('services/microservice.service');
 
@@ -12,4 +12,3 @@ async function checkErrorMicroservices() {
 }
 
 new CronJob('*/10 * * * * *', checkErrorMicroservices, null, true, 'America/Los_Angeles'); // eslint-disable-line no-new
-

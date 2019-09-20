@@ -38,7 +38,7 @@ class EndpointRouter {
             });
         });
         ctx.body = 'ok';
-        
+
     }
 
 }

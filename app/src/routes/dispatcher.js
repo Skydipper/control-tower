@@ -9,22 +9,22 @@ const NotAuthenticated = require('errors/notAuthenticated');
 const NotApplicationKey = require('errors/notApplicationKey');
 const FilterError = require('errors/filterError');
 const fs = require('fs');
+
 const router = new Router();
 const requestPromise = require('request-promise');
 const request = require('request');
 
 const passThrough = require('stream').PassThrough;
 
-const unlink = async(file) =>
-    new Promise((resolve, reject) => {
-        fs.unlink(file, (err) => {
-            if (err) {
-                reject(err);
-                return;
-            }
-            resolve();
-        });
+const unlink = async (file) => new Promise((resolve, reject) => {
+    fs.unlink(file, (err) => {
+        if (err) {
+            reject(err);
+            return;
+        }
+        resolve();
     });
+});
 
 const ALLOWED_HEADERS = [
     'access-control-allow-origin',
@@ -45,7 +45,7 @@ const ALLOWED_HEADERS = [
 function getHeadersFromResponse(response) {
     const validHeaders = {};
     const keys = Object.keys(response.headers);
-    for (let i = 0, length = keys.length; i < length; i++) {
+    for (let i = 0, { length } = keys; i < length; i++) {
         if (ALLOWED_HEADERS.indexOf(keys[i].toLowerCase()) > -1) {
             validHeaders[keys[i]] = response.headers[keys[i]];
         }
@@ -60,7 +60,7 @@ class DispatcherRouter {
         if (ctx.state) {
             if (ctx.state.user) {
                 return ctx.state.user;
-            } else if (ctx.state.microservice) {
+            } if (ctx.state.microservice) {
                 return ctx.state.microservice;
             }
         }
@@ -90,7 +90,7 @@ class DispatcherRouter {
         try {
             logger.debug('Obtaining config request');
             const infoRequest = await DispatcherService.getRequest(ctx);
-            const configRequest = infoRequest.configRequest;
+            const { configRequest } = infoRequest;
 
             logger.debug('Sending request');
             // save information about redirect
@@ -112,7 +112,7 @@ class DispatcherRouter {
                 ctx.set(getHeadersFromResponse(result));
                 ctx.status = result.statusCode;
                 if (ctx.status >= 400 && ctx.status < 500) {
-                    let body = result.body;
+                    let { body } = result;
                     if (body instanceof Buffer) {
                         body = body.toString('utf8');
                     }
@@ -193,7 +193,7 @@ class DispatcherRouter {
             if (ctx.request.body.files) {
                 logger.debug('Removing files');
                 const files = Object.keys(ctx.request.body.files);
-                for (let i = 0, length = files.length; i < length; i++) {
+                for (let i = 0, { length } = files; i < length; i++) {
                     logger.debug('Removing file  %s', ctx.request.body.files[files[i]].path);
                     await unlink(ctx.request.body.files[files[i]].path);
                 }

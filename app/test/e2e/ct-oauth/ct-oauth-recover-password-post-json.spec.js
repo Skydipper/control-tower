@@ -62,7 +62,7 @@ describe('OAuth endpoints tests - Recover password post - JSON version', () => {
 
         const response = await requester
             .post(`/auth/reset-password/myToken`)
-            .set('Content-Type', 'application/json')
+            .set('Content-Type', 'application/json');
 
         return new Promise((resolve) => {
             response.status.should.equal(422);

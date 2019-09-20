@@ -46,13 +46,9 @@ describe('Plugins calls', () => {
         pluginId = response.body[0]._id; // set plugin id for future update requests
     });
 
-    it('Update plugin without being authenticated should fail with a 401 error', () => {
-        return helpers.isTokenRequired('patch', `plugin/${pluginId}`)();
-    });
+    it('Update plugin without being authenticated should fail with a 401 error', () => helpers.isTokenRequired('patch', `plugin/${pluginId}`)());
 
-    it('Update plugin authenticated without ADMIN role should fail with a 403 error', () => {
-        return helpers.isAdminOnly('patch', `plugin/${pluginId}`)();
-    });
+    it('Update plugin authenticated without ADMIN role should fail with a 403 error', () => helpers.isAdminOnly('patch', `plugin/${pluginId}`)());
 
     it('Update plugin authenticated should update', async () => {
         const newData = {

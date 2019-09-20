@@ -39,14 +39,14 @@ describe('Headers', () => {
         response.should.have.header('access-control-allow-headers', 'content-type');
     });
 
-    afterEach(() => {
+    after(() => {
         Microservice.deleteMany({}).exec();
         Endpoint.deleteMany({}).exec();
 
         if (!nock.isDone()) {
             throw new Error(`Not all nock interceptors were used: ${nock.pendingMocks()}`);
         }
-    });
 
-    after(closeTestAgent);
+        closeTestAgent();
+    });
 });

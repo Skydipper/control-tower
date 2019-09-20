@@ -1,5 +1,3 @@
-const apiRouter = require('./auth.router');
-const passportService = require('./services/passport.service');
 const passport = require('koa-passport');
 const debug = require('debug')('oauth-plugin');
 const mongoose = require('mongoose');
@@ -7,6 +5,8 @@ const jwt = require('koa-jwt');
 const views = require('koa-views');
 const Promise = require('bluebird');
 const JWT = Promise.promisifyAll(require('jsonwebtoken'));
+const passportService = require('./services/passport.service');
+const apiRouter = require('./auth.router');
 
 const authServiceFunc = require('./services/auth.service');
 
