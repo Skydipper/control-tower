@@ -1,6 +1,7 @@
 const mongoose = require('mongoose');
 require('mongoose-regexp')(mongoose);
-const Schema = mongoose.Schema;
+
+const { Schema } = mongoose;
 
 const Endpoint = new Schema({
     path: { type: String, required: true, trim: true },
@@ -20,7 +21,9 @@ const Endpoint = new Schema({
         filters: [{
             name: { type: String, required: true, trim: true },
             path: { type: String, required: true, trim: true },
-            condition: { type: String, required: true, trim: true, default: 'AND' },
+            condition: {
+                type: String, required: true, trim: true, default: 'AND'
+            },
             method: { type: String, required: true, trim: true },
             pathRegex: { type: RegExp, required: true },
             pathKeys: [{ type: String, trim: true }],

@@ -1,5 +1,6 @@
 const mongoose = require('mongoose');
-const Schema = mongoose.Schema;
+
+const { Schema } = mongoose;
 const bluebird = require('bluebird');
 
 mongoose.Promise = bluebird;
@@ -18,7 +19,9 @@ function whiteListModel(connection, plugin) {
 
     const WhiteList = new Schema({
         token: { type: String, required: true, trim: true },
-        createdAt: { type: Date, required: true, default: Date.now, expires },
+        createdAt: {
+            type: Date, required: true, default: Date.now, expires
+        },
     });
 
     whiteList = connection.model('WhiteList', WhiteList);

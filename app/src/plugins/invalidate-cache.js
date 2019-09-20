@@ -12,7 +12,7 @@ function middleware(app) {
             logger.debug('Endpoint', ctx.state.redirect.endpoint);
             logger.debug('Endpoint', ctx.state.redirect.endpoint.uncache);
             if (ctx.status >= 200 && ctx.status < 400) {
-                ctx.state.redirect.endpoint.uncache.forEach(exp => {
+                ctx.state.redirect.endpoint.uncache.forEach((exp) => {
                     logger.debug('Invalidating cache of exp:', exp);
                     request({
                         url: 'http://mymachine',

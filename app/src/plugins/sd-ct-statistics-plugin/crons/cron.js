@@ -1,5 +1,5 @@
 require('app-module-path').addPath(__dirname);
-const CronJob = require('cron').CronJob;
+const { CronJob } = require('cron');
 const mongoose = require('mongoose');
 const debug = require('debug')('statistics-plugin');
 const StatisticService = require('plugins/sd-ct-statistics-plugin/services/statistic.service');

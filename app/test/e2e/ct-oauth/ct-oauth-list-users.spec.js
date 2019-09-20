@@ -13,9 +13,6 @@ const should = chai.should();
 
 let requester;
 
-const mongoUri = process.env.CT_MONGO_URI || `mongodb://${config.get('mongodb.host')}:${config.get('mongodb.port')}/${config.get('mongodb.database')}`;
-const connection = mongoose.createConnection(mongoUri);
-
 nock.disableNetConnect();
 nock.enableNetConnect(process.env.HOST_IP);
 

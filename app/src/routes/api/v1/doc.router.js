@@ -17,7 +17,7 @@ class DocRouter {
         try {
             swagger.host = config.get('server.publicUrl').replace('http://', '');
             if (services) {
-                for (let i = 0, length = services.length; i < length; i++) {
+                for (let i = 0, { length } = services; i < length; i++) {
                     if (services[i].swagger) {
                         const swaggerService = JSON.parse(services[i].swagger);
                         if (swaggerService) {
