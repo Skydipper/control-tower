@@ -1,0 +1,385 @@
+const chai = require('chai');
+const nock = require('nock');
+const Endpoint = require('models/endpoint.model');
+const { getTestAgent } = require('./test-server');
+const { endpointTest, testFilter, TOKENS, USERS } = require('./test.constants');
+const { createEndpoint, ensureCorrectError, updateVersion } = require('./utils');
+const { createMockEndpointWithBody } = require('./mock');
+
+const should = chai.should();
+let microservice;
+
+describe('Dispatch DELETE requests with filters', () => {
+    before(async () => {
+        nock.cleanAll();
+
+        microservice = await getTestAgent();
+    });
+
+    // TODO: This illustrates an issue where the user data is not being handled properly when generating the filter request. Probably should be fixed in the future.
+    // it('Endpoint with DELETE filter that expect user data, can be verified and matches return a 200 HTTP code (no filter value) - Null user is passed as query argument', async () => {
+    //     await updateVersion();
+    //     // eslint-disable-next-line no-useless-escape
+    //     await createEndpoint({
+    //         pathRegex: new RegExp('^/api/v1/dataset$'),
+    //         redirect: [{ ...endpointTest.redirect[0], filters: testFilter({ foo: 'bar' }) }]
+    //     });
+    //     await createEndpoint({
+    //         path: '/api/v1/test1/test',
+    //         redirect: [
+    //             {
+    //                 filters: null,
+    //                 method: 'DELETE',
+    //                 path: '/api/v1/test1/test',
+    //                 url: 'http://mymachine:6001'
+    //             }
+    //         ],
+    //     });
+    //
+    //     // this is where it's "failing": the generated filter request does not include the user.
+    //     createMockEndpointWithBody(`/api/v1/test1/test?loggedUser=${USERS.USER}`, {
+    //         response: { body: { data: { foo: 'bar' } } },
+    //         method: 'delete'
+    //     });
+    //     createMockEndpointWithBody('/api/v1/dataset', {
+    //         body: {
+    //             foo: 'bar',
+    //             loggedUser: USERS.USER,
+    //             dataset: { body: { data: { foo: 'bar' } } },
+    //         }
+    //     });
+    //     const response = await microservice
+    //         .post('/api/v1/dataset')
+    //         .set('Authorization', `Bearer ${TOKENS.USER}`)
+    //         .send({ foo: 'bar' });
+    //
+    //     response.status.should.equal(200);
+    //     response.text.should.equal('ok');
+    // });
+
+
+    it('Endpoint with DELETE filter that can be verified and matches return a 200 HTTP code (no filter value) - Null user is passed as query argument', async () => {
+        await updateVersion();
+        // eslint-disable-next-line no-useless-escape
+        await createEndpoint({
+            method: 'DELETE',
+            pathRegex: new RegExp('^/api/v1/dataset$'),
+            redirect: [{ ...endpointTest.redirect[0], method: 'DELETE', filters: testFilter({ foo: 'bar' }) }]
+        });
+        await createEndpoint({
+            path: '/api/v1/test1/test',
+            redirect: [
+                {
+                    filters: null,
+                    method: 'DELETE',
+                    path: '/api/v1/test1/test',
+                    url: 'http://mymachine:6001'
+                }
+            ],
+        });
+        createMockEndpointWithBody('/api/v1/test1/test?loggedUser=null', {
+            response: { body: { data: { foo: 'bar' } } },
+            method: 'delete'
+        });
+        createMockEndpointWithBody(`/api/v1/dataset?foo=bar&dataset=${JSON.stringify({ body: { data: { foo: 'bar' } } })}&loggedUser=null`, {
+            method: 'delete'
+        });
+        const response = await microservice
+            .delete('/api/v1/dataset')
+            .query({ foo: 'bar' });
+
+        response.status.should.equal(200);
+        response.text.should.equal('ok');
+    });
+
+    it('Endpoint with DELETE filter that can be verified and matches return a 200 HTTP code (no filter value) - USER user is passed as query argument', async () => {
+        await updateVersion();
+        // eslint-disable-next-line no-useless-escape
+        await createEndpoint({
+            method: 'DELETE',
+            pathRegex: new RegExp('^/api/v1/dataset$'),
+            redirect: [{
+                ...endpointTest.redirect[0],
+                method: 'DELETE',
+                filters: testFilter({ foo: 'bar' }, { method: 'DELETE' })
+            }]
+        });
+        await createEndpoint({
+            path: '/api/v1/test1/test',
+            method: 'DELETE',
+            redirect: [
+                {
+                    filters: null,
+                    method: 'DELETE',
+                    path: '/api/v1/test1/test',
+                    url: 'http://mymachine:6001'
+                }
+            ],
+        });
+        createMockEndpointWithBody(`/api/v1/test1/test?loggedUser=null`, {
+            response: { body: { data: { foo: 'bar' } } },
+            method: 'delete'
+        });
+        createMockEndpointWithBody(`/api/v1/dataset?foo=bar&dataset=${JSON.stringify({ body: { data: { foo: 'bar' } } })}&loggedUser=${JSON.stringify(USERS.USER)}`, {
+            method: 'delete'
+        });
+        const response = await microservice
+            .delete('/api/v1/dataset')
+            .set('Authorization', `Bearer ${TOKENS.USER}`)
+            .query({ foo: 'bar' });
+
+        response.status.should.equal(200);
+        response.text.should.equal('ok');
+    });
+
+    it('Endpoint with POST filter that can be verified and matches return a 200 HTTP code (happy case) - Null user is passed as body content', async () => {
+        await updateVersion();
+        // eslint-disable-next-line no-useless-escape
+        await createEndpoint({
+            method: 'DELETE',
+            pathRegex: new RegExp('^/api/v1/dataset$'),
+            redirect: [{ ...endpointTest.redirect[0], method: 'DELETE', filters: testFilter({ foo: 'bar' }) }]
+        });
+        await createEndpoint({
+            path: '/api/v1/test1/test',
+            redirect: [
+                {
+                    filters: null,
+                    method: 'POST',
+                    path: '/api/v1/test1/test',
+                    url: 'http://mymachine:6001'
+                }
+            ],
+        });
+
+        createMockEndpointWithBody('/api/v1/test1/test', {
+            body: { loggedUser: null },
+            response: { body: { data: { foo: 'bar' } } }
+        });
+        createMockEndpointWithBody(`/api/v1/dataset?foo=bar&dataset=${JSON.stringify({ body: { data: { foo: 'bar' } } })}&loggedUser=null`, {
+            method: 'delete'
+        });
+        const response = await microservice
+            .delete('/api/v1/dataset')
+            .query({ foo: 'bar' });
+
+        response.status.should.equal(200);
+        response.text.should.equal('ok');
+    });
+
+    it('Endpoint with POST filter that can be verified and matches return a 200 HTTP code (happy case) - USER user is passed as body content', async () => {
+        await updateVersion();
+        // eslint-disable-next-line no-useless-escape
+        await createEndpoint({
+            method: 'DELETE',
+            pathRegex: new RegExp('^/api/v1/dataset$'),
+            redirect: [{ ...endpointTest.redirect[0], method: 'DELETE', filters: testFilter({ foo: 'bar' }) }]
+        });
+        await createEndpoint({
+            path: '/api/v1/test1/test',
+            redirect: [
+                {
+                    filters: null,
+                    method: 'POST',
+                    path: '/api/v1/test1/test',
+                    url: 'http://mymachine:6001'
+                }
+            ],
+        });
+
+        // TODO: token should probably be passed to the filter request too
+        createMockEndpointWithBody('/api/v1/test1/test', {
+            body: { loggedUser: null },
+            response: { body: { data: { foo: 'bar' } } }
+        });
+        createMockEndpointWithBody(`/api/v1/dataset?foo=bar&dataset=${JSON.stringify({ body: { data: { foo: 'bar' } } })}&loggedUser=${JSON.stringify(USERS.USER)}`, {
+            method: 'delete'
+        });
+        const response = await microservice
+            .delete('/api/v1/dataset')
+            .set('Authorization', `Bearer ${TOKENS.USER}`)
+            .query({ foo: 'bar' });
+
+        response.status.should.equal(200);
+        response.text.should.equal('ok');
+    });
+
+    it('Endpoint with filters that can be verified and match return a 200 HTTP code (happy case)', async () => {
+        await updateVersion();
+        // eslint-disable-next-line no-useless-escape
+        await createEndpoint({
+            method: 'DELETE',
+            pathRegex: new RegExp('^/api/v1/dataset$'),
+            redirect: [{ ...endpointTest.redirect[0], method: 'DELETE', filters: testFilter({ foo: 'bar' }) }]
+        });
+        await createEndpoint({
+            path: '/api/v1/test1/test',
+            redirect: [
+                {
+                    filters: null,
+                    method: 'POST',
+                    path: '/api/v1/test1/test',
+                    url: 'http://mymachine:6001'
+                }
+            ],
+        });
+
+        createMockEndpointWithBody('/api/v1/test1/test', {
+            body: { loggedUser: null },
+            response: { body: { data: { foo: 'bar' } } }
+        });
+        createMockEndpointWithBody(`/api/v1/dataset?foo=bar&dataset=${JSON.stringify({ body: { data: { foo: 'bar' } } })}&loggedUser=${JSON.stringify(USERS.USER)}`, {
+            method: 'delete'
+        });
+
+        const response = await microservice
+            .delete('/api/v1/dataset')
+            .set('Authorization', `Bearer ${TOKENS.USER}`)
+            .query({ foo: 'bar' });
+
+        response.status.should.equal(200);
+        response.text.should.equal('ok');
+    });
+
+    it('Endpoint with filters that can be verified and don\'t match return a 404 HTTP code with a "Endpoint not found" message', async () => {
+        await updateVersion();
+        // eslint-disable-next-line no-useless-escape
+        await createEndpoint({
+            method: 'DELETE',
+            pathRegex: new RegExp('^/api/v1/dataset$'),
+            redirect: [{ ...endpointTest.redirect[0], method: 'DELETE', filters: testFilter({ test: 'test1' }) }]
+        });
+        await createEndpoint({
+            path: '/api/v1/test1/test',
+            redirect: [
+                {
+                    filters: null,
+                    method: 'POST',
+                    path: '/api/v1/test1/test',
+                    url: 'http://mymachine:6001'
+                }
+            ],
+        });
+
+        createMockEndpointWithBody('/api/v1/test1/test', {
+            body: { loggedUser: null },
+            response: { data: { test: 'bar' } }
+        });
+
+        const response = await microservice
+            .delete('/api/v1/dataset')
+            .set('Authorization', `Bearer ${TOKENS.USER}`)
+            .query({ foo: 'bar' });
+
+        ensureCorrectError(response, 'Endpoint not found', 404);
+    });
+
+    it('Endpoint with filters that return a 404 response should return a 404 HTTP code with a "Endpoint not found" message', async () => {
+        await updateVersion();
+        // eslint-disable-next-line no-useless-escape
+        await createEndpoint({
+            pathRegex: new RegExp('^/api/v1/dataset$'),
+            method: 'DELETE',
+            redirect: [{ ...endpointTest.redirect[0], filters: testFilter({ test: 'trest1' }) }]
+        });
+        await createEndpoint({
+            path: '/api/v1/test1/test',
+            redirect: [
+                {
+                    filters: null,
+                    method: 'POST',
+                    path: '/api/v1/test1/test',
+                    url: 'http://mymachine:6001'
+                }
+            ],
+        });
+
+        // TODO: token should probably be passed to the filter request too
+        createMockEndpointWithBody('/api/v1/test1/test', {
+            body: { loggedUser: null },
+            replyStatus: 404
+        });
+
+        const response = await microservice
+            .delete('/api/v1/dataset')
+            .set('Authorization', `Bearer ${TOKENS.USER}`)
+            .query({ foo: 'bar' });
+
+        ensureCorrectError(response, 'Endpoint not found', 404);
+    });
+
+    it('Endpoint with multiple filters with multiple types that can be verified and match return a 200 HTTP code (happy case)', async () => {
+        await updateVersion();
+        // eslint-disable-next-line no-useless-escape
+        await createEndpoint({
+            pathRegex: new RegExp('^/api/v1/dataset$'),
+            method: 'DELETE',
+            redirect: [
+                {
+                    ...endpointTest.redirect[0],
+                    method: 'DELETE',
+                    filters: [
+                        testFilter({ foo: 'bar' }),
+                        {
+                            name: 'widget',
+                            path: '/api/v1/test2/test',
+                            pathRegex: new RegExp('/api/v1/test2/test'),
+                            method: 'DELETE',
+                            compare: { data: { boo: 'tar' } }
+                        }
+                    ]
+                }
+            ]
+        });
+        await createEndpoint({
+            path: '/api/v1/test1/test',
+            redirect: [
+                {
+                    filters: null,
+                    method: 'POST',
+                    path: '/api/v1/test1/test',
+                    url: 'http://mymachine:6001'
+                }
+            ],
+        });
+        await createEndpoint({
+            method: 'DELETE',
+            path: '/api/v1/test2/test',
+            redirect: [
+                {
+                    filters: null,
+                    method: 'DELETE',
+                    path: '/api/v1/test2/test',
+                    url: 'http://mymachine:6001'
+                }
+            ],
+        });
+        createMockEndpointWithBody('/api/v1/test1/test', {
+            body: { loggedUser: null },
+            response: { body: { data: { foo: 'bar' } } }
+        });
+        createMockEndpointWithBody('/api/v1/test2/test?loggedUser=null', {
+            method: 'delete',
+            response: { body: { data: { boo: 'tar' } } }
+        });
+        createMockEndpointWithBody(`/api/v1/dataset?foo=bar&dataset=${JSON.stringify({ body: { data: { foo: 'bar' } } })}&loggedUser=${JSON.stringify(USERS.USER)}&widget=${JSON.stringify({ body: { data: { boo: 'tar' } } })}`, {
+            method: 'delete'
+        });
+
+        const response = await microservice
+            .delete('/api/v1/dataset')
+            .set('Authorization', `Bearer ${TOKENS.USER}`)
+            .query({ foo: 'bar' });
+
+        response.status.should.equal(200);
+        response.text.should.equal('ok');
+    });
+
+    afterEach(async () => {
+        await Endpoint.deleteMany({}).exec();
+
+        if (!nock.isDone()) {
+            throw new Error(`Not all nock interceptors were used: ${nock.pendingMocks()}`);
+        }
+    });
+});
