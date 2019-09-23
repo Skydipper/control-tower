@@ -119,8 +119,29 @@ describe('OAuth endpoints tests - Recover password post - HTML version', () => {
             });
 
         response.status.should.equal(200);
-        response.redirects.should.be.an('array').and.length(1);
-        response.redirects[0].should.equal('http://www.google.com/');
+        response.redirects.should.be.an('array').and.contain('https://resourcewatch.org/');
+    });
+
+    it('Recover password post with correct token, matching passwords and custom origin app should redirect to that app\'s configured URL - HTML format', async () => {
+        const user = await new UserModel({
+            email: 'potato@gmail.com'
+        }).save();
+
+        await new RenewModel({
+            userId: user._id,
+            token: 'myToken'
+        }).save();
+
+        const response = await requester
+            .post(`/auth/reset-password/myToken?origin=gfw`)
+            .type('form')
+            .send({
+                password: 'abcd',
+                repeatPassword: 'abcd'
+            });
+
+        response.status.should.equal(200);
+        response.redirects.should.be.an('array').and.contain('https://www.globalforestwatch.org/');
     });
 
     after(async () => {
