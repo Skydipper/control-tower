@@ -79,14 +79,16 @@ module.exports = async function init() {
                     logo: 'https://resourcewatch.org/static/images/logo-embed.png',
                     principalColor: '#c32d7b',
                     sendNotifications: true,
-                    emailSenderName: 'RW API'
+                    emailSenderName: 'RW API',
+                    confirmUrlRedirect: 'http://resourcewatch.org'
                 },
                 gfw: {
                     name: 'GFW',
                     logo: 'https://www.globalforestwatch.org/packs/gfw-9c5fe396ee5b15cb5f5b639a7ef771bd.png',
                     principalColor: '#97be32',
                     sendNotifications: true,
-                    emailSenderName: 'GFW'
+                    emailSenderName: 'GFW',
+                    confirmUrlRedirect: 'https://www.globalforestwatch.org'
                 }
             },
             defaultApp: 'gfw',

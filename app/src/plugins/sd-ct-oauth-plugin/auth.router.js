@@ -638,6 +638,13 @@ module.exports = (plugin, connection, generalConfig) => {
                     ctx.response.type = 'application/json';
                     ctx.body = UserTempSerializer.serialize(user);
                 } else {
+                    const app = getOriginApp(ctx, plugin);
+                    const applicationConfig = plugin.config.applications && plugin.config.applications[app];
+
+                    if (applicationConfig && applicationConfig.confirmUrlRedirect) {
+                        ctx.redirect(applicationConfig.confirmUrlRedirect);
+                        return;
+                    }
                     if (plugin.config.local.confirmUrlRedirect) {
                         ctx.redirect(plugin.config.local.confirmUrlRedirect);
                         return;
