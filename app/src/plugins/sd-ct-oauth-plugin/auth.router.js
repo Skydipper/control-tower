@@ -519,6 +519,7 @@ module.exports = (plugin, connection, generalConfig) => {
             }
             await ctx.render('reset-password', {
                 error,
+                app: getOriginApp(ctx, plugin),
                 token: renew ? renew.token : null,
                 generalConfig: ctx.state.generalConfig,
             });
@@ -625,6 +626,7 @@ module.exports = (plugin, connection, generalConfig) => {
                 } else {
                     await ctx.render('reset-password', {
                         error,
+                        app: getOriginApp(ctx, plugin),
                         token: ctx.params.token,
                         generalConfig: ctx.state.generalConfig,
                     });
@@ -653,6 +655,7 @@ module.exports = (plugin, connection, generalConfig) => {
                 }
             } else {
                 await ctx.render('reset-password', {
+                    app: getOriginApp(ctx, plugin),
                     error: 'Error updating user',
                     token: ctx.params.token,
                     generalConfig: ctx.state.generalConfig,
