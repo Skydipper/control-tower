@@ -4,6 +4,7 @@ const JWT = Promise.promisifyAll(require('jsonwebtoken'));
 const bcrypt = require('bcrypt');
 const crypto = require('crypto');
 const mongoose = require('mongoose');
+
 const { ObjectId } = mongoose.Types;
 
 const whiteListModelFunc = require('plugins/sd-ct-oauth-plugin/models/white-list.model');
@@ -26,7 +27,7 @@ function authService(plugin, connection) {
         static getFilteredQuery(query) {
             const allowedSearchFields = ['name', 'provider', 'email', 'role'];
             debug('Object.keys(query)', Object.keys(query));
-            Object.keys(query).filter(param => allowedSearchFields.includes(param)).forEach((param) => {
+            Object.keys(query).filter((param) => allowedSearchFields.includes(param)).forEach((param) => {
                 switch (UserModel.schema.paths[param].instance) {
 
                     case 'String':
@@ -38,11 +39,11 @@ function authService(plugin, connection) {
                     case 'Array':
                         if (query[param].indexOf('@') >= 0) {
                             query[param] = {
-                                $all: query[param].split('@').map(elem => elem.trim())
+                                $all: query[param].split('@').map((elem) => elem.trim())
                             };
                         } else {
                             query[param] = {
-                                $in: query[param].split(',').map(elem => elem.trim())
+                                $in: query[param].split(',').map((elem) => elem.trim())
                             };
                         }
                         break;
@@ -87,7 +88,7 @@ function authService(plugin, connection) {
                         await userData.save();
                     }
                 } else {
-                    const dataToken = Object.assign({}, user);
+                    const dataToken = { ...user };
                     delete dataToken.exp;
                     dataToken.createdAt = Date.now();
                     token = await JWT.sign(dataToken, plugin.config.jwt.secret, options);
@@ -104,7 +105,7 @@ function authService(plugin, connection) {
         static async getUsers(app, query) {
             debug('Get users with app', app);
 
-            const filteredQuery = AuthService.getFilteredQuery(Object.assign({}, query));
+            const filteredQuery = AuthService.getFilteredQuery({ ...query });
 
             if (app) {
                 filteredQuery['extraUserData.apps'] = {
@@ -127,7 +128,7 @@ function authService(plugin, connection) {
         }
 
         static async getUsersByIds(ids = []) {
-            const newIds = ids.map(id => new ObjectId(id));
+            const newIds = ids.map((id) => new ObjectId(id));
             return UserModel.find({
                 _id: {
                     $in: newIds
@@ -140,7 +141,7 @@ function authService(plugin, connection) {
                 role
             }).exec();
             // eslint-disable-next-line no-underscore-dangle
-            return data.map(el => el._id);
+            return data.map((el) => el._id);
         }
 
         static async updateUser(id, data) {
@@ -383,7 +384,7 @@ function authService(plugin, connection) {
                     apps: []
                 };
             } else {
-                user.extraUserData = Object.assign({}, user.extraUserData);
+                user.extraUserData = { ...user.extraUserData };
             }
             for (let i = 0, { length } = applications; i < length; i += 1) {
                 if (user.extraUserData.apps.indexOf(applications[i]) === -1) {

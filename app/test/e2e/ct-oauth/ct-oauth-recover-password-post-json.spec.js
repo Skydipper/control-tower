@@ -39,16 +39,18 @@ describe('OAuth endpoints tests - Recover password post - JSON version', () => {
     });
 
     it('Recover password post with fake token returns a 422 error - JSON format', async () => {
-        requester
+        const response = await requester
             .post(`/auth/reset-password/token`)
-            .set('Content-Type', 'application/json')
-            .then((response) => {
-                response.status.should.equal(422);
-                response.header['content-type'].should.equal('application/json; charset=utf-8');
-                response.body.should.have.property('errors').and.be.an('array');
-                response.body.errors[0].should.have.property('detail').and.equal(`Token expired`);
-                done();
-            });
+            .set('Content-Type', 'application/json');
+
+        return new Promise((resolve) => {
+            response.status.should.equal(422);
+            response.header['content-type'].should.equal('application/json; charset=utf-8');
+            response.body.should.have.property('errors').and.be.an('array');
+            response.body.errors[0].should.have.property('detail').and.equal(`Token expired`);
+
+            resolve();
+        });
 
     });
 
@@ -58,18 +60,19 @@ describe('OAuth endpoints tests - Recover password post - JSON version', () => {
             token: 'myToken'
         }).save();
 
-        requester
+        const response = await requester
             .post(`/auth/reset-password/myToken`)
-            .set('Content-Type', 'application/json')
-            .then((response) => {
-                response.status.should.equal(422);
-                response.header['content-type'].should.equal('application/json; charset=utf-8');
-                response.body.should.have.property('errors').and.be.an('array');
-                response.body.errors[0].status.should.equal(422);
-                response.body.errors[0].detail.should.equal('Password and Repeat password are required');
+            .set('Content-Type', 'application/json');
 
-                done();
-            });
+        return new Promise((resolve) => {
+            response.status.should.equal(422);
+            response.header['content-type'].should.equal('application/json; charset=utf-8');
+            response.body.should.have.property('errors').and.be.an('array');
+            response.body.errors[0].status.should.equal(422);
+            response.body.errors[0].detail.should.equal('Password and Repeat password are required');
+
+            resolve();
+        });
     });
 
     it('Recover password post with correct token and missing repeat password should return an error message - JSON format', async () => {
@@ -78,20 +81,22 @@ describe('OAuth endpoints tests - Recover password post - JSON version', () => {
             token: 'myToken'
         }).save();
 
-        requester
+        const response = await requester
             .post(`/auth/reset-password/myToken`)
             .set('Content-Type', 'application/json')
             .send({
                 password: 'abcd'
-            })
-            .then((response) => {
-                response.status.should.equal(422);
-                response.header['content-type'].should.equal('application/json; charset=utf-8');
-                response.body.should.have.property('errors').and.be.an('array');
-                response.body.errors[0].status.should.equal(422);
-                response.body.errors[0].detail.should.equal('Password and Repeat password not equal');
-                done();
             });
+
+        return new Promise((resolve) => {
+            response.status.should.equal(422);
+            response.header['content-type'].should.equal('application/json; charset=utf-8');
+            response.body.should.have.property('errors').and.be.an('array');
+            response.body.errors[0].status.should.equal(422);
+            response.body.errors[0].detail.should.equal('Password and Repeat password not equal');
+
+            resolve();
+        });
 
     });
 
@@ -101,21 +106,22 @@ describe('OAuth endpoints tests - Recover password post - JSON version', () => {
             token: 'myToken'
         }).save();
 
-        requester
+        const response = await requester
             .post(`/auth/reset-password/myToken`)
             .set('Content-Type', 'application/json')
             .send({
                 password: 'abcd',
                 repeatPassword: 'efgh'
-            })
-            .then((response) => {
-                response.status.should.equal(422);
-                response.header['content-type'].should.equal('application/json; charset=utf-8');
-                response.body.should.have.property('errors').and.be.an('array');
-                response.body.errors[0].status.should.equal(422);
-                response.body.errors[0].detail.should.equal('Password and Repeat password not equal');
-                done();
             });
+        return new Promise((resolve) => {
+            response.status.should.equal(422);
+            response.header['content-type'].should.equal('application/json; charset=utf-8');
+            response.body.should.have.property('errors').and.be.an('array');
+            response.body.errors[0].status.should.equal(422);
+            response.body.errors[0].detail.should.equal('Password and Repeat password not equal');
+
+            resolve();
+        });
 
     });
 
@@ -141,28 +147,29 @@ describe('OAuth endpoints tests - Recover password post - JSON version', () => {
             token: 'myToken'
         }).save();
 
-        requester
+        const response = await requester
             .post(`/auth/reset-password/myToken`)
             .set('Content-Type', 'application/json')
             .send({
                 password: 'abcd',
                 repeatPassword: 'abcd'
-            })
-            .then((response) => {
-                response.status.should.equal(200);
-                response.redirects.should.be.an('array').and.length(0);
-
-                const responseUser = response.body.data;
-                // eslint-disable-next-line no-unused-expressions
-                responseUser.should.have.property('id').and.be.a('string').and.not.be.empty;
-                responseUser.should.have.property('name').and.be.a('string').and.equal('lorem-ipsum');
-                responseUser.should.have.property('photo').and.be.a('string').and.equal('http://www.random.rand/abc.jpg');
-                responseUser.should.have.property('email').and.equal('test@example.com');
-                responseUser.should.have.property('role').and.equal('USER');
-                responseUser.should.have.property('extraUserData').and.be.an('object');
-                responseUser.extraUserData.should.have.property('apps').and.be.an('array').and.contain('rw');
-                done();
             });
+        return new Promise((resolve) => {
+            response.status.should.equal(200);
+            response.redirects.should.be.an('array').and.length(0);
+
+            const responseUser = response.body.data;
+            // eslint-disable-next-line no-unused-expressions
+            responseUser.should.have.property('id').and.be.a('string').and.not.be.empty;
+            responseUser.should.have.property('name').and.be.a('string').and.equal('lorem-ipsum');
+            responseUser.should.have.property('photo').and.be.a('string').and.equal('http://www.random.rand/abc.jpg');
+            responseUser.should.have.property('email').and.equal('test@example.com');
+            responseUser.should.have.property('role').and.equal('USER');
+            responseUser.should.have.property('extraUserData').and.be.an('object');
+            responseUser.extraUserData.should.have.property('apps').and.be.an('array').and.contain('rw');
+
+            resolve();
+        });
 
     });
 

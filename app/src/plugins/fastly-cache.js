@@ -16,9 +16,9 @@ function middleware(app, plugin) {
         if (ctx.status >= 200 && ctx.status < 400) {
             if (ctx.request.method !== 'GET') {
                 if (ctx.response.headers && ctx.response.headers.uncache) {
-                    const tags = ctx.response.headers.uncache.split(' ').filter(part => part !== '');
+                    const tags = ctx.response.headers.uncache.split(' ').filter((part) => part !== '');
                     logger.debug('Uncache ', tags);
-                    for (let i = 0, length = tags.length; i < length; i++) {
+                    for (let i = 0, { length } = tags; i < length; i++) {
                         fastlyPurge.key(SERVICE_ID, tags[i], (err) => {
                             if (err) {
                                 logger.error('Error purging', err);
@@ -27,16 +27,14 @@ function middleware(app, plugin) {
                     }
                 }
                 ctx.set('Cache-Control', 'private');
+            } else if (!ctx.state.redirect || ctx.state.redirect.endpoint.authenticated) {
+                ctx.set('Cache-Control', 'private');
+            } else if (ctx.response.headers && ctx.response.headers.cache) {
+                const key = ctx.response.headers.cache.split(' ').filter((part) => part !== '').join(' ');
+                logger.debug('Caching with key: ', key);
+                ctx.set('Surrogate-Key', key);
             } else {
-                if (!ctx.state.redirect || ctx.state.redirect.endpoint.authenticated) {
-                    ctx.set('Cache-Control', 'private');
-                } else if (ctx.response.headers && ctx.response.headers.cache) {
-                    const key = ctx.response.headers.cache.split(' ').filter(part => part !== '').join(' ');
-                    logger.debug('Caching with key: ', key);
-                    ctx.set('Surrogate-Key', key);
-                } else {
-                    ctx.set('Cache-Control', 'private');
-                }
+                ctx.set('Cache-Control', 'private');
             }
         }
     });

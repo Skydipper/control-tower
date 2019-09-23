@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+
 let connection = null;
 
 function init(uri) {

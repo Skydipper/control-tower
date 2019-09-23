@@ -84,21 +84,6 @@ describe('OAuth endpoints tests - Sign up without auth', () => {
         response.text.should.include('Password and Repeat password not equal');
     });
 
-    it('Registering a user with different passwords returns a 200 error (TODO: this should return a 422)', async () => {
-        const response = await requester
-            .post(`/auth/sign-up`)
-            .set('Authorization', `Bearer ${TOKENS.ADMIN}`)
-            .type('form')
-            .send({
-                email: 'someemail@gmail.com',
-                password: 'somepassword',
-                repeatPassword: 'anotherpassword'
-            });
-
-        response.status.should.equal(200);
-        response.text.should.include('Password and Repeat password not equal');
-    });
-
     it('Registering a user with correct data and no app returns a 200', async () => {
         nock('https://api.sparkpost.com')
             .post('/api/v1/transmissions', (body) => {

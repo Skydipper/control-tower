@@ -19,6 +19,7 @@ describe('Endpoint dispatch tests', () => {
     });
 
     it('Created endpoint without redirects should return a 404 HTTP code with a "Endpoint not found" message', async () => {
+        await updateVersion();
         await createEndpoint({ redirect: [] });
         const result = await microservice.post('/api/v1/dataset');
         ensureCorrectError(result, 'Endpoint not found', 404);
@@ -187,7 +188,7 @@ describe('Endpoint dispatch tests', () => {
         result.text.should.equal('ok');
     });
 
-    it('Endpoint with pathRegex are matched to external requests and return a 200 HTTP code (negative test)', async () => {
+    it('Endpoint with pathRegex are not matched to external requests and return a 404 HTTP code (negative test)', async () => {
         await updateVersion();
         // eslint-disable-next-line no-useless-escape
         await createEndpoint({ pathRegex: new RegExp('^/api/v1/dataset/[0-9]*$') });

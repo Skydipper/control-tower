@@ -20,6 +20,7 @@ exports.getTestAgent = async function getTestAgent(forceNew = false) {
         return requester;
     }
 
+    // eslint-disable-next-line global-require
     const serverPromise = require('../../src/app');
     const { server } = await serverPromise();
     requester = chai.request.agent(server);

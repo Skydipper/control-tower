@@ -164,7 +164,7 @@ describe('Facebook auth endpoint tests', () => {
                 id: '10216001184997572',
                 name: 'John Doe',
                 last_name: 'Doe',
-                first_name: 'Tiago',
+                first_name: 'John',
                 email: 'john.doe@vizzuality.com'
             });
 

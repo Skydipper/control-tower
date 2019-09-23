@@ -7,6 +7,8 @@ const UserModel = require('plugins/sd-ct-oauth-plugin/models/user.model');
 const { getTestAgent, closeTestAgent } = require('./../test-server');
 const { TOKENS } = require('./../test.constants');
 
+const should = chai.should();
+
 let requester;
 
 nock.disableNetConnect();

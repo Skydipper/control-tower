@@ -2,12 +2,12 @@
 const debug = require('debug')('oauth-plugin');
 const Router = require('koa-router');
 const passport = require('koa-passport');
+const { cloneDeep } = require('lodash');
 const authServiceFunc = require('./services/auth.service');
 const UnprocessableEntityError = require('./errors/unprocessableEntity.error');
 const UnauthorizedError = require('./errors/unauthorized.error');
 const UserTempSerializer = require('./serializers/user-temp.serializer');
 const UserSerializer = require('./serializers/user.serializer');
-const { cloneDeep } = require('lodash');
 
 module.exports = (plugin, connection, generalConfig) => {
     const ApiRouter = new Router({
@@ -17,7 +17,7 @@ module.exports = (plugin, connection, generalConfig) => {
     debug('Initializing services');
     const AuthService = authServiceFunc(plugin, connection);
 
-    const getUser = ctx => ctx.req.user || ctx.state.user || ctx.state.microservice;
+    const getUser = (ctx) => ctx.req.user || ctx.state.user || ctx.state.microservice;
 
     const getOriginApp = (ctx, plugin) => {
         if (ctx.query.origin) {
@@ -29,7 +29,7 @@ module.exports = (plugin, connection, generalConfig) => {
         }
 
         return plugin.config.defaultApp;
-    }
+    };
 
     const getApplicationsConfig = (ctx, plugin) => {
         const app = getOriginApp(ctx, plugin);
@@ -89,7 +89,7 @@ module.exports = (plugin, connection, generalConfig) => {
             })(ctx, next);
         };
 
-        const localCallback = async ctx => passport.authenticate('local', async (user) => {
+        const localCallback = async (ctx) => passport.authenticate('local', async (user) => {
             if (!user) {
                 if (ctx.request.type === 'application/json') {
                     ctx.status = 401;
@@ -804,7 +804,7 @@ module.exports = (plugin, connection, generalConfig) => {
         const applicationConfig = getApplicationsConfig(ctx, oauthPlugin);
 
         if (applicationConfig) {
-            ctx.state.generalConfig.application = Object.assign({}, ctx.state.generalConfig.application, applicationConfig);
+            ctx.state.generalConfig.application = { ...ctx.state.generalConfig.application, ...applicationConfig };
         }
 
         await next();

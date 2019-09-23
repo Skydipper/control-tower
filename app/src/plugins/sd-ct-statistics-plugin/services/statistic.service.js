@@ -13,9 +13,9 @@ class StatisticService {
             'geo.completed': false,
         }).limit(10000).exec();
         debug('Ips found ', statistics.length);
-        for (let i = 0, length = statistics.length; i < length; i++) {
+        for (let i = 0, { length } = statistics; i < length; i++) {
             if (statistics[i].ip && statistics[i].ip.indexOf('127.0.0.1') === -1) {
-                let ip = statistics[i].ip;
+                let { ip } = statistics[i];
                 if (ip.indexOf(',') >= 0) {
                     ip = ip.split(',')[1];
                 }

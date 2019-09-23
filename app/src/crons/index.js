@@ -2,6 +2,7 @@ const logger = require('logger');
 const config = require('config');
 const mongoose = require('mongoose');
 const bluebird = require('bluebird');
+
 const mongoUri = process.env.CT_MONGO_URI || `mongodb://${config.get('mongodb.host')}:${config.get('mongodb.port')}/${config.get('mongodb.database')}`;
 
 const loader = require('loader');

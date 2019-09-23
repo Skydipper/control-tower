@@ -23,7 +23,7 @@ class Microservice {
         logger.debug('Checking filters in endpoint', endpoint);
         let filters = null;
         if (endpoint.filters) {
-            for (let i = 0, length = endpoint.filters.length; i < length; i++) {
+            for (let i = 0, { length } = endpoint.filters; i < length; i++) {
                 logger.debug(endpoint.filters[i]);
                 let pathKeys = [];
                 const pathRegex = pathToRegexp(endpoint.filters[i].path, pathKeys);
@@ -76,7 +76,7 @@ class Microservice {
                 await oldEndpoint.save();
             } else {
                 logger.debug('Exist redirect. Updating', oldRedirect);
-                for (let i = 0, length = oldRedirect.redirect.length; i < length; i++) {
+                for (let i = 0, { length } = oldRedirect.redirect; i < length; i++) {
                     if (oldRedirect.redirect[i].url === endpoint.redirect.url) {
                         oldRedirect.uncache = micro.uncache;
                         oldRedirect.cache = micro.cache;
@@ -118,7 +118,7 @@ class Microservice {
     static async saveEndpoints(micro, info, version) {
         logger.info('Saving endpoints');
         if (info.endpoints && info.endpoints.length > 0) {
-            for (let i = 0, length = info.endpoints.length; i < length; i++) {
+            for (let i = 0, { length } = info.endpoints; i < length; i++) {
                 await Microservice.saveEndpoint(info.endpoints[i], micro, version);
             }
         }
@@ -304,7 +304,7 @@ class Microservice {
         const versionFound = await VersionModel.findOne({
             name: appConstants.ENDPOINT_VERSION,
         });
-        const version = versionFound.version;
+        const { version } = versionFound;
 
         const errorMicroservices = await MicroserviceModel.find({
             status: {
@@ -313,10 +313,10 @@ class Microservice {
             version
         });
         if (errorMicroservices && errorMicroservices.length > 0) {
-            for (let i = 0, length = errorMicroservices.length; i < length; i++) {
+            for (let i = 0, { length } = errorMicroservices; i < length; i++) {
                 const micro = errorMicroservices[i];
-                if (micro.status === MICRO_STATUS_ERROR ||
-                    (micro.status === MICRO_STATUS_PENDING && (Date.now() - micro.updatedAt.getTime()) > 10000)) {
+                if (micro.status === MICRO_STATUS_ERROR
+                    || (micro.status === MICRO_STATUS_PENDING && (Date.now() - micro.updatedAt.getTime()) > 10000)) {
                     const correct = await Microservice.getInfoMicroservice(micro, version);
                     if (correct) {
                         logger.info(`Updating state of microservice with name ${micro.name}`);
@@ -341,7 +341,7 @@ class Microservice {
             return;
         }
 
-        for (let i = 0, length = micro.endpoints.length; i < length; i++) {
+        for (let i = 0, { length } = micro.endpoints; i < length; i++) {
             const endpoint = await EndpointModel.findOne({
                 method: micro.endpoints[i].method,
                 path: micro.endpoints[i].path,
@@ -377,7 +377,7 @@ class Microservice {
         if (!micro.endpoints) {
             return;
         }
-        for (let i = 0, length = micro.endpoints.length; i < length; i++) {
+        for (let i = 0, { length } = micro.endpoints; i < length; i++) {
             await EndpointModel.remove({
                 method: micro.endpoints[i].method,
                 path: micro.endpoints[i].path,
@@ -454,7 +454,7 @@ class Microservice {
             logger.info('Not exist registered microservices');
             return;
         }
-        for (let i = 0, length = microservices.length; i < length; i++) {
+        for (let i = 0, { length } = microservices; i < length; i++) {
             await Microservice.checkLiveMicro(microservices[i]);
         }
         logger.info('Finished checking');
@@ -471,7 +471,7 @@ class Microservice {
         logger.debug('New version is ', newVersion);
 
         if (microservices) {
-            for (let i = 0, length = microservices.length; i < length; i++) {
+            for (let i = 0, { length } = microservices; i < length; i++) {
                 try {
                     if (microservices[i].name !== null && microservices[i].url !== null) {
                         logger.debug(`Registering microservice with name ${microservices[i].name}`);

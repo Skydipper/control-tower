@@ -183,7 +183,7 @@ describe('OAuth endpoints tests - Sign up with JSON content type', () => {
         response.body.errors[0].detail.should.equal('Email exist');
     });
 
-    it('Confirming a user\'s account using the email token should be successful', async () => {
+    it('Confirming a user\'s account using the email token should be successful (user without app)', async () => {
         const tempUser = await UserTempModel.findOne({ email: 'someemail@gmail.com' }).exec();
 
         const response = await requester
@@ -294,7 +294,7 @@ describe('OAuth endpoints tests - Sign up with JSON content type', () => {
         user.extraUserData.apps.should.be.an('array').and.contain('rw');
     });
 
-    it('Confirming a user\'s account using the email token should be successful', async () => {
+    it('Confirming a user\'s account using the email token should be successful (user with app)', async () => {
         const tempUser = await UserTempModel.findOne({ email: 'someotheremail@gmail.com' }).exec();
 
         const response = await requester

@@ -6,6 +6,77 @@ const TOKENS = {
     MICROSERVICE: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6Im1pY3Jvc2VydmljZSIsInJvbGUiOiJBRE1JTiIsInByb3ZpZGVyIjoibG9jYWwiLCJlbWFpbCI6Im1pY3Jvc2VydmljZUBjb250cm9sLXRvd2VyLm9yZyIsImV4dHJhVXNlckRhdGEiOnsiYXBwcyI6WyJydyIsImdmdyIsImdmdy1jbGltYXRlIiwicHJlcCIsImFxdWVkdWN0IiwiZm9yZXN0LWF0bGFzIiwiZGF0YTRzZGdzIl19fQ.nbC1lngIFcGgGBFwRYV54fGaGmcck-Ocotr3qDXkyTs'
 };
 
+const USERS = {
+    USER: {
+        id: '1a10d7c6e0a37126611fd7a7',
+        role: 'USER',
+        provider: 'local',
+        email: 'user@control-tower.org',
+        extraUserData: {
+            apps: [
+                'rw',
+                'gfw',
+                'gfw-climate',
+                'prep',
+                'aqueduct',
+                'forest-atlas',
+                'data4sdgs'
+            ]
+        }
+    },
+    MANAGER: {
+        id: '1a10d7c6e0a37126611fd7a7',
+        role: 'MANAGER',
+        provider: 'local',
+        email: 'manager@control-tower.org',
+        extraUserData: {
+            apps: [
+                'rw',
+                'gfw',
+                'gfw-climate',
+                'prep',
+                'aqueduct',
+                'forest-atlas',
+                'data4sdgs'
+            ]
+        }
+    },
+    ADMIN: {
+        id: '1a10d7c6e0a37126611fd7a7',
+        role: 'ADMIN',
+        provider: 'local',
+        email: 'admin@control-tower.org',
+        extraUserData: {
+            apps: [
+                'rw',
+                'gfw',
+                'gfw-climate',
+                'prep',
+                'aqueduct',
+                'forest-atlas',
+                'data4sdgs'
+            ]
+        }
+    },
+    MICROSERVICE: {
+        id: 'microservice',
+        role: 'ADMIN',
+        provider: 'local',
+        email: 'microservice@control-tower.org',
+        extraUserData: {
+            apps: [
+                'rw',
+                'gfw',
+                'gfw-climate',
+                'prep',
+                'aqueduct',
+                'forest-atlas',
+                'data4sdgs'
+            ]
+        }
+    }
+};
+
 const testAppKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIn0.sQOVoEtkQlgy8UwlPOi5YWSdGAkRn80JqT53RdktIms';
 
 const microserviceTest = {
@@ -37,14 +108,12 @@ const endpointTest = {
     cache: [],
     uncache: [],
     toDelete: false,
-    _id: '5d2eeae405314b1645baadaf',
     path: '/v1/dataset',
     method: 'POST',
     pathRegex: '',
     redirect: [
         {
             filters: null,
-            _id: '5d2eeae405314b1645baadb0',
             method: 'POST',
             path: '/api/v1/dataset',
             url: 'http://mymachine:6001'
@@ -53,9 +122,20 @@ const endpointTest = {
     version: 1
 };
 
+const testFilter = (compareData, additionalData) => ({
+    name: 'dataset',
+    path: '/api/v1/test1/test',
+    pathRegex: new RegExp('/api/v1/test1/test'),
+    method: 'POST',
+    compare: { data: compareData },
+    ...additionalData,
+});
+
 module.exports = {
     TOKENS,
+    USERS,
     microserviceTest,
     endpointTest,
-    testAppKey
+    testAppKey,
+    testFilter
 };

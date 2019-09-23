@@ -1,8 +1,6 @@
 const nock = require('nock');
 const chai = require('chai');
 
-const mongoose = require('mongoose');
-const config = require('config');
 const UserModel = require('plugins/sd-ct-oauth-plugin/models/user.model');
 const UserTempModel = require('plugins/sd-ct-oauth-plugin/models/user-temp.model');
 
@@ -12,9 +10,6 @@ const { getUUID, setPluginSetting } = require('./../utils');
 const should = chai.should();
 
 let requester;
-
-const mongoUri = process.env.CT_MONGO_URI || `mongodb://${config.get('mongodb.host')}:${config.get('mongodb.port')}/${config.get('mongodb.database')}`;
-const connection = mongoose.createConnection(mongoUri);
 
 nock.disableNetConnect();
 nock.enableNetConnect(process.env.HOST_IP);
@@ -79,7 +74,7 @@ describe('OAuth endpoints tests - Confirm account', () => {
         responseUser.extraUserData.should.have.property('apps').and.be.an('array').and.contain('rw');
     });
 
-    it('Confirm account request with conmfigured redirect should return HTTP 200 and redirect to URL', async () => {
+    it('Confirm account request with configured redirect should return HTTP 200 and redirect to URL', async () => {
         const confirmationToken = getUUID();
         await new UserTempModel({
             email: 'test@example.com',

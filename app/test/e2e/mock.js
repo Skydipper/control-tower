@@ -15,10 +15,12 @@ const createMockEndpointWithHeaders = (path, params = {}) => {
 };
 
 // eslint-disable-next-line arrow-body-style
-const createMockEndpointWithBody = (path, params) => {
-    const { method = 'post', host = 'http://mymachine:6001', body = {} } = params;
+const createMockEndpointWithBody = (path, params = {}) => {
+    const {
+        method = 'post', host = 'http://mymachine:6001', body = {}, response = 'ok', replyStatus = 200
+    } = params;
 
-    return nock(host)[method](path, body).reply(200, 'ok');
+    return nock(host)[method](path, body).reply(replyStatus, response);
 };
 
 module.exports = { createMockEndpoint, createMockEndpointWithBody, createMockEndpointWithHeaders };

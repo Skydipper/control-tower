@@ -8,7 +8,7 @@ function init() {
 function middleware(app, plugin) {
     logger.info('Init basic auth');
     koaCtxBasicAuth(app);
-    app.use(async(ctx, next) => {
+    app.use(async (ctx, next) => {
         try {
             await next();
         } catch (err) {
@@ -22,7 +22,7 @@ function middleware(app, plugin) {
         }
     });
 
-    app.use(async(ctx, next) => {
+    app.use(async (ctx, next) => {
         if (ctx.basicAuth) {
             const {
                 name,
@@ -35,21 +35,17 @@ function middleware(app, plugin) {
                     role: plugin.config.credentials.role,
                 };
                 await next();
-            } else {
-                if (plugin.config.passthrough) {
-                    logger.warn('User not authorized');
-                    await next();
-                } else {
-                    ctx.throw(401, 'Invalid credentials');
-                }
-            }
-        } else {
-            if (plugin.config.passthrough) {
+            } else if (plugin.config.passthrough) {
                 logger.warn('User not authorized');
                 await next();
             } else {
                 ctx.throw(401, 'Invalid credentials');
             }
+        } else if (plugin.config.passthrough) {
+            logger.warn('User not authorized');
+            await next();
+        } else {
+            ctx.throw(401, 'Invalid credentials');
         }
     });
 }

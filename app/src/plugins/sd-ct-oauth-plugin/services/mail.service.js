@@ -32,7 +32,7 @@ function mailService(plugin) {
             if (this.disableEmailSending) {
                 debug('Email sending disabled, skipping user account confirmation email');
                 debug(reqOpts);
-                return new Promise(resolve => resolve());
+                return new Promise((resolve) => resolve());
             }
 
             return new Promise((resolve, reject) => {
@@ -66,7 +66,7 @@ function mailService(plugin) {
             if (this.disableEmailSending) {
                 debug('Email sending disabled, skipping user account confirmation with password email');
                 debug(reqOpts);
-                return new Promise(resolve => resolve());
+                return new Promise((resolve) => resolve());
             }
 
             return new Promise((resolve, reject) => {
@@ -99,7 +99,7 @@ function mailService(plugin) {
             if (this.disableEmailSending) {
                 debug('Email sending disabled, skipping password recover email');
                 debug(reqOpts);
-                return new Promise(resolve => resolve());
+                return new Promise((resolve) => resolve());
             }
 
             return new Promise((resolve, reject) => {
