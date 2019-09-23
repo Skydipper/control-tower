@@ -42,10 +42,12 @@ describe('OAuth endpoints tests - Recover password post - HTML version', () => {
         const response = await requester
             .post(`/auth/reset-password/token`);
 
-
-        response.status.should.equal(200);
-        response.header['content-type'].should.equal('text/html; charset=utf-8');
-        response.text.should.include(`Token expired`);
+        return new Promise((resolve) => {
+            response.status.should.equal(200);
+            response.header['content-type'].should.equal('text/html; charset=utf-8');
+            response.text.should.include(`Token expired`);
+            resolve();
+        });
     });
 
     it('Recover password post with correct token and missing passwords should return an error message - HTML format', async () => {
@@ -58,9 +60,13 @@ describe('OAuth endpoints tests - Recover password post - HTML version', () => {
             .post(`/auth/reset-password/myToken`)
             .type('form');
 
-        response.status.should.equal(200);
-        response.header['content-type'].should.equal('text/html; charset=utf-8');
-        response.text.should.include(`Password and Repeat password are required`);
+        return new Promise((resolve) => {
+
+            response.status.should.equal(200);
+            response.header['content-type'].should.equal('text/html; charset=utf-8');
+            response.text.should.include(`Password and Repeat password are required`);
+            resolve();
+        });
     });
 
     it('Recover password post with correct token and missing repeat password should return an error message - HTML format', async () => {
@@ -76,9 +82,12 @@ describe('OAuth endpoints tests - Recover password post - HTML version', () => {
                 password: 'abcd'
             });
 
-        response.status.should.equal(200);
-        response.header['content-type'].should.equal('text/html; charset=utf-8');
-        response.text.should.include(`Password and Repeat password not equal`);
+        return new Promise((resolve) => {
+            response.status.should.equal(200);
+            response.header['content-type'].should.equal('text/html; charset=utf-8');
+            response.text.should.include(`Password and Repeat password not equal`);
+            resolve();
+        });
     });
 
     it('Recover password post with correct token and different password and repeatPassword should return an error message - HTML format', async () => {
@@ -95,9 +104,12 @@ describe('OAuth endpoints tests - Recover password post - HTML version', () => {
                 repeatPassword: 'efgh'
             });
 
-        response.status.should.equal(200);
-        response.header['content-type'].should.equal('text/html; charset=utf-8');
-        response.text.should.include(`Password and Repeat password not equal`);
+        return new Promise((resolve) => {
+            response.status.should.equal(200);
+            response.header['content-type'].should.equal('text/html; charset=utf-8');
+            response.text.should.include(`Password and Repeat password not equal`);
+            resolve();
+        });
     });
 
     it('Recover password post with correct token and matching passwords should redirect to the configured URL (happy case) - HTML format', async () => {
@@ -118,8 +130,11 @@ describe('OAuth endpoints tests - Recover password post - HTML version', () => {
                 repeatPassword: 'abcd'
             });
 
-        response.status.should.equal(200);
-        response.redirects.should.be.an('array').and.contain('https://resourcewatch.org/');
+        return new Promise((resolve) => {
+            response.status.should.equal(200);
+            response.redirects.should.be.an('array').and.contain('https://resourcewatch.org/');
+            resolve();
+        });
     });
 
     it('Recover password post with correct token, matching passwords and custom origin app should redirect to that app\'s configured URL - HTML format', async () => {
@@ -140,8 +155,11 @@ describe('OAuth endpoints tests - Recover password post - HTML version', () => {
                 repeatPassword: 'abcd'
             });
 
-        response.status.should.equal(200);
-        response.redirects.should.be.an('array').and.contain('https://www.globalforestwatch.org/');
+        return new Promise((resolve) => {
+            response.status.should.equal(200);
+            response.redirects.should.be.an('array').and.contain('https://www.globalforestwatch.org/');
+            resolve();
+        });
     });
 
     after(async () => {
