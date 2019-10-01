@@ -8,6 +8,7 @@ const UnprocessableEntityError = require('./errors/unprocessableEntity.error');
 const UnauthorizedError = require('./errors/unauthorized.error');
 const UserTempSerializer = require('./serializers/user-temp.serializer');
 const UserSerializer = require('./serializers/user.serializer');
+const { omit } = require('lodash');
 
 module.exports = (plugin, connection, generalConfig) => {
     const ApiRouter = new Router({
@@ -166,20 +167,17 @@ module.exports = (plugin, connection, generalConfig) => {
                 ctx.throw(403, 'Not authorized');
                 return;
             }
-            let { apps } = user.extraUserData;
-            if (ctx.query.app) {
-                apps = ctx.query.app.split(',');
-                // check if user has permission
-                for (let i = 0; i < apps.length; i += 1) {
-                    if (user.extraUserData.apps.indexOf(apps[i]) === -1) {
-                        ctx.throw(403, 'Not authorized');
-                        return;
-                    }
-                }
+
+            if (ctx.query.app === 'all') {
+                ctx.body = await AuthService.getUsers(null, omit(ctx.query, ['app']));
+                return;
+            } else if (ctx.query.app) {
+                ctx.body = await AuthService.getUsers(ctx.query.app.split(','), omit(ctx.query, ['app']));
+                return;
             }
 
+            const { apps } = user.extraUserData;
             const { query } = ctx;
-
             ctx.body = await AuthService.getUsers(apps, query);
         }
 
