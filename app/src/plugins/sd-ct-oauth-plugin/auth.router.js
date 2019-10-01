@@ -171,7 +171,8 @@ module.exports = (plugin, connection, generalConfig) => {
             if (ctx.query.app === 'all') {
                 ctx.body = await AuthService.getUsers(null, omit(ctx.query, ['app']));
                 return;
-            } else if (ctx.query.app) {
+            }
+            if (ctx.query.app) {
                 ctx.body = await AuthService.getUsers(ctx.query.app.split(','), omit(ctx.query, ['app']));
                 return;
             }

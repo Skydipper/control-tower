@@ -2,8 +2,6 @@
 const nock = require('nock');
 const chai = require('chai');
 
-const mongoose = require('mongoose');
-const config = require('config');
 const UserModel = require('plugins/sd-ct-oauth-plugin/models/user.model');
 
 const { getTestAgent, closeTestAgent } = require('./../test-server');
@@ -273,7 +271,7 @@ describe('List users', () => {
 
         response.status.should.equal(200);
         response.body.should.be.an('array').and.length(5);
-        response.body.map(e => e.email).should.include('rw-user-two@example.com').and.to.include('rw-user-one@example.com');
+        response.body.map((e) => e.email).should.include('rw-user-two@example.com').and.to.include('rw-user-one@example.com');
     });
 
     it('Visiting /auth/user while logged in as ADMIN should return the list of users with apps which provided in the query app', async () => {
