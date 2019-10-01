@@ -27,37 +27,39 @@ function authService(plugin, connection) {
         static getFilteredQuery(query) {
             const allowedSearchFields = ['name', 'provider', 'email', 'role'];
             debug('Object.keys(query)', Object.keys(query));
-            Object.keys(query).filter((param) => allowedSearchFields.includes(param)).forEach((param) => {
+            const filteredSearchFields = Object.keys(query).filter((param) => allowedSearchFields.includes(param));
+            const filteredQuery = {};
+
+            filteredSearchFields.forEach((param) => {
                 switch (UserModel.schema.paths[param].instance) {
 
                     case 'String':
-                        query[param] = {
+                        filteredQuery[param] = {
                             $regex: query[param],
                             $options: 'i'
                         };
                         break;
                     case 'Array':
                         if (query[param].indexOf('@') >= 0) {
-                            query[param] = {
+                            filteredQuery[param] = {
                                 $all: query[param].split('@').map((elem) => elem.trim())
                             };
                         } else {
-                            query[param] = {
+                            filteredQuery[param] = {
                                 $in: query[param].split(',').map((elem) => elem.trim())
                             };
                         }
                         break;
                     case 'Mixed':
-                        query[param] = { $ne: null };
-                        break;
-                    case 'Date':
+                        filteredQuery[param] = { $ne: null };
                         break;
                     default:
+                        filteredQuery[param] = query[param];
 
                 }
             });
-            debug(query);
-            return query;
+            debug(filteredQuery);
+            return filteredQuery;
         }
 
         static async createToken(user, saveInUser) {
