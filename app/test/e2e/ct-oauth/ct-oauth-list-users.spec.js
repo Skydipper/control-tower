@@ -234,6 +234,59 @@ describe('List users', () => {
         response.body.map((e) => e.email).should.include('rw-user-two@example.com').and.to.include('rw-user-one@example.com');
     });
 
+    it('Visiting /auth/user while logged in as ADMIN and query app=all should return the list of users - even if apps of users are not match to current user\'s app', async () => {
+        await new UserModel({
+            __v: 0,
+            name: 'user three',
+            email: 'rw-user-three@example.com',
+            password: '$2b$10$1wDgP5YCStyvZnfwDu2GwuC6Ie9wj7yRZ3BNaaI.p9JqV8CnetdPK',
+            salt: '$2b$10$1wDgP5YCStyvZndwDu2Gwu',
+            extraUserData: {
+                apps: ['rw']
+            },
+            _id: '5decfa2b67da0d3ec07a27f2',
+            createdAt: '2018-11-15T04:46:35.313Z',
+            role: 'USER',
+            provider: 'test'
+        }).save();
+
+        await new UserModel({
+            __v: 0,
+            name: 'user four',
+            email: 'rw-user-four@example.com',
+            password: '$2b$10$1wDgP5YCStyvZnddDu2GwuC6Ie9wj7yRZ3BNaaI.p9JqV8CnetdPK',
+            salt: '$2b$10$1wDgP5YCStyvZndwDu2Gwu',
+            extraUserData: {
+                apps: ['fake-app-2']
+            },
+            _id: '5decfa2b67d50d3ec07a27f4',
+            createdAt: '2018-11-15T04:46:35.313Z',
+            role: 'MANAGER',
+            provider: 'test3'
+        }).save();
+
+        const response = await requester
+            .get(`/auth/user?app=all`)
+            .set('Content-Type', 'application/json')
+            .set('Authorization', `Bearer ${TOKENS.ADMIN}`)
+            .send();
+
+        response.status.should.equal(200);
+        response.body.should.be.an('array').and.length(5);
+        response.body.map(e => e.email).should.include('rw-user-two@example.com').and.to.include('rw-user-one@example.com');
+    });
+
+    it('Visiting /auth/user while logged in as ADMIN should return the list of users with apps which provided in the query app', async () => {
+        const response = await requester
+            .get(`/auth/user?app=fake-app,fake-app-2`)
+            .set('Content-Type', 'application/json')
+            .set('Authorization', `Bearer ${TOKENS.ADMIN}`)
+            .send();
+
+        response.status.should.equal(200);
+        response.body.should.be.an('array').and.length(2);
+    });
+
     after(async () => {
         UserModel.deleteMany({}).exec();
 
