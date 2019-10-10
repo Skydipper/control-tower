@@ -215,12 +215,27 @@ module.exports = (plugin, connection, generalConfig) => {
             debug(`Update user with id ${ctx.params.id}`);
             ctx.assert(ctx.params.id, 'Id param required');
 
-            const userUpdate = await AuthService.updateUser(ctx.params.id, ctx.request.body);
+            const user = getUser(ctx);
+
+            const userUpdate = await AuthService.updateUser(ctx.params.id, ctx.request.body, user);
             if (!userUpdate) {
                 ctx.throw(404, 'User not found');
                 return;
             }
-            ctx.body = userUpdate;
+            ctx.body = UserSerializer.serialize(userUpdate);
+        }
+
+        async function updateMe(ctx) {
+            debug(`Update user me`);
+
+            const user = getUser(ctx);
+
+            const userUpdate = await AuthService.updateUser(user.id, ctx.request.body, user);
+            if (!userUpdate) {
+                ctx.throw(404, 'User not found');
+                return;
+            }
+            ctx.body = UserSerializer.serialize(userUpdate);
         }
 
         async function deleteUser(ctx) {
@@ -233,17 +248,6 @@ module.exports = (plugin, connection, generalConfig) => {
                 return;
             }
             ctx.body = UserSerializer.serialize(deletedUser);
-        }
-
-        async function updateMe(ctx) {
-            debug(`Update user me`);
-
-            const userUpdate = await AuthService.updateUserMe(getUser(ctx), ctx.request.body);
-            if (!userUpdate) {
-                ctx.throw(404, 'User not found');
-                return;
-            }
-            ctx.body = userUpdate;
         }
 
         async function createUser(ctx) {
