@@ -170,13 +170,14 @@ function authService(plugin, connection) {
                 if (data.role) {
                     user.role = data.role;
                 }
-                if (data.extraUserData) {
-                    user.extraUserData = data.extraUserData;
+                if (data.extraUserData && data.extraUserData.apps) {
+                    user.extraUserData = { ...user.extraUserData, apps: data.extraUserData.apps};
                 }
             }
 
-            const userUpdate = await user.save();
-            return userUpdate;
+            user.updatedAt = new Date();
+
+            return user.save();
         }
 
         static async deleteUser(id) {

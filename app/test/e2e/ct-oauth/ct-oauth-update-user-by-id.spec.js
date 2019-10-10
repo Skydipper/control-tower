@@ -9,6 +9,7 @@ const { getTestAgent, closeTestAgent } = require('./../test-server');
 const { TOKENS } = require('./../test.constants');
 
 const should = chai.should();
+chai.use(require('chai-datetime'));
 
 let requester;
 
@@ -87,6 +88,8 @@ describe('Auth endpoints tests - Update user by id', () => {
     });
 
     it('Updating an existing user should return a 200 and the updated user data', async () => {
+        const startDate = new Date();
+
         const user = await new UserModel({
             email: 'test@example.com',
             password: '$2b$10$1wDgP5YCStyvZndwDu2GwuC6Ie9wj7yRZ3BNaaI.p9JqV8CnetdPK',
@@ -97,6 +100,7 @@ describe('Auth endpoints tests - Update user by id', () => {
             _id: '5becfa2b67da0d3ec07a27f6',
             userToken: 'abcdef',
             createdAt: '2018-11-15T04:46:35.313Z',
+            updatedAt: '2018-11-15T04:46:35.313Z',
             role: 'USER',
             provider: 'local',
             name: 'lorem-ipsum',
@@ -112,11 +116,13 @@ describe('Auth endpoints tests - Update user by id', () => {
                 password: 'changedPassword',
                 salt: 'changedSalt',
                 extraUserData: {
-                    apps: ['changed-apps']
+                    apps: ['changed-apps'],
+                    foo: 'bar'
                 },
                 _id: 'changed-id',
                 userToken: 'changedToken',
                 createdAt: '2000-01-01T00:00:00.000Z',
+                updatedAt: '2000-01-01T00:00:00.000Z',
                 role: 'MANAGER',
                 provider: 'changedProvider',
                 name: 'changed name',
@@ -127,12 +133,15 @@ describe('Auth endpoints tests - Update user by id', () => {
 
         response.body.data.should.have.property('name').and.equal('changed name');
         response.body.data.should.have.property('photo').and.equal('http://www.changed-photo.com');
-        response.body.data.should.have.property('extraUserData').and.be.an('object').and.have.property('apps').and.eql(['changed-apps']);
+        response.body.data.should.have.property('extraUserData').and.be.an('object').and.deep.eql({ apps: ['changed-apps'] });
         response.body.data.should.have.property('role').and.equal('MANAGER');
 
         response.body.data.should.have.property('id').and.equal(user.id);
         response.body.data.should.have.property('email').and.equal(user.email);
         response.body.data.should.have.property('createdAt').and.equal(user.createdAt.toISOString());
+        response.body.data.should.have.property('updatedAt');
+
+        (new Date(response.body.data.updatedAt)).should.be.afterTime(startDate);
 
         const updatedUser = await UserModel.findOne({ email: 'test@example.com' }).exec();
 
