@@ -27,37 +27,39 @@ function authService(plugin, connection) {
         static getFilteredQuery(query) {
             const allowedSearchFields = ['name', 'provider', 'email', 'role'];
             debug('Object.keys(query)', Object.keys(query));
-            Object.keys(query).filter((param) => allowedSearchFields.includes(param)).forEach((param) => {
+            const filteredSearchFields = Object.keys(query).filter((param) => allowedSearchFields.includes(param));
+            const filteredQuery = {};
+
+            filteredSearchFields.forEach((param) => {
                 switch (UserModel.schema.paths[param].instance) {
 
                     case 'String':
-                        query[param] = {
+                        filteredQuery[param] = {
                             $regex: query[param],
                             $options: 'i'
                         };
                         break;
                     case 'Array':
                         if (query[param].indexOf('@') >= 0) {
-                            query[param] = {
+                            filteredQuery[param] = {
                                 $all: query[param].split('@').map((elem) => elem.trim())
                             };
                         } else {
-                            query[param] = {
+                            filteredQuery[param] = {
                                 $in: query[param].split(',').map((elem) => elem.trim())
                             };
                         }
                         break;
                     case 'Mixed':
-                        query[param] = { $ne: null };
-                        break;
-                    case 'Date':
+                        filteredQuery[param] = { $ne: null };
                         break;
                     default:
+                        filteredQuery[param] = query[param];
 
                 }
             });
-            debug(query);
-            return query;
+            debug(filteredQuery);
+            return filteredQuery;
         }
 
         static async createToken(user, saveInUser) {
@@ -144,19 +146,38 @@ function authService(plugin, connection) {
             return data.map((el) => el._id);
         }
 
-        static async updateUser(id, data) {
+        static async updateUser(id, data, requestUser) {
+            const isValidId = mongoose.Types.ObjectId.isValid(id);
+
+            if (!isValidId) {
+                debug(`[Auth Service - updateUserMe] Invalid id ${id} provided`);
+                throw new UnprocessableEntityError(`Invalid id ${id} provided`);
+            }
+
             const user = await UserModel.findById(id).exec();
             if (!user) {
                 return null;
             }
-            if (data.role) {
-                user.role = data.role;
+
+            if (data.name) {
+                user.name = data.name;
             }
-            if (data.extraUserData) {
-                user.extraUserData = data.extraUserData;
+            if (data.photo !== undefined) {
+                user.photo = data.photo;
             }
-            const userUpdate = await user.save();
-            return userUpdate;
+
+            if (requestUser.role === 'ADMIN') {
+                if (data.role) {
+                    user.role = data.role;
+                }
+                if (data.extraUserData && data.extraUserData.apps) {
+                    user.extraUserData = { ...user.extraUserData, apps: data.extraUserData.apps};
+                }
+            }
+
+            user.updatedAt = new Date();
+
+            return user.save();
         }
 
         static async deleteUser(id) {
@@ -185,25 +206,6 @@ function authService(plugin, connection) {
             }
 
             return user.remove();
-        }
-
-
-        static async updateUserMe(me, data) {
-            const user = await UserModel.findById(me.id).exec();
-            if (!user) {
-                return null;
-            }
-            if (data.name) {
-                user.name = data.name;
-            }
-            if (data.photo !== undefined) {
-                user.photo = data.photo;
-            }
-            if (data.email && user.provider !== 'local') {
-                user.email = data.email;
-            }
-            const userUpdate = await user.save();
-            return userUpdate;
         }
 
         static async existEmail(email) {

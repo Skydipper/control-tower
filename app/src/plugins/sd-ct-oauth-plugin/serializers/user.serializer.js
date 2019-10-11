@@ -6,7 +6,8 @@ class UserSerializer {
             email: el.email,
             name: el.name,
             photo: el.photo,
-            createdAt: el.createdAt,
+            createdAt: el.createdAt.toISOString(),
+            updatedAt: el.updatedAt.toISOString(),
             role: el.role,
             extraUserData: el.extraUserData
         };

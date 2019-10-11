@@ -2,8 +2,6 @@
 const nock = require('nock');
 const chai = require('chai');
 
-const mongoose = require('mongoose');
-const config = require('config');
 const UserModel = require('plugins/sd-ct-oauth-plugin/models/user.model');
 
 const { getTestAgent, closeTestAgent } = require('./../test-server');
@@ -273,10 +271,10 @@ describe('List users', () => {
 
         response.status.should.equal(200);
         response.body.should.be.an('array').and.length(5);
-        response.body.map(e => e.email).should.include('rw-user-two@example.com').and.to.include('rw-user-one@example.com');
+        response.body.map((e) => e.email).should.include('rw-user-two@example.com').and.to.include('rw-user-one@example.com');
     });
 
-    it('Visiting /auth/user while logged in as ADMIN should return the list of users with apps which provided in the query app', async () => {
+    it('Visiting /auth/user while logged in as ADMIN and filtering by app should return the list of users with apps which provided in the query app', async () => {
         const response = await requester
             .get(`/auth/user?app=fake-app,fake-app-2`)
             .set('Content-Type', 'application/json')
@@ -285,6 +283,23 @@ describe('List users', () => {
 
         response.status.should.equal(200);
         response.body.should.be.an('array').and.length(2);
+    });
+
+    it('Visiting /auth/user while logged in as ADMIN and an invalid query param should return the list of users ignoring the invalid query param', async () => {
+        const filteredResponse = await requester
+            .get(`/auth/user?foo=bar`)
+            .set('Content-Type', 'application/json')
+            .set('Authorization', `Bearer ${TOKENS.ADMIN}`)
+            .send();
+
+        const response = await requester
+            .get(`/auth/user`)
+            .set('Content-Type', 'application/json')
+            .set('Authorization', `Bearer ${TOKENS.ADMIN}`)
+            .send();
+
+        response.status.should.equal(200);
+        response.body.should.deep.equal(filteredResponse.body);
     });
 
     after(async () => {

@@ -16,6 +16,7 @@ const User = new Schema({
         type: String, required: true, default: 'USER', trim: true
     },
     createdAt: { type: Date, required: true, default: Date.now },
+    updatedAt: { type: Date, required: true, default: Date.now },
     extraUserData: { type: Schema.Types.Mixed },
     userToken: { type: String, required: false, trim: true }
 });
