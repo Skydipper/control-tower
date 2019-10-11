@@ -6,6 +6,8 @@ const Endpoint = require('models/endpoint.model');
 const Version = require('models/version.model');
 const appConstants = require('app.constants');
 const { TOKENS, endpointTest } = require('./test.constants');
+// eslint-disable-next-line import/order
+const JWT = require('jsonwebtoken');
 
 const mongoUri = process.env.CT_MONGO_URI || `mongodb://${config.get('mongodb.host')}:${config.get('mongodb.port')}/${config.get('mongodb.database')}`;
 const getUUID = () => Math.random().toString(36).substring(7);
@@ -71,6 +73,23 @@ const updateVersion = () => Version.update({
     }
 });
 
+const createToken = (tokenData) => JWT.sign(tokenData, process.env.JWT_SECRET);
+
+const createUserInDB = async () => {
+    const userData = await createUser();
+
+    return {
+        id: userData._id,
+        role: userData.role,
+        provider: userData.provider,
+        email: userData.email,
+        extraUserData: userData.extraUserData,
+        createdAt: Date.now(),
+        photo: userData.photo,
+        name: userData.name
+    };
+};
+
 const createEndpoint = (endpoint) => new Endpoint({ ...endpointTest, ...endpoint }).save();
 
 async function setPluginSetting(pluginName, settingKey, settingValue) {
@@ -103,5 +122,7 @@ module.exports = {
     getUUID,
     ensureCorrectError,
     initHelpers,
-    createEndpoint
+    createEndpoint,
+    createToken,
+    createUserInDB
 };
