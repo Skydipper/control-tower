@@ -3,12 +3,14 @@ const logger = require('logger');
 const config = require('config');
 const Promise = require('bluebird');
 const JWT = Promise.promisifyAll(require('jsonwebtoken'));
+const UserModel = require('plugins/sd-ct-oauth-plugin/models/user.model');
 const DispatcherService = require('services/dispatcher.service.js');
 const EndpointNotFound = require('errors/endpointNotFound');
 const NotAuthenticated = require('errors/notAuthenticated');
 const NotApplicationKey = require('errors/notApplicationKey');
 const FilterError = require('errors/filterError');
 const fs = require('fs');
+const { isEqual, omit } = require('lodash');
 
 const router = new Router();
 const requestPromise = require('request-promise');
@@ -204,6 +206,21 @@ class DispatcherRouter {
 
 }
 
+// eslint-disable-next-line consistent-return
+async function isActualUser(ctx, next) {
+    if (ctx.state.user) {
+        const receivedUser = omit(ctx.state.user, ['createdAt', 'provider', 'iat', 'photo', 'name']);
+
+        const user = await UserModel.findById(receivedUser.id);
+
+        if (!user || !Object.keys(receivedUser).every((key) => user[key] && isEqual(user[key], receivedUser[key]))) {
+            return ctx.throw(401, 'your token is outdated, please use /auth/login to generate a new one');
+        }
+    }
+
+    await next();
+}
+
 async function authMicroservice(ctx, next) {
     if (ctx.headers && ctx.headers.authentication) {
         logger.debug('Attempting to authenticate microservice with token: ', ctx.headers.authentication);
@@ -236,10 +253,10 @@ router.get('/healthz', async (ctx) => {
     ctx.body = 'OK';
 });
 
-router.get('/*', authMicroservice, DispatcherRouter.dispatch);
-router.post('/*', authMicroservice, DispatcherRouter.dispatch);
-router.delete('/*', authMicroservice, DispatcherRouter.dispatch);
-router.put('/*', authMicroservice, DispatcherRouter.dispatch);
-router.patch('/*', authMicroservice, DispatcherRouter.dispatch);
+router.get('/*', authMicroservice, isActualUser, DispatcherRouter.dispatch);
+router.post('/*', authMicroservice, isActualUser, DispatcherRouter.dispatch);
+router.delete('/*', authMicroservice, isActualUser, DispatcherRouter.dispatch);
+router.put('/*', authMicroservice, isActualUser, DispatcherRouter.dispatch);
+router.patch('/*', authMicroservice, isActualUser, DispatcherRouter.dispatch);
 
 module.exports = router;
