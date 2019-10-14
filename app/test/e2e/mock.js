@@ -2,9 +2,9 @@ const nock = require('nock');
 
 // eslint-disable-next-line arrow-body-style
 const createMockEndpoint = (path, params = {}) => {
-    const { method = 'post', host = 'http://mymachine:6001' } = params;
+    const { method = 'post', host = 'http://mymachine:6001', response = 'ok' } = params;
 
-    return nock(host)[method](path).reply(200, 'ok');
+    return nock(host)[method](path).reply(200, response);
 };
 
 // eslint-disable-next-line arrow-body-style

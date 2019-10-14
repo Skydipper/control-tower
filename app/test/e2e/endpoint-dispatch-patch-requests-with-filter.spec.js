@@ -1,16 +1,26 @@
 const chai = require('chai');
 const nock = require('nock');
 const Endpoint = require('models/endpoint.model');
+const UserModel = require('plugins/sd-ct-oauth-plugin/models/user.model');
 const { getTestAgent } = require('./test-server');
-const { endpointTest, testFilter, TOKENS, USERS } = require('./test.constants');
-const { createEndpoint, ensureCorrectError, updateVersion } = require('./utils');
+const {
+    endpointTest, testFilter
+} = require('./test.constants');
+const {
+    createEndpoint, ensureCorrectError, updateVersion, createUserInDB, createToken, getUserFromToken
+} = require('./utils');
 const { createMockEndpointWithBody } = require('./mock');
 
 const should = chai.should();
 let microservice;
 
+let token;
+
 describe('Dispatch PATCH requests with filters', () => {
     before(async () => {
+        await UserModel.deleteMany({}).exec();
+        token = createToken(await createUserInDB());
+
         nock.cleanAll();
 
         microservice = await getTestAgent();
@@ -121,13 +131,13 @@ describe('Dispatch PATCH requests with filters', () => {
         createMockEndpointWithBody('/api/v1/dataset', {
             body: {
                 foo: 'bar',
-                loggedUser: USERS.USER,
+                loggedUser: getUserFromToken(token, false),
                 dataset: { body: { data: { foo: 'bar' } } },
             }
         });
         const response = await microservice
             .patch('/api/v1/dataset')
-            .set('Authorization', `Bearer ${TOKENS.USER}`)
+            .set('Authorization', `Bearer ${token}`)
             .send({ foo: 'bar' });
 
         response.status.should.equal(200);
@@ -202,13 +212,13 @@ describe('Dispatch PATCH requests with filters', () => {
         createMockEndpointWithBody('/api/v1/dataset', {
             body: {
                 foo: 'bar',
-                loggedUser: USERS.USER,
+                loggedUser: getUserFromToken(token, false),
                 dataset: { body: { data: { foo: 'bar' } } },
             }
         });
         const response = await microservice
             .patch('/api/v1/dataset')
-            .set('Authorization', `Bearer ${TOKENS.USER}`)
+            .set('Authorization', `Bearer ${token}`)
             .send({ foo: 'bar' });
 
         response.status.should.equal(200);
