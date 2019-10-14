@@ -1,16 +1,25 @@
 const chai = require('chai');
 const nock = require('nock');
 const Endpoint = require('models/endpoint.model');
+const UserModel = require('plugins/sd-ct-oauth-plugin/models/user.model');
 const { getTestAgent } = require('./test-server');
-const { endpointTest, testFilter, TOKENS, USERS } = require('./test.constants');
-const { createEndpoint, ensureCorrectError, updateVersion } = require('./utils');
+const {
+    endpointTest, testFilter
+} = require('./test.constants');
+const {
+    createEndpoint, ensureCorrectError, updateVersion, createUserInDB, createToken, getUserFromToken
+} = require('./utils');
 const { createMockEndpointWithBody } = require('./mock');
 
 const should = chai.should();
 let microservice;
+let token;
 
 describe('Dispatch DELETE requests with filters', () => {
     before(async () => {
+        await UserModel.deleteMany({}).exec();
+        token = createToken(await createUserInDB());
+
         nock.cleanAll();
 
         microservice = await getTestAgent();
@@ -92,7 +101,7 @@ describe('Dispatch DELETE requests with filters', () => {
         response.text.should.equal('ok');
     });
 
-    it('Endpoint with DELETE filter that can be verified and matches return a 200 HTTP code (no filter value) - USER user is passed as query argument', async () => {
+    it('Endpoint with DELETE filter that can be verified and matches return a 200 HTTP code (no filter value) - USER null is passed as query argument', async () => {
         await updateVersion();
         // eslint-disable-next-line no-useless-escape
         await createEndpoint({
@@ -120,12 +129,13 @@ describe('Dispatch DELETE requests with filters', () => {
             response: { body: { data: { foo: 'bar' } } },
             method: 'delete'
         });
-        createMockEndpointWithBody(`/api/v1/dataset?foo=bar&dataset=${JSON.stringify({ body: { data: { foo: 'bar' } } })}&loggedUser=${JSON.stringify(USERS.USER)}`, {
+
+        createMockEndpointWithBody(`/api/v1/dataset?foo=bar&dataset=${JSON.stringify({ body: { data: { foo: 'bar' } } })}&loggedUser=${getUserFromToken(token)}`, {
             method: 'delete'
         });
         const response = await microservice
             .delete('/api/v1/dataset')
-            .set('Authorization', `Bearer ${TOKENS.USER}`)
+            .set('Authorization', `Bearer ${token}`)
             .query({ foo: 'bar' });
 
         response.status.should.equal(200);
@@ -192,12 +202,12 @@ describe('Dispatch DELETE requests with filters', () => {
             body: { loggedUser: null },
             response: { body: { data: { foo: 'bar' } } }
         });
-        createMockEndpointWithBody(`/api/v1/dataset?foo=bar&dataset=${JSON.stringify({ body: { data: { foo: 'bar' } } })}&loggedUser=${JSON.stringify(USERS.USER)}`, {
+        createMockEndpointWithBody(`/api/v1/dataset?foo=bar&dataset=${JSON.stringify({ body: { data: { foo: 'bar' } } })}&loggedUser=${getUserFromToken(token)}`, {
             method: 'delete'
         });
         const response = await microservice
             .delete('/api/v1/dataset')
-            .set('Authorization', `Bearer ${TOKENS.USER}`)
+            .set('Authorization', `Bearer ${token}`)
             .query({ foo: 'bar' });
 
         response.status.should.equal(200);
@@ -228,13 +238,13 @@ describe('Dispatch DELETE requests with filters', () => {
             body: { loggedUser: null },
             response: { body: { data: { foo: 'bar' } } }
         });
-        createMockEndpointWithBody(`/api/v1/dataset?foo=bar&dataset=${JSON.stringify({ body: { data: { foo: 'bar' } } })}&loggedUser=${JSON.stringify(USERS.USER)}`, {
+        createMockEndpointWithBody(`/api/v1/dataset?foo=bar&dataset=${JSON.stringify({ body: { data: { foo: 'bar' } } })}&loggedUser=${getUserFromToken(token)}`, {
             method: 'delete'
         });
 
         const response = await microservice
             .delete('/api/v1/dataset')
-            .set('Authorization', `Bearer ${TOKENS.USER}`)
+            .set('Authorization', `Bearer ${token}`)
             .query({ foo: 'bar' });
 
         response.status.should.equal(200);
@@ -268,7 +278,7 @@ describe('Dispatch DELETE requests with filters', () => {
 
         const response = await microservice
             .delete('/api/v1/dataset')
-            .set('Authorization', `Bearer ${TOKENS.USER}`)
+            .set('Authorization', `Bearer ${token}`)
             .query({ foo: 'bar' });
 
         ensureCorrectError(response, 'Endpoint not found', 404);
@@ -302,7 +312,7 @@ describe('Dispatch DELETE requests with filters', () => {
 
         const response = await microservice
             .delete('/api/v1/dataset')
-            .set('Authorization', `Bearer ${TOKENS.USER}`)
+            .set('Authorization', `Bearer ${token}`)
             .query({ foo: 'bar' });
 
         ensureCorrectError(response, 'Endpoint not found', 404);
@@ -362,13 +372,13 @@ describe('Dispatch DELETE requests with filters', () => {
             method: 'delete',
             response: { body: { data: { boo: 'tar' } } }
         });
-        createMockEndpointWithBody(`/api/v1/dataset?foo=bar&dataset=${JSON.stringify({ body: { data: { foo: 'bar' } } })}&loggedUser=${JSON.stringify(USERS.USER)}&widget=${JSON.stringify({ body: { data: { boo: 'tar' } } })}`, {
+        createMockEndpointWithBody(`/api/v1/dataset?foo=bar&dataset=${JSON.stringify({ body: { data: { foo: 'bar' } } })}&loggedUser=${getUserFromToken(token)}&widget=${JSON.stringify({ body: { data: { boo: 'tar' } } })}`, {
             method: 'delete'
         });
 
         const response = await microservice
             .delete('/api/v1/dataset')
-            .set('Authorization', `Bearer ${TOKENS.USER}`)
+            .set('Authorization', `Bearer ${token}`)
             .query({ foo: 'bar' });
 
         response.status.should.equal(200);

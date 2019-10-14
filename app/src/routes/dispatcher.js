@@ -208,7 +208,7 @@ class DispatcherRouter {
 
 // eslint-disable-next-line consistent-return
 async function isActualUser(ctx, next) {
-    if (ctx.state.user) {
+    if (ctx.state && ctx.state.user) {
         const receivedUser = omit(ctx.state.user, ['createdAt', 'provider', 'iat', 'photo', 'name']);
 
         const user = await UserModel.findById(receivedUser.id);
