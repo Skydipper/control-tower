@@ -2,16 +2,22 @@ const chai = require('chai');
 const nock = require('nock');
 const Endpoint = require('models/endpoint.model');
 const { getTestAgent } = require('./test-server');
-const { endpointTest, testFilter, TOKENS, USERS } = require('./test.constants');
-const { createEndpoint, ensureCorrectError, updateVersion } = require('./utils');
+const { endpointTest, testFilter } = require('./test.constants');
+const {
+    createEndpoint, ensureCorrectError, updateVersion, createUserInDB, createToken, getUserFromToken
+} = require('./utils');
 const { createMockEndpointWithBody } = require('./mock');
 
 const should = chai.should();
 let microservice;
 
+let token;
+
 describe('Dispatch GET requests with filters', () => {
     before(async () => {
         nock.cleanAll();
+
+        token = createToken(await createUserInDB());
 
         microservice = await getTestAgent();
     });
@@ -120,12 +126,12 @@ describe('Dispatch GET requests with filters', () => {
             response: { body: { data: { foo: 'bar' } } },
             method: 'get'
         });
-        createMockEndpointWithBody(`/api/v1/dataset?foo=bar&dataset=${JSON.stringify({ body: { data: { foo: 'bar' } } })}&loggedUser=${JSON.stringify(USERS.USER)}`, {
+        createMockEndpointWithBody(`/api/v1/dataset?foo=bar&dataset=${JSON.stringify({ body: { data: { foo: 'bar' } } })}&loggedUser=${getUserFromToken(token)}`, {
             method: 'get'
         });
         const response = await microservice
             .get('/api/v1/dataset')
-            .set('Authorization', `Bearer ${TOKENS.USER}`)
+            .set('Authorization', `Bearer ${token}`)
             .query({ foo: 'bar' });
 
         response.status.should.equal(200);
@@ -192,12 +198,12 @@ describe('Dispatch GET requests with filters', () => {
             body: { loggedUser: null },
             response: { body: { data: { foo: 'bar' } } }
         });
-        createMockEndpointWithBody(`/api/v1/dataset?foo=bar&dataset=${JSON.stringify({ body: { data: { foo: 'bar' } } })}&loggedUser=${JSON.stringify(USERS.USER)}`, {
+        createMockEndpointWithBody(`/api/v1/dataset?foo=bar&dataset=${JSON.stringify({ body: { data: { foo: 'bar' } } })}&loggedUser=${getUserFromToken(token)}`, {
             method: 'get'
         });
         const response = await microservice
             .get('/api/v1/dataset')
-            .set('Authorization', `Bearer ${TOKENS.USER}`)
+            .set('Authorization', `Bearer ${token}`)
             .query({ foo: 'bar' });
 
         response.status.should.equal(200);
@@ -228,13 +234,13 @@ describe('Dispatch GET requests with filters', () => {
             body: { loggedUser: null },
             response: { body: { data: { foo: 'bar' } } }
         });
-        createMockEndpointWithBody(`/api/v1/dataset?foo=bar&dataset=${JSON.stringify({ body: { data: { foo: 'bar' } } })}&loggedUser=${JSON.stringify(USERS.USER)}`, {
+        createMockEndpointWithBody(`/api/v1/dataset?foo=bar&dataset=${JSON.stringify({ body: { data: { foo: 'bar' } } })}&loggedUser=${getUserFromToken(token)}`, {
             method: 'get'
         });
 
         const response = await microservice
             .get('/api/v1/dataset')
-            .set('Authorization', `Bearer ${TOKENS.USER}`)
+            .set('Authorization', `Bearer ${token}`)
             .query({ foo: 'bar' });
 
         response.status.should.equal(200);
@@ -268,7 +274,7 @@ describe('Dispatch GET requests with filters', () => {
 
         const response = await microservice
             .get('/api/v1/dataset')
-            .set('Authorization', `Bearer ${TOKENS.USER}`)
+            .set('Authorization', `Bearer ${token}`)
             .query({ foo: 'bar' });
 
         ensureCorrectError(response, 'Endpoint not found', 404);
@@ -302,7 +308,7 @@ describe('Dispatch GET requests with filters', () => {
 
         const response = await microservice
             .get('/api/v1/dataset')
-            .set('Authorization', `Bearer ${TOKENS.USER}`)
+            .set('Authorization', `Bearer ${token}`)
             .query({ foo: 'bar' });
 
         ensureCorrectError(response, 'Endpoint not found', 404);
@@ -362,13 +368,13 @@ describe('Dispatch GET requests with filters', () => {
             method: 'get',
             response: { body: { data: { boo: 'tar' } } }
         });
-        createMockEndpointWithBody(`/api/v1/dataset?foo=bar&dataset=${JSON.stringify({ body: { data: { foo: 'bar' } } })}&loggedUser=${JSON.stringify(USERS.USER)}&widget=${JSON.stringify({ body: { data: { boo: 'tar' } } })}`, {
+        createMockEndpointWithBody(`/api/v1/dataset?foo=bar&dataset=${JSON.stringify({ body: { data: { foo: 'bar' } } })}&loggedUser=${getUserFromToken(token)}&widget=${JSON.stringify({ body: { data: { boo: 'tar' } } })}`, {
             method: 'get'
         });
 
         const response = await microservice
             .get('/api/v1/dataset')
-            .set('Authorization', `Bearer ${TOKENS.USER}`)
+            .set('Authorization', `Bearer ${token}`)
             .query({ foo: 'bar' });
 
         response.status.should.equal(200);

@@ -5,9 +5,10 @@ const { ObjectId } = require('mongoose').Types;
 const Endpoint = require('models/endpoint.model');
 const Version = require('models/version.model');
 const appConstants = require('app.constants');
-const { TOKENS, endpointTest } = require('./test.constants');
 // eslint-disable-next-line import/order
 const JWT = require('jsonwebtoken');
+const UserModel = require('plugins/sd-ct-oauth-plugin/models/user.model');
+const { TOKENS, endpointTest } = require('./test.constants');
 
 const mongoUri = process.env.CT_MONGO_URI || `mongodb://${config.get('mongodb.host')}:${config.get('mongodb.port')}/${config.get('mongodb.database')}`;
 const getUUID = () => Math.random().toString(36).substring(7);
@@ -75,8 +76,14 @@ const updateVersion = () => Version.update({
 
 const createToken = (tokenData) => JWT.sign(tokenData, process.env.JWT_SECRET);
 
+const getUserFromToken = (token, isString = true) => {
+    const userData = JWT.verify(token, process.env.JWT_SECRET);
+    return isString ? JSON.stringify(userData) : userData;
+};
+
 const createUserInDB = async () => {
-    const userData = await createUser();
+    // eslint-disable-next-line no-undef
+    const userData = await new UserModel(createUser()).save();
 
     return {
         id: userData._id,
@@ -119,6 +126,7 @@ module.exports = {
     createUser,
     setPluginSetting,
     updateVersion,
+    getUserFromToken,
     getUUID,
     ensureCorrectError,
     initHelpers,
