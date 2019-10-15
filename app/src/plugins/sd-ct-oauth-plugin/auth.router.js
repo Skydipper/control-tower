@@ -204,7 +204,7 @@ module.exports = (plugin, connection, generalConfig) => {
         }
 
         async function getIdsByRole(ctx) {
-            debug('Get ids by Role');
+            debug(`[getIdsByRole] Get ids by role: ${ctx.params.role}`);
             const data = await AuthService.getIdsByRole(ctx.params.role);
             ctx.body = {
                 data
