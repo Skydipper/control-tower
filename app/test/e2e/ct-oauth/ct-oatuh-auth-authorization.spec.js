@@ -9,10 +9,11 @@ const {
     updateVersion, createEndpoint, ensureCorrectError, createUserInDB, createToken
 } = require('../utils');
 const { createMockEndpoint } = require('../mock');
+const { TOKENS } = require('./../test.constants');
 
 const should = chai.should();
 
-let tower;
+let requester;
 
 nock.disableNetConnect();
 nock.enableNetConnect(process.env.HOST_IP);
@@ -25,7 +26,7 @@ describe('Authorization tests', () => {
 
         nock.cleanAll();
 
-        tower = await getTestAgent();
+        requester = await getTestAgent();
     });
 
     it('Sending request without token to not authenticated request should be successful', async () => {
@@ -33,7 +34,7 @@ describe('Authorization tests', () => {
         await createEndpoint();
         createMockEndpoint('/api/v1/dataset');
 
-        const result = await tower.post('/api/v1/dataset');
+        const result = await requester.post('/api/v1/dataset');
         result.status.should.equal(200);
         result.text.should.equal('ok');
     });
@@ -42,7 +43,7 @@ describe('Authorization tests', () => {
         await updateVersion();
         await createEndpoint({ authenticated: true });
 
-        const result = await tower.post('/api/v1/dataset');
+        const result = await requester.post('/api/v1/dataset');
         result.status.should.equal(401);
         ensureCorrectError(result, 'Unauthorized', 401);
     });
@@ -55,8 +56,8 @@ describe('Authorization tests', () => {
         const token = createToken(user);
         await UserModel.update({ _id: user.id }, { $set: { role: 'ADMIN' } });
 
-        const result = await tower.post('/api/v1/dataset').set('Authorization', `Bearer ${token}`);
-        ensureCorrectError(result, 'your token is outdated, please use /auth/login to generate a new one', 401);
+        const result = await requester.post('/api/v1/dataset').set('Authorization', `Bearer ${token}`);
+        ensureCorrectError(result, 'Your token is outdated, please use /auth/login to generate a new one', 401);
     });
 
     it('Sending request with token to authenticated request but EMAIL is changed should be unsuccessful with unauthorized error ', async () => {
@@ -67,8 +68,8 @@ describe('Authorization tests', () => {
         const token = createToken(user);
         await UserModel.update({ _id: user.id }, { $set: { email: 'test123' } });
 
-        const result = await tower.post('/api/v1/dataset').set('Authorization', `Bearer ${token}`);
-        ensureCorrectError(result, 'your token is outdated, please use /auth/login to generate a new one', 401);
+        const result = await requester.post('/api/v1/dataset').set('Authorization', `Bearer ${token}`);
+        ensureCorrectError(result, 'Your token is outdated, please use /auth/login to generate a new one', 401);
     });
 
     it('Sending request with token to authenticated request but extraUserData is changed should be unsuccessful with unauthorized error ', async () => {
@@ -79,8 +80,8 @@ describe('Authorization tests', () => {
         const token = createToken(user);
         await UserModel.update({ _id: user.id }, { $set: { extraUserData: [] } });
 
-        const result = await tower.post('/api/v1/dataset').set('Authorization', `Bearer ${token}`);
-        ensureCorrectError(result, 'your token is outdated, please use /auth/login to generate a new one', 401);
+        const result = await requester.post('/api/v1/dataset').set('Authorization', `Bearer ${token}`);
+        ensureCorrectError(result, 'Your token is outdated, please use /auth/login to generate a new one', 401);
     });
 
     it('Sending request with token to authenticated request but user is removed should be unsuccessful with unauthorized error ', async () => {
@@ -89,18 +90,31 @@ describe('Authorization tests', () => {
 
         const user = await createUserInDB();
         const token = createToken(user);
-        await UserModel.deleteMany().exec();
+        await UserModel.deleteMany({}).exec();
 
-        const result = await tower.post('/api/v1/dataset').set('Authorization', `Bearer ${token}`);
-        ensureCorrectError(result, 'your token is outdated, please use /auth/login to generate a new one', 401);
+        const result = await requester.post('/api/v1/dataset').set('Authorization', `Bearer ${token}`);
+        ensureCorrectError(result, 'Your token is outdated, please use /auth/login to generate a new one', 401);
     });
 
-    it('Sending request with token to authenticated request and user is actual should be successful', async () => {
+    it('Sending request with a user token to authenticated request and user is actual should be successful (happy case)', async () => {
         await updateVersion();
         await createEndpoint();
         createMockEndpoint('/api/v1/dataset');
 
-        const result = await tower.post('/api/v1/dataset');
+        const user = await createUserInDB();
+        const token = createToken(user);
+
+        const result = await requester.post('/api/v1/dataset').set('Authorization', `Bearer ${token}`);
+        result.status.should.equal(200);
+        result.text.should.equal('ok');
+    });
+
+    it('Sending request with MICROSERVICE token to authenticated request and user is actual should be successful (happy case)', async () => {
+        await updateVersion();
+        await createEndpoint();
+        createMockEndpoint('/api/v1/dataset');
+
+        const result = await requester.post('/api/v1/dataset').set('Authorization', `Bearer ${TOKENS.MICROSERVICE}`);
         result.status.should.equal(200);
         result.text.should.equal('ok');
     });

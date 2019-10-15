@@ -49,7 +49,7 @@ describe('GET users by id', () => {
     it('Get user with an invalid id of a user that does not exist returns a 422', async () => {
         const response = await requester
             .get(`/auth/user/1234`)
-            .set('Authorization', `Bearer ${TOKENS.MICROSERVICE}`);
+            .set('Authorization', `Bearer ${TOKENS.ADMIN}`);
 
         response.status.should.equal(422);
         response.body.should.have.property('errors').and.be.an('array');
@@ -60,7 +60,7 @@ describe('GET users by id', () => {
     it('Get user with id of a user that does not exist returns a 404', async () => {
         const response = await requester
             .get(`/auth/user/41224d776a326fb40f000001`)
-            .set('Authorization', `Bearer ${TOKENS.MICROSERVICE}`);
+            .set('Authorization', `Bearer ${TOKENS.ADMIN}`);
 
         response.status.should.equal(404);
         response.body.errors[0].should.have.property('detail').and.equal(`User not found`);
@@ -71,7 +71,7 @@ describe('GET users by id', () => {
 
         const response = await requester
             .get(`/auth/user/${userOne.id}`)
-            .set('Authorization', `Bearer ${TOKENS.MICROSERVICE}`);
+            .set('Authorization', `Bearer ${TOKENS.ADMIN}`);
 
         response.status.should.equal(200);
 
