@@ -10,7 +10,7 @@ const NotAuthenticated = require('errors/notAuthenticated');
 const NotApplicationKey = require('errors/notApplicationKey');
 const FilterError = require('errors/filterError');
 const fs = require('fs');
-const { isEqual, omit } = require('lodash');
+const { isEqual } = require('lodash');
 
 const router = new Router();
 const requestPromise = require('request-promise');
@@ -207,18 +207,25 @@ class DispatcherRouter {
 }
 
 // eslint-disable-next-line consistent-return
-async function isActualUser(ctx, next) {
-    if (ctx.state && ctx.state.user) {
-        const receivedUser = omit(ctx.state.user, ['createdAt', 'provider', 'iat', 'photo', 'name']);
+async function isTokenValid(ctx, next) {
+    if (ctx.state && ctx.state.user && ctx.state.user.id !== 'microservice') {
+        const checkList = ['id', 'role', 'extraUserData', 'email'];
 
-        const user = await UserModel.findById(receivedUser.id);
+        const user = await UserModel.findById(ctx.state.user.id);
 
-        if (!user || !Object.keys(receivedUser).every((key) => user[key] && isEqual(user[key], receivedUser[key]))) {
-            return ctx.throw(401, 'your token is outdated, please use /auth/login to generate a new one');
+        if (!user) {
+            return ctx.throw(401, 'Your token is outdated, please use /auth/login to generate a new one');
         }
+
+        // eslint-disable-next-line consistent-return
+        checkList.forEach((property) => {
+            if (!user[property] || !isEqual(user[property], ctx.state.user[property])) {
+                return ctx.throw(401, 'Your token is outdated, please use /auth/login to generate a new one');
+            }
+        });
     }
 
-    await next();
+    return next();
 }
 
 async function authMicroservice(ctx, next) {
@@ -253,10 +260,10 @@ router.get('/healthz', async (ctx) => {
     ctx.body = 'OK';
 });
 
-router.get('/*', authMicroservice, isActualUser, DispatcherRouter.dispatch);
-router.post('/*', authMicroservice, isActualUser, DispatcherRouter.dispatch);
-router.delete('/*', authMicroservice, isActualUser, DispatcherRouter.dispatch);
-router.put('/*', authMicroservice, isActualUser, DispatcherRouter.dispatch);
-router.patch('/*', authMicroservice, isActualUser, DispatcherRouter.dispatch);
+router.get('/*', authMicroservice, isTokenValid, DispatcherRouter.dispatch);
+router.post('/*', authMicroservice, isTokenValid, DispatcherRouter.dispatch);
+router.delete('/*', authMicroservice, isTokenValid, DispatcherRouter.dispatch);
+router.put('/*', authMicroservice, isTokenValid, DispatcherRouter.dispatch);
+router.patch('/*', authMicroservice, isTokenValid, DispatcherRouter.dispatch);
 
 module.exports = router;

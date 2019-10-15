@@ -80,7 +80,7 @@ describe('Auth endpoints tests - Update user by id', () => {
     it('Updating user with an invalid id of a user that does not exist returns a 422', async () => {
         const response = await requester
             .patch(`/auth/user/1234`)
-            .set('Authorization', `Bearer ${TOKENS.MICROSERVICE}`);
+            .set('Authorization', `Bearer ${TOKENS.ADMIN}`);
 
         response.status.should.equal(422);
         response.body.should.have.property('errors').and.be.an('array');
