@@ -10,7 +10,7 @@ const { TOKENS, endpointTest } = require('./test.constants');
 const mongoUri = process.env.CT_MONGO_URI || `mongodb://${config.get('mongodb.host')}:${config.get('mongodb.port')}/${config.get('mongodb.database')}`;
 const getUUID = () => Math.random().toString(36).substring(7);
 
-const createUser = (apps = ['rw']) => ({
+const createUser = (apps = ['rw'], role = 'USER') => ({
     _id: new ObjectId(),
     email: 'microservice@control-tower.com',
     password: '$password.hash',
@@ -19,7 +19,7 @@ const createUser = (apps = ['rw']) => ({
         apps
     },
     createdAt: '2019-02-12T10:27:24.001Z',
-    role: 'USER',
+    role,
     provider: 'local',
     userToken: 'myUserToken'
 });

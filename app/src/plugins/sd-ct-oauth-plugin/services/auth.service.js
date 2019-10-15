@@ -139,6 +139,10 @@ function authService(plugin, connection) {
         }
 
         static async getIdsByRole(role) {
+            if (!['SUPERADMIN', 'ADMIN', 'MANAGER', 'USER'].includes(role)) {
+                throw new UnprocessableEntityError(`Invalid role ${role} provided`);
+            }
+
             const data = await UserModel.find({
                 role
             }).exec();
