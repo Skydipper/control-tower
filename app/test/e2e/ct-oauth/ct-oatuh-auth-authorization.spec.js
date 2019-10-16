@@ -54,7 +54,7 @@ describe('Authorization tests', () => {
 
         const result = await requester.post('/api/v1/dataset').set('Authorization', `Bearer 1234`);
         result.status.should.equal(401);
-        ensureCorrectError(result, 'Your token is invalid, please use /auth/login to generate a new one', 401);
+        ensureCorrectError(result, 'Your token is invalid. Please use /auth/login to login and /auth/generate-token to generate a new token.', 401);
     });
 
     it('Sending request with token to authenticated request but ROLE is changed should be unsuccessful with unauthorized error ', async () => {
@@ -65,7 +65,7 @@ describe('Authorization tests', () => {
         await UserModel.update({ _id: user.id }, { $set: { role: 'ADMIN' } });
 
         const result = await requester.post('/api/v1/dataset').set('Authorization', `Bearer ${token}`);
-        ensureCorrectError(result, 'Your token is outdated, please use /auth/login to generate a new one', 401);
+        ensureCorrectError(result, 'Your token is outdated. Please use /auth/login to login and /auth/generate-token to generate a new token.', 401);
     });
 
     it('Sending request with token to authenticated request but EMAIL is changed should be unsuccessful with unauthorized error ', async () => {
@@ -76,7 +76,7 @@ describe('Authorization tests', () => {
         await UserModel.update({ _id: user.id }, { $set: { email: 'test123' } });
 
         const result = await requester.post('/api/v1/dataset').set('Authorization', `Bearer ${token}`);
-        ensureCorrectError(result, 'Your token is outdated, please use /auth/login to generate a new one', 401);
+        ensureCorrectError(result, 'Your token is outdated. Please use /auth/login to login and /auth/generate-token to generate a new token.', 401);
     });
 
     it('Sending request with token to authenticated request but extraUserData is changed should be unsuccessful with unauthorized error ', async () => {
@@ -87,7 +87,7 @@ describe('Authorization tests', () => {
         await UserModel.update({ _id: user.id }, { $set: { extraUserData: [] } });
 
         const result = await requester.post('/api/v1/dataset').set('Authorization', `Bearer ${token}`);
-        ensureCorrectError(result, 'Your token is outdated, please use /auth/login to generate a new one', 401);
+        ensureCorrectError(result, 'Your token is outdated. Please use /auth/login to login and /auth/generate-token to generate a new token.', 401);
     });
 
     it('Sending request with token to authenticated request but user is removed should be unsuccessful with unauthorized error ', async () => {
@@ -98,7 +98,7 @@ describe('Authorization tests', () => {
         await UserModel.deleteMany({}).exec();
 
         const result = await requester.post('/api/v1/dataset').set('Authorization', `Bearer ${token}`);
-        ensureCorrectError(result, 'Your token is outdated, please use /auth/login to generate a new one', 401);
+        ensureCorrectError(result, 'Your token is outdated. Please use /auth/login to login and /auth/generate-token to generate a new token.', 401);
     });
 
     it('Sending request with a user token to authenticated request and user is actual should be successful (happy case)', async () => {
