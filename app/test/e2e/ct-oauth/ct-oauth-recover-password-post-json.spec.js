@@ -106,6 +106,9 @@ describe('OAuth endpoints tests - Recover password post - JSON version', () => {
             token: 'myToken'
         }).save();
 
+        const endpoints = await RenewModel.find({});
+        endpoints.should.have.lengthOf(1);
+
         const response = await requester
             .post(`/auth/reset-password/myToken`)
             .set('Content-Type', 'application/json')
@@ -113,16 +116,12 @@ describe('OAuth endpoints tests - Recover password post - JSON version', () => {
                 password: 'abcd',
                 repeatPassword: 'efgh'
             });
-        return new Promise((resolve) => {
-            response.status.should.equal(422);
-            response.header['content-type'].should.equal('application/json; charset=utf-8');
-            response.body.should.have.property('errors').and.be.an('array');
-            response.body.errors[0].status.should.equal(422);
-            response.body.errors[0].detail.should.equal('Password and Repeat password not equal');
 
-            resolve();
-        });
-
+        response.status.should.equal(422);
+        response.header['content-type'].should.equal('application/json; charset=utf-8');
+        response.body.should.have.property('errors').and.be.an('array');
+        response.body.errors[0].status.should.equal(422);
+        response.body.errors[0].detail.should.equal('Password and Repeat password not equal');
     });
 
     it('Recover password post with correct token and matching passwords should redirect to the configured URL (happy case) - JSON format', async () => {
