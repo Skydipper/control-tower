@@ -17,24 +17,8 @@
     "email": "hello@vizzuality.com",
     "url": "http://vizzuality.com/"
   },
-  "contributors": [
-    {
-      "name": "Raul Requero"
-    },
-    {
-      "name": "Sergio Gordillo"
-    },
-    {
-      "name": "Enrique Cornejo"
-    },
-    {
-      "name": "Tiago Garcia",
-      "url": "https://github.com/tiagojsag"
-    }
-  ],
   "license": "MIT",
   "devDependencies": {
-    "babel-eslint": "^10.0.3",
     "chai": "^4.2.0",
     "chai-datetime": "^1.5.0",
     "chai-http": "^4.3.0",
@@ -85,7 +69,7 @@
     "koa-ctx-basic-auth": "^1.0.0",
     "koa-generic-session": "1.11.7",
     "koa-generic-session-mongo": "^0.4.0",
-    "koa-jwt": "^3.3.2",
+    "koa-jwt": "^3.6.0",
     "koa-logger": "^2.0.0",
     "koa-mount": "2.0.0",
     "koa-passport": "^2.1.1",

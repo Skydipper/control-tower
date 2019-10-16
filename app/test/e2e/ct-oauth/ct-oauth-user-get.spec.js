@@ -4,9 +4,8 @@ const chai = require('chai');
 
 const UserModel = require('plugins/sd-ct-oauth-plugin/models/user.model');
 
-const { createUser } = require('./../utils');
+const { createUser, createUserAndToken } = require('../utils/helpers');
 const { getTestAgent, closeTestAgent } = require('./../test-server');
-const { TOKENS } = require('./../test.constants');
 
 const should = chai.should();
 
@@ -24,7 +23,7 @@ describe('GET users by id', () => {
 
         requester = await getTestAgent();
 
-        UserModel.deleteMany({}).exec();
+        await UserModel.deleteMany({}).exec();
 
         nock.cleanAll();
     });
@@ -37,9 +36,11 @@ describe('GET users by id', () => {
     });
 
     it('Get user while being logged in as a regular user returns a 400 error', async () => {
+        const { token } = await createUserAndToken({ role: 'USER' });
+
         const response = await requester
             .get(`/auth/user/41224d776a326fb40f000001`)
-            .set('Authorization', `Bearer ${TOKENS.USER}`);
+            .set('Authorization', `Bearer ${token}`);
 
         response.status.should.equal(403);
         response.body.should.have.property('errors').and.be.an('array');
@@ -47,9 +48,11 @@ describe('GET users by id', () => {
     });
 
     it('Get user with an invalid id of a user that does not exist returns a 422', async () => {
+        const { token } = await createUserAndToken({ role: 'ADMIN' });
+
         const response = await requester
             .get(`/auth/user/1234`)
-            .set('Authorization', `Bearer ${TOKENS.ADMIN}`);
+            .set('Authorization', `Bearer ${token}`);
 
         response.status.should.equal(422);
         response.body.should.have.property('errors').and.be.an('array');
@@ -58,39 +61,39 @@ describe('GET users by id', () => {
     });
 
     it('Get user with id of a user that does not exist returns a 404', async () => {
+        const { token } = await createUserAndToken({ role: 'ADMIN' });
+
         const response = await requester
             .get(`/auth/user/41224d776a326fb40f000001`)
-            .set('Authorization', `Bearer ${TOKENS.ADMIN}`);
+            .set('Authorization', `Bearer ${token}`);
 
         response.status.should.equal(404);
         response.body.errors[0].should.have.property('detail').and.equal(`User not found`);
     });
 
     it('Get user with id of a user that exists returns the requested user (happy case)', async () => {
-        const userOne = await new UserModel(createUser()).save();
+        const { token, user } = await createUserAndToken({ role: 'ADMIN' });
 
         const response = await requester
-            .get(`/auth/user/${userOne.id}`)
-            .set('Authorization', `Bearer ${TOKENS.ADMIN}`);
+            .get(`/auth/user/${user.id}`)
+            .set('Authorization', `Bearer ${token}`);
 
         response.status.should.equal(200);
 
-        response.body.should.have.property('_id').and.equal(userOne.id);
+        response.body.should.have.property('_id').and.equal(user.id.toString());
         response.body.should.have.property('extraUserData').and.be.an('object');
-        response.body.extraUserData.should.have.property('apps').and.be.an('array').and.deep.equal(userOne.extraUserData.apps);
-        response.body.should.have.property('email').and.equal(userOne.email);
+        response.body.extraUserData.should.have.property('apps').and.be.an('array').and.deep.equal(user.extraUserData.apps);
+        response.body.should.have.property('email').and.equal(user.email);
         response.body.should.have.property('createdAt');
-        response.body.should.have.property('role').and.equal(userOne.role);
-        response.body.should.have.property('provider').and.equal(userOne.provider);
+        response.body.should.have.property('role').and.equal(user.role);
+        response.body.should.have.property('provider').and.equal(user.provider);
     });
 
-    after(async () => {
-        UserModel.deleteMany({}).exec();
+    after(closeTestAgent);
 
-        closeTestAgent();
-    });
+    afterEach(async () => {
+        await UserModel.deleteMany({}).exec();
 
-    afterEach(() => {
         if (!nock.isDone()) {
             throw new Error(`Not all nock interceptors were used: ${nock.pendingMocks()}`);
         }

@@ -1,17 +1,11 @@
 const nock = require('nock');
 const Microservice = require('models/microservice.model');
 const Endpoint = require('models/endpoint.model');
-const { TOKENS, endpointTest } = require('./test.constants');
-const { initHelpers } = require('./utils');
+const { endpointTest } = require('./test.constants');
+const { isTokenRequired, isAdminOnly, createUserAndToken } = require('./utils/helpers');
 const { getTestAgent, closeTestAgent } = require('./test-server');
 
-const helpers = initHelpers(getTestAgent);
-
 let requester;
-
-const getListEndpoints = () => requester
-    .get('/api/v1/endpoint')
-    .set('Authorization', `Bearer ${TOKENS.ADMIN}`);
 
 describe('GET Endpoints', () => {
     before(async () => {
@@ -20,25 +14,37 @@ describe('GET Endpoints', () => {
         }
 
         requester = await getTestAgent();
-        helpers.setRequester(requester);
         nock.cleanAll();
     });
 
-    it('Getting a list of endpoints without being authenticated should fail with a 401 error', helpers.isTokenRequired('get', 'plugin'));
+    it('Getting a list of endpoints without being authenticated should fail with a 401 error', () => {
+        isTokenRequired(requester, 'get', 'plugin');
+    });
 
-    it('Getting a list of endpoints authenticated without ADMIN role should fail with a 403 error', helpers.isAdminOnly('get', 'plugin'));
+    it('Getting a list of endpoints authenticated without ADMIN role should fail with a 403 error', () => {
+        isAdminOnly(requester, 'get', 'plugin');
+    });
 
     it('Getting a list of endpoints without creating microservice should return empty array', async () => {
-        const response = await getListEndpoints();
+        const { token } = await createUserAndToken({ role: 'ADMIN' });
+
+        const response = await requester
+            .get('/api/v1/endpoint')
+            .set('Authorization', `Bearer ${token}`);
 
         response.status.should.equal(200);
         response.body.should.be.an('array').and.lengthOf(0);
     });
 
     it('Getting a list of endpoints should return those endpoints (happy case)', async () => {
+        const { token } = await createUserAndToken({ role: 'ADMIN' });
+
         await new Endpoint({ ...endpointTest, authenticated: true }).save();
 
-        const resEndpoints = await getListEndpoints();
+        const resEndpoints = await requester
+            .get('/api/v1/endpoint')
+            .set('Authorization', `Bearer ${token}`);
+
         resEndpoints.status.should.equal(200);
         resEndpoints.body.should.be.an('array').and.length.above(0);
 

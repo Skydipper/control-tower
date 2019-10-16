@@ -4,7 +4,7 @@ const chai = require('chai');
 
 const UserModel = require('plugins/sd-ct-oauth-plugin/models/user.model');
 
-const { createUser } = require('./../utils');
+const { createUser, createUserAndToken } = require('../utils/helpers');
 const { getTestAgent, closeTestAgent } = require('./../test-server');
 const { TOKENS } = require('./../test.constants');
 
@@ -37,9 +37,11 @@ describe('GET users ids by role', () => {
     });
 
     it('Get users ids by role while being logged in as a USER returns a 400 error', async () => {
+        const { token } = await createUserAndToken({ role: 'USER' });
+
         const response = await requester
             .get(`/auth/user/ids/USER`)
-            .set('Authorization', `Bearer ${TOKENS.USER}`);
+            .set('Authorization', `Bearer ${token}`);
 
         response.status.should.equal(403);
         response.body.should.have.property('errors').and.be.an('array');
@@ -47,9 +49,11 @@ describe('GET users ids by role', () => {
     });
 
     it('Get users ids by role while being logged in as a MANAGER returns a 400 error', async () => {
+        const { token } = await createUserAndToken({ role: 'MANAGER' });
+
         const response = await requester
             .get(`/auth/user/ids/USER`)
-            .set('Authorization', `Bearer ${TOKENS.MANAGER}`);
+            .set('Authorization', `Bearer ${token}`);
 
         response.status.should.equal(403);
         response.body.should.have.property('errors').and.be.an('array');
@@ -57,9 +61,11 @@ describe('GET users ids by role', () => {
     });
 
     it('Get users ids by role while being logged in as an ADMIN returns a 400 error', async () => {
+        const { token } = await createUserAndToken({ role: 'ADMIN' });
+
         const response = await requester
             .get(`/auth/user/ids/USER`)
-            .set('Authorization', `Bearer ${TOKENS.ADMIN}`);
+            .set('Authorization', `Bearer ${token}`);
 
         response.status.should.equal(403);
         response.body.should.have.property('errors').and.be.an('array');
@@ -100,10 +106,10 @@ describe('GET users ids by role', () => {
     });
 
     it('Get users ids by role with a valid role returns a 200 response with the users ids (happy case, multiple users)', async () => {
-        await new UserModel(createUser(['rw'], 'ADMIN')).save();
-        await new UserModel(createUser(['rw'], 'MANAGER')).save();
-        const userThree = await new UserModel(createUser(['rw'], 'USER')).save();
-        const userFour = await new UserModel(createUser(['rw'], 'USER')).save();
+        await new UserModel(createUser({ extraUserData: { apps: ['rw'] }, role: 'ADMIN' })).save();
+        await new UserModel(createUser({ extraUserData: { apps: ['rw'] }, role: 'MANAGER' })).save();
+        const userThree = await new UserModel(createUser({ extraUserData: { apps: ['rw'] }, role: 'USER' })).save();
+        const userFour = await new UserModel(createUser({ extraUserData: { apps: ['rw'] }, role: 'USER' })).save();
 
         const response = await requester
             .get(`/auth/user/ids/USER`)

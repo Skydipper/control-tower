@@ -4,7 +4,7 @@ const chai = require('chai');
 
 const UserModel = require('plugins/sd-ct-oauth-plugin/models/user.model');
 
-const { createUser } = require('./../utils');
+const { createUser, createUserAndToken } = require('../utils/helpers');
 const { getTestAgent, closeTestAgent } = require('./../test-server');
 const { TOKENS } = require('./../test.constants');
 
@@ -41,9 +41,11 @@ describe('Find users by id', () => {
     });
 
     it('Find users while being logged in as a regular user returns a 400 error', async () => {
+        const { token } = await createUserAndToken();
+
         const response = await requester
             .post(`/auth/user/find-by-ids`)
-            .set('Authorization', `Bearer ${TOKENS.USER}`)
+            .set('Authorization', `Bearer ${token}`)
             .send({});
 
         response.status.should.equal(403);

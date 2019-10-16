@@ -3,8 +3,8 @@ const chai = require('chai');
 
 const UserModel = require('plugins/sd-ct-oauth-plugin/models/user.model');
 
+const { createUserAndToken } = require('../utils/helpers');
 const { getTestAgent, closeTestAgent } = require('./../test-server');
-const { TOKENS } = require('./../test.constants');
 
 const should = chai.should();
 
@@ -40,9 +40,11 @@ describe('Auth endpoints tests', () => {
     });
 
     it('Visiting /auth while logged in should redirect to the success page', async () => {
+        const { token } = await createUserAndToken({ role: 'ADMIN' });
+
         const response = await requester
             .get(`/auth`)
-            .set('Authorization', `Bearer ${TOKENS.ADMIN}`);
+            .set('Authorization', `Bearer ${token}`);
 
         response.status.should.equal(200);
         response.redirects.should.be.an('array').and.length(2);
@@ -51,9 +53,11 @@ describe('Auth endpoints tests', () => {
     });
 
     it('Visiting /auth with callbackUrl while being logged in should redirect to the callback page', async () => {
+        const { token } = await createUserAndToken({ role: 'ADMIN' });
+
         const response = await requester
             .get(`/auth?callbackUrl=https://www.wikipedia.org`)
-            .set('Authorization', `Bearer ${TOKENS.ADMIN}`);
+            .set('Authorization', `Bearer ${token}`);
 
         response.status.should.equal(200);
         response.redirects.should.be.an('array').and.length(3);
@@ -142,9 +146,15 @@ describe('Auth endpoints tests', () => {
     });
 
     it('Visiting /auth/login with callbackUrl while being logged in should redirect to the callback page', async () => {
+        const { token } = await createUserAndToken({
+            role: 'ADMIN',
+            password: '$2b$10$1wDgP5YCStyvZndwDu2GwuC6Ie9wj7yRZ3BNaaI.p9JqV8CnetdPK',
+            salt: '$2b$10$1wDgP5YCStyvZndwDu2Gwu'
+        });
+
         const response = await requester
             .get(`/auth/login?callbackUrl=https://www.wikipedia.org`)
-            .set('Authorization', `Bearer ${TOKENS.ADMIN}`);
+            .set('Authorization', `Bearer ${token}`);
 
         response.status.should.equal(200);
         response.redirects.should.be.an('array').and.length(2);
@@ -153,6 +163,13 @@ describe('Auth endpoints tests', () => {
     });
 
     it('Logging in successfully with /auth/login with callbackUrl should redirect to the callback page', async () => {
+        await createUserAndToken({
+            email: 'test@example.com',
+            role: 'ADMIN',
+            password: '$2b$10$1wDgP5YCStyvZndwDu2GwuC6Ie9wj7yRZ3BNaaI.p9JqV8CnetdPK',
+            salt: '$2b$10$1wDgP5YCStyvZndwDu2Gwu'
+        });
+
         await requester
             .get(`/auth/login?callbackUrl=https://www.wikipedia.org`);
 
@@ -171,6 +188,13 @@ describe('Auth endpoints tests', () => {
     });
 
     it('Logging in successfully with /auth/login with callbackUrl and token=true should redirect to the callback page and pass the token', async () => {
+        await createUserAndToken({
+            email: 'test@example.com',
+            role: 'ADMIN',
+            password: '$2b$10$1wDgP5YCStyvZndwDu2GwuC6Ie9wj7yRZ3BNaaI.p9JqV8CnetdPK',
+            salt: '$2b$10$1wDgP5YCStyvZndwDu2Gwu'
+        });
+
         await requester
             .get(`/auth/login?callbackUrl=https://www.wikipedia.org&token=true`);
 
@@ -203,11 +227,9 @@ describe('Auth endpoints tests', () => {
         response.redirects[0].should.match(/\/auth\/fail\?error=true$/);
     });
 
-    after(async () => {
-        UserModel.deleteMany({}).exec();
-    });
+    afterEach(async () => {
+        await UserModel.deleteMany({}).exec();
 
-    afterEach(() => {
         if (!nock.isDone()) {
             throw new Error(`Not all nock interceptors were used: ${nock.pendingMocks()}`);
         }

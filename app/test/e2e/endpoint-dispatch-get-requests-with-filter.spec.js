@@ -1,25 +1,22 @@
 const chai = require('chai');
 const nock = require('nock');
-const Endpoint = require('models/endpoint.model');
-const { getTestAgent } = require('./test-server');
+const EndpointModel = require('models/endpoint.model');
+const UserModel = require('plugins/sd-ct-oauth-plugin/models/user.model');
+const { getTestAgent, closeTestAgent } = require('./test-server');
 const { endpointTest, testFilter } = require('./test.constants');
 const {
-    createEndpoint, ensureCorrectError, updateVersion, createUserInDB, createToken, getUserFromToken
-} = require('./utils');
+    createEndpoint, ensureCorrectError, updateVersion, getUserFromToken, createUserAndToken
+} = require('./utils/helpers');
 const { createMockEndpointWithBody } = require('./mock');
 
 const should = chai.should();
-let microservice;
-
-let token;
+let requester;
 
 describe('Dispatch GET requests with filters', () => {
     before(async () => {
         nock.cleanAll();
 
-        token = createToken(await createUserInDB());
-
-        microservice = await getTestAgent();
+        requester = await getTestAgent();
     });
 
     // TODO: This illustrates an issue where the user data is not being handled properly when generating the filter request. Probably should be fixed in the future.
@@ -90,7 +87,7 @@ describe('Dispatch GET requests with filters', () => {
         createMockEndpointWithBody(`/api/v1/dataset?foo=bar&dataset=${JSON.stringify({ body: { data: { foo: 'bar' } } })}&loggedUser=null`, {
             method: 'get'
         });
-        const response = await microservice
+        const response = await requester
             .get('/api/v1/dataset')
             .query({ foo: 'bar' });
 
@@ -99,6 +96,8 @@ describe('Dispatch GET requests with filters', () => {
     });
 
     it('Endpoint with GET filter that can be verified and matches return a 200 HTTP code (no filter value) - USER user is passed as query argument', async () => {
+        const { token } = await createUserAndToken({ role: 'USER' });
+
         await updateVersion();
         // eslint-disable-next-line no-useless-escape
         await createEndpoint({
@@ -129,7 +128,7 @@ describe('Dispatch GET requests with filters', () => {
         createMockEndpointWithBody(`/api/v1/dataset?foo=bar&dataset=${JSON.stringify({ body: { data: { foo: 'bar' } } })}&loggedUser=${getUserFromToken(token)}`, {
             method: 'get'
         });
-        const response = await microservice
+        const response = await requester
             .get('/api/v1/dataset')
             .set('Authorization', `Bearer ${token}`)
             .query({ foo: 'bar' });
@@ -165,7 +164,7 @@ describe('Dispatch GET requests with filters', () => {
         createMockEndpointWithBody(`/api/v1/dataset?foo=bar&dataset=${JSON.stringify({ body: { data: { foo: 'bar' } } })}&loggedUser=null`, {
             method: 'get'
         });
-        const response = await microservice
+        const response = await requester
             .get('/api/v1/dataset')
             .query({ foo: 'bar' });
 
@@ -174,6 +173,8 @@ describe('Dispatch GET requests with filters', () => {
     });
 
     it('Endpoint with POST filter that can be verified and matches return a 200 HTTP code (happy case) - USER user is passed as body content', async () => {
+        const { token } = await createUserAndToken({ role: 'USER' });
+
         await updateVersion();
         // eslint-disable-next-line no-useless-escape
         await createEndpoint({
@@ -201,7 +202,7 @@ describe('Dispatch GET requests with filters', () => {
         createMockEndpointWithBody(`/api/v1/dataset?foo=bar&dataset=${JSON.stringify({ body: { data: { foo: 'bar' } } })}&loggedUser=${getUserFromToken(token)}`, {
             method: 'get'
         });
-        const response = await microservice
+        const response = await requester
             .get('/api/v1/dataset')
             .set('Authorization', `Bearer ${token}`)
             .query({ foo: 'bar' });
@@ -211,6 +212,8 @@ describe('Dispatch GET requests with filters', () => {
     });
 
     it('Endpoint with filters that can be verified and match return a 200 HTTP code (happy case)', async () => {
+        const { token } = await createUserAndToken({ role: 'USER' });
+
         await updateVersion();
         // eslint-disable-next-line no-useless-escape
         await createEndpoint({
@@ -238,7 +241,7 @@ describe('Dispatch GET requests with filters', () => {
             method: 'get'
         });
 
-        const response = await microservice
+        const response = await requester
             .get('/api/v1/dataset')
             .set('Authorization', `Bearer ${token}`)
             .query({ foo: 'bar' });
@@ -248,6 +251,8 @@ describe('Dispatch GET requests with filters', () => {
     });
 
     it('Endpoint with filters that can be verified and don\'t match return a 404 HTTP code with a "Endpoint not found" message', async () => {
+        const { token } = await createUserAndToken({ role: 'USER' });
+
         await updateVersion();
         // eslint-disable-next-line no-useless-escape
         await createEndpoint({
@@ -272,7 +277,7 @@ describe('Dispatch GET requests with filters', () => {
             response: { data: { test: 'bar' } }
         });
 
-        const response = await microservice
+        const response = await requester
             .get('/api/v1/dataset')
             .set('Authorization', `Bearer ${token}`)
             .query({ foo: 'bar' });
@@ -281,6 +286,8 @@ describe('Dispatch GET requests with filters', () => {
     });
 
     it('Endpoint with filters that return a 404 response should return a 404 HTTP code with a "Endpoint not found" message', async () => {
+        const { token } = await createUserAndToken({ role: 'USER' });
+
         await updateVersion();
         // eslint-disable-next-line no-useless-escape
         await createEndpoint({
@@ -306,7 +313,7 @@ describe('Dispatch GET requests with filters', () => {
             replyStatus: 404
         });
 
-        const response = await microservice
+        const response = await requester
             .get('/api/v1/dataset')
             .set('Authorization', `Bearer ${token}`)
             .query({ foo: 'bar' });
@@ -315,6 +322,8 @@ describe('Dispatch GET requests with filters', () => {
     });
 
     it('Endpoint with multiple filters with multiple types that can be verified and match return a 200 HTTP code (happy case)', async () => {
+        const { token } = await createUserAndToken({ role: 'USER' });
+
         await updateVersion();
         // eslint-disable-next-line no-useless-escape
         await createEndpoint({
@@ -372,7 +381,7 @@ describe('Dispatch GET requests with filters', () => {
             method: 'get'
         });
 
-        const response = await microservice
+        const response = await requester
             .get('/api/v1/dataset')
             .set('Authorization', `Bearer ${token}`)
             .query({ foo: 'bar' });
@@ -382,10 +391,13 @@ describe('Dispatch GET requests with filters', () => {
     });
 
     afterEach(async () => {
-        await Endpoint.deleteMany({}).exec();
+        await EndpointModel.deleteMany({}).exec();
+        await UserModel.deleteMany({}).exec();
 
         if (!nock.isDone()) {
             throw new Error(`Not all nock interceptors were used: ${nock.pendingMocks()}`);
         }
     });
+
+    after(closeTestAgent);
 });

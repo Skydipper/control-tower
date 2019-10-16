@@ -5,9 +5,9 @@ const UserModel = require('plugins/sd-ct-oauth-plugin/models/user.model');
 const UserTempModel = require('plugins/sd-ct-oauth-plugin/models/user-temp.model');
 
 const { isEqual } = require('lodash');
-const { setPluginSetting } = require('./../utils');
+const { setPluginSetting, createUserAndToken, createTempUser } = require('../utils/helpers');
+
 const { getTestAgent, closeTestAgent } = require('./../test-server');
-const { TOKENS } = require('./../test.constants');
 
 const should = chai.should();
 
@@ -47,19 +47,23 @@ describe('OAuth endpoints tests - Sign up without auth', () => {
     });
 
     it('Registering a user without the actual data returns a 200 error (TODO: this should return a 422)', async () => {
+        const { token } = await createUserAndToken({ role: 'ADMIN' });
+
         const response = await requester
             .post(`/auth/sign-up`)
             .type('form')
-            .set('Authorization', `Bearer ${TOKENS.ADMIN}`);
+            .set('Authorization', `Bearer ${token}`);
 
         response.status.should.equal(200);
         response.text.should.include('Email, Password and Repeat password are required');
     });
 
     it('Registering a user with partial data returns a 200 error (TODO: this should return a 422)', async () => {
+        const { token } = await createUserAndToken({ role: 'ADMIN' });
+
         const response = await requester
             .post(`/auth/sign-up`)
-            .set('Authorization', `Bearer ${TOKENS.ADMIN}`)
+            .set('Authorization', `Bearer ${token}`)
             .type('form')
             .send({
                 email: 'someemail@gmail.com'
@@ -70,9 +74,11 @@ describe('OAuth endpoints tests - Sign up without auth', () => {
     });
 
     it('Registering a user with different passwords returns a 200 error (TODO: this should return a 422)', async () => {
+        const { token } = await createUserAndToken({ role: 'ADMIN' });
+
         const response = await requester
             .post(`/auth/sign-up`)
-            .set('Authorization', `Bearer ${TOKENS.ADMIN}`)
+            .set('Authorization', `Bearer ${token}`)
             .type('form')
             .send({
                 email: 'someemail@gmail.com',
@@ -85,6 +91,8 @@ describe('OAuth endpoints tests - Sign up without auth', () => {
     });
 
     it('Registering a user with correct data and no app returns a 200', async () => {
+        const { token } = await createUserAndToken({ role: 'ADMIN' });
+
         nock('https://api.sparkpost.com')
             .post('/api/v1/transmissions', (body) => {
                 const expectedRequestBody = {
@@ -121,7 +129,7 @@ describe('OAuth endpoints tests - Sign up without auth', () => {
 
         const response = await requester
             .post(`/auth/sign-up`)
-            .set('Authorization', `Bearer ${TOKENS.ADMIN}`)
+            .set('Authorization', `Bearer ${token}`)
             .type('form')
             .send({
                 email: 'someemail@gmail.com',
@@ -145,12 +153,14 @@ describe('OAuth endpoints tests - Sign up without auth', () => {
     });
 
     it('Registering a user with an existing email address (temp user) returns a 200 error (TODO: this should return a 422)', async () => {
-        const tempUser = await UserTempModel.findOne({ email: 'someemail@gmail.com' }).exec();
+        const { token } = await createUserAndToken({ role: 'ADMIN' });
+        const tempUser = await createTempUser({ email: 'someemail@gmail.com' });
+
         should.exist(tempUser);
 
         const response = await requester
             .post(`/auth/sign-up`)
-            .set('Authorization', `Bearer ${TOKENS.ADMIN}`)
+            .set('Authorization', `Bearer ${token}`)
             .type('form')
             .send({
                 email: 'someemail@gmail.com',
@@ -163,7 +173,7 @@ describe('OAuth endpoints tests - Sign up without auth', () => {
     });
 
     it('Confirming a user\'s account using the email token should be successful', async () => {
-        const tempUser = await UserTempModel.findOne({ email: 'someemail@gmail.com' }).exec();
+        const tempUser = await createTempUser({ email: 'someemail@gmail.com' });
 
         const response = await requester
             .get(`/auth/confirm/${tempUser.confirmationToken}`);
@@ -183,12 +193,13 @@ describe('OAuth endpoints tests - Sign up without auth', () => {
     });
 
     it('Registering a user with an existing email address (confirmed user) returns a 200 error (TODO: this should return a 422)', async () => {
-        const user = await UserModel.findOne({ email: 'someemail@gmail.com' }).exec();
+        const { token, user } = await createUserAndToken({ role: 'ADMIN', email: 'someemail@gmail.com' });
+
         should.exist(user);
 
         const response = await requester
             .post(`/auth/sign-up`)
-            .set('Authorization', `Bearer ${TOKENS.ADMIN}`)
+            .set('Authorization', `Bearer ${token}`)
             .type('form')
             .send({
                 email: 'someemail@gmail.com',
@@ -202,6 +213,8 @@ describe('OAuth endpoints tests - Sign up without auth', () => {
 
     // User registration - with app
     it('Registering a user with correct data and app returns a 200', async () => {
+        const { token } = await createUserAndToken({ role: 'ADMIN' });
+
         nock('https://api.sparkpost.com')
             .post('/api/v1/transmissions', (body) => {
                 const expectedRequestBody = {
@@ -238,7 +251,7 @@ describe('OAuth endpoints tests - Sign up without auth', () => {
 
         const response = await requester
             .post(`/auth/sign-up`)
-            .set('Authorization', `Bearer ${TOKENS.ADMIN}`)
+            .set('Authorization', `Bearer ${token}`)
             .type('form')
             .send({
                 email: 'someotheremail@gmail.com',
@@ -261,14 +274,12 @@ describe('OAuth endpoints tests - Sign up without auth', () => {
         user.extraUserData.apps.should.be.an('array').and.contain('rw');
     });
 
-    after(async () => {
-        UserModel.deleteMany({}).exec();
-        UserTempModel.deleteMany({}).exec();
+    after(closeTestAgent);
 
-        closeTestAgent();
-    });
+    afterEach(async () => {
+        await UserModel.deleteMany({}).exec();
+        await UserTempModel.deleteMany({}).exec();
 
-    afterEach(() => {
         if (!nock.isDone()) {
             throw new Error(`Not all nock interceptors were used: ${nock.pendingMocks()}`);
         }

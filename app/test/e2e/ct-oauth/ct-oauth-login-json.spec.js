@@ -5,7 +5,7 @@ const chai = require('chai');
 const UserModel = require('plugins/sd-ct-oauth-plugin/models/user.model');
 
 const { getTestAgent, closeTestAgent } = require('./../test-server');
-const { TOKENS } = require('./../test.constants');
+const { createUserAndToken, createUserInDB } = require('../utils/helpers');
 
 const should = chai.should();
 
@@ -42,10 +42,12 @@ describe('Auth endpoints tests', () => {
 
     // Default HTML request behavior
     it('Visiting /auth while logged in should redirect to the success page', async () => {
+        const { token } = await createUserAndToken({ role: 'ADMIN' });
+
         const response = await requester
             .get(`/auth`)
             .set('Content-Type', 'application/json')
-            .set('Authorization', `Bearer ${TOKENS.ADMIN}`);
+            .set('Authorization', `Bearer ${token}`);
 
         response.status.should.equal(200);
         response.redirects.should.be.an('array').and.length(2);
@@ -55,10 +57,12 @@ describe('Auth endpoints tests', () => {
 
     // Default HTML request behavior
     it('Visiting /auth with callbackUrl while being logged in should redirect to the callback page', async () => {
+        const { token } = await createUserAndToken({ role: 'ADMIN' });
+
         const response = await requester
             .get(`/auth?callbackUrl=https://www.wikipedia.org`)
             .set('Content-Type', 'application/json')
-            .set('Authorization', `Bearer ${TOKENS.ADMIN}`);
+            .set('Authorization', `Bearer ${token}`);
 
         response.status.should.equal(200);
         response.redirects.should.be.an('array').and.length(3);
@@ -123,21 +127,11 @@ describe('Auth endpoints tests', () => {
     });
 
     it('Logging in at /auth/login with valid credentials should return a 200 HTTP code and the user details', async () => {
-        await new UserModel({
-            __v: 0,
+        const user = await createUserInDB({
             email: 'test@example.com',
             password: '$2b$10$1wDgP5YCStyvZndwDu2GwuC6Ie9wj7yRZ3BNaaI.p9JqV8CnetdPK',
-            salt: '$2b$10$1wDgP5YCStyvZndwDu2Gwu',
-            extraUserData: {
-                apps: ['rw']
-            },
-            _id: '5becfa2b67da0d3ec07a27f6',
-            createdAt: '2018-11-15T04:46:35.313Z',
-            role: 'USER',
-            provider: 'local',
-            name: 'lorem-ipsum',
-            photo: 'http://www.random.rand/abc.jpg'
-        }).save();
+            salt: '$2b$10$1wDgP5YCStyvZndwDu2Gwu'
+        });
 
         const response = await requester
             .post(`/auth/login`)
@@ -151,27 +145,34 @@ describe('Auth endpoints tests', () => {
         response.redirects.should.be.an('array').and.length(0);
 
         const responseUser = response.body.data;
-        responseUser.should.have.property('id').and.be.a('string').and.not.be.empty;
-        responseUser.should.have.property('name').and.be.a('string').and.equal('lorem-ipsum');
-        responseUser.should.have.property('photo').and.be.a('string').and.equal('http://www.random.rand/abc.jpg');
-        responseUser.should.have.property('email').and.equal('test@example.com');
-        responseUser.should.have.property('role').and.equal('USER');
-        responseUser.should.have.property('extraUserData').and.be.an('object');
+        responseUser.should.have.property('id').and.be.a('string').and.equal(user.id.toString());
+        responseUser.should.have.property('name').and.be.a('string').and.equal(user.name);
+        responseUser.should.have.property('photo').and.be.a('string').and.equal(user.photo);
+        responseUser.should.have.property('email').and.equal(user.email);
+        responseUser.should.have.property('role').and.equal(user.role);
+        responseUser.should.have.property('extraUserData').and.eql(user.extraUserData);
         responseUser.should.have.property('token').and.be.a('string').and.not.be.empty;
-        responseUser.extraUserData.should.have.property('apps').and.be.an('array').and.contain('rw');
     });
 
     it('Visiting GET /auth/login with callbackUrl while being logged in should return a 200', async () => {
+        const { token } = await createUserAndToken({ role: 'ADMIN' });
+
         const response = await requester
             .get(`/auth/login?callbackUrl=https://www.wikipedia.org`)
             .set('Content-Type', 'application/json')
-            .set('Authorization', `Bearer ${TOKENS.ADMIN}`);
+            .set('Authorization', `Bearer ${token}`);
 
         response.status.should.equal(200);
         response.redirects.should.be.an('array').and.length(0);
     });
 
     it('Logging in successfully with POST /auth/login with callbackUrl should not redirect to the callback page', async () => {
+        const user = await createUserInDB({
+            email: 'test@example.com',
+            password: '$2b$10$1wDgP5YCStyvZndwDu2GwuC6Ie9wj7yRZ3BNaaI.p9JqV8CnetdPK',
+            salt: '$2b$10$1wDgP5YCStyvZndwDu2Gwu'
+        });
+
         const response = await requester
             .post(`/auth/login?callbackUrl=https://www.wikipedia.org`)
             .set('Content-Type', 'application/json')
@@ -184,12 +185,12 @@ describe('Auth endpoints tests', () => {
         response.redirects.should.be.an('array').and.length(0);
 
         const responseUser = response.body.data;
-        responseUser.should.have.property('id').and.be.a('string').and.not.be.empty;
-        responseUser.should.have.property('name').and.be.a('string').and.equal('lorem-ipsum');
-        responseUser.should.have.property('photo').and.be.a('string').and.equal('http://www.random.rand/abc.jpg');
-        responseUser.should.have.property('email').and.equal('test@example.com');
-        responseUser.should.have.property('role').and.equal('USER');
-        responseUser.should.have.property('extraUserData').and.be.an('object');
+        responseUser.should.have.property('id').and.be.a('string').and.equal(user.id.toString());
+        responseUser.should.have.property('name').and.be.a('string').and.equal(user.name);
+        responseUser.should.have.property('photo').and.be.a('string').and.equal(user.photo);
+        responseUser.should.have.property('email').and.equal(user.email);
+        responseUser.should.have.property('role').and.equal(user.role);
+        responseUser.should.have.property('extraUserData').and.eql(user.extraUserData);
         responseUser.should.have.property('token').and.be.an('string').and.not.be.empty;
         // eslint-disable-next-line
         responseUser.extraUserData.should.have.property('apps').and.be.an('array').and.contain('rw');
@@ -211,13 +212,13 @@ describe('Auth endpoints tests', () => {
         response.body.errors[0].detail.should.equal('Invalid email or password');
     });
 
-    after(async () => {
-        UserModel.deleteMany({}).exec();
-
+    after(() => {
         closeTestAgent();
     });
 
-    afterEach(() => {
+    afterEach(async () => {
+        await UserModel.deleteMany({}).exec();
+
         if (!nock.isDone()) {
             throw new Error(`Not all nock interceptors were used: ${nock.pendingMocks()}`);
         }

@@ -1,13 +1,14 @@
 const nock = require('nock');
 const chai = require('chai');
 
-const Microservice = require('models/microservice.model');
-const Endpoint = require('models/endpoint.model');
-const { TOKENS } = require('./test.constants');
+const MicroserviceModel = require('models/microservice.model');
+const EndpointModel = require('models/endpoint.model');
+const UserModel = require('plugins/sd-ct-oauth-plugin/models/user.model');
 
 const should = chai.should();
 
 const { getTestAgent, closeTestAgent } = require('./test-server');
+const { createUserAndToken } = require('./utils/helpers');
 
 let requester;
 nock.disableNetConnect();
@@ -27,8 +28,8 @@ describe('Endpoint purge all', () => {
 
         requester = await getTestAgent();
 
-        Microservice.deleteMany({}).exec();
-        Endpoint.deleteMany({}).exec();
+        MicroserviceModel.deleteMany({}).exec();
+        EndpointModel.deleteMany({}).exec();
 
         nock.cleanAll();
     });
@@ -43,8 +44,10 @@ describe('Endpoint purge all', () => {
     });
 
     it('Purging endpoints as USER should fail', async () => {
+        const { token } = await createUserAndToken({ role: 'USER' });
+
         const response = await requester.delete(`/api/v1/endpoint/purge-all`)
-            .set('Authorization', `Bearer ${TOKENS.USER}`);
+            .set('Authorization', `Bearer ${token}`);
 
         response.status.should.equal(403);
         response.body.should.have.property('errors').and.be.an('array');
@@ -53,8 +56,10 @@ describe('Endpoint purge all', () => {
     });
 
     it('Purging endpoints as MANAGER should fail', async () => {
+        const { token } = await createUserAndToken({ role: 'MANAGER' });
+
         const response = await requester.delete(`/api/v1/endpoint/purge-all`)
-            .set('Authorization', `Bearer ${TOKENS.MANAGER}`);
+            .set('Authorization', `Bearer ${token}`);
 
         response.status.should.equal(403);
         response.body.should.have.property('errors').and.be.an('array');
@@ -63,26 +68,28 @@ describe('Endpoint purge all', () => {
     });
 
     it('Purging endpoints as ADMIN should succeed (happy case)', async () => {
+        const { token } = await createUserAndToken({ role: 'ADMIN' });
+
         nock('https://api.fastly.com')
             .post(`/service/${process.env.FASTLY_SERVICEID}/purge_all`)
             .reply(200, { status: 'ok' });
 
         const response = await requester.delete(`/api/v1/endpoint/purge-all`)
-            .set('Authorization', `Bearer ${TOKENS.ADMIN}`);
+            .set('Authorization', `Bearer ${token}`);
 
         response.status.should.equal(200);
     });
 
-    afterEach(() => {
+    afterEach(async () => {
+        await EndpointModel.deleteMany({}).exec();
+        await UserModel.deleteMany({}).exec();
+        await MicroserviceModel.deleteMany({}).exec();
+
+
         if (!nock.isDone()) {
             throw new Error(`Not all nock interceptors were used: ${nock.pendingMocks()}`);
         }
     });
 
-    after(() => {
-        Microservice.deleteMany({}).exec();
-        Endpoint.deleteMany({}).exec();
-
-        closeTestAgent();
-    });
+    after(closeTestAgent);
 });

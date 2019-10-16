@@ -1,29 +1,28 @@
 const chai = require('chai');
 const nock = require('nock');
-const Endpoint = require('models/endpoint.model');
+const EndpointModel = require('models/endpoint.model');
 const UserModel = require('plugins/sd-ct-oauth-plugin/models/user.model');
-const { getTestAgent } = require('./test-server');
+const { getTestAgent, closeTestAgent } = require('./test-server');
 const {
     endpointTest, testFilter
 } = require('./test.constants');
 const {
-    createEndpoint, ensureCorrectError, updateVersion, createUserInDB, createToken, getUserFromToken
-} = require('./utils');
+    createEndpoint, ensureCorrectError, updateVersion, getUserFromToken, createUserAndToken
+} = require('./utils/helpers');
 const { createMockEndpointWithBody } = require('./mock');
 
 const should = chai.should();
-let microservice;
+let requester;
 
-let token;
 
 describe('Dispatch PUT requests with filters', () => {
     before(async () => {
         await UserModel.deleteMany({}).exec();
-        token = createToken(await createUserInDB());
+        await EndpointModel.deleteMany({}).exec();
 
         nock.cleanAll();
 
-        microservice = await getTestAgent();
+        requester = await getTestAgent();
     });
 
     it('PUT endpoint with GET filter that can be verified and matches return a 200 HTTP code (no filter value) - Null user is passed as query argument', async () => {
@@ -56,7 +55,7 @@ describe('Dispatch PUT requests with filters', () => {
                 dataset: { body: { data: { foo: 'bar' } } },
             }
         });
-        const response = await microservice
+        const response = await requester
             .put('/api/v1/dataset')
             .send({ foo: 'bar' });
 
@@ -106,6 +105,8 @@ describe('Dispatch PUT requests with filters', () => {
     // });
 
     it('Endpoint with GET filter that can be verified and matches return a 200 HTTP code (no filter value) - USER user is passed as query argument', async () => {
+        const { token } = await createUserAndToken({ role: 'USER' });
+
         await updateVersion();
         // eslint-disable-next-line no-useless-escape
         await createEndpoint({
@@ -135,7 +136,7 @@ describe('Dispatch PUT requests with filters', () => {
                 dataset: { body: { data: { foo: 'bar' } } },
             }
         });
-        const response = await microservice
+        const response = await requester
             .put('/api/v1/dataset')
             .set('Authorization', `Bearer ${token}`)
             .send({ foo: 'bar' });
@@ -145,6 +146,8 @@ describe('Dispatch PUT requests with filters', () => {
     });
 
     it('Endpoint with PUT filter that can be verified and matches return a 200 HTTP code (happy case) - Null user is passed as body content', async () => {
+        const { token } = await createUserAndToken({ role: 'USER' });
+
         await updateVersion();
         // eslint-disable-next-line no-useless-escape
         await createEndpoint({
@@ -176,7 +179,7 @@ describe('Dispatch PUT requests with filters', () => {
                 dataset: { body: { data: { foo: 'bar' } } },
             }
         });
-        const response = await microservice
+        const response = await requester
             .put('/api/v1/dataset')
             .send({ foo: 'bar' });
 
@@ -185,6 +188,8 @@ describe('Dispatch PUT requests with filters', () => {
     });
 
     it('Endpoint with PUT filter that can be verified and matches return a 200 HTTP code (happy case) - USER user is passed as body content', async () => {
+        const { token } = await createUserAndToken({ role: 'USER' });
+
         await updateVersion();
         // eslint-disable-next-line no-useless-escape
         await createEndpoint({
@@ -216,7 +221,7 @@ describe('Dispatch PUT requests with filters', () => {
                 dataset: { body: { data: { foo: 'bar' } } },
             }
         });
-        const response = await microservice
+        const response = await requester
             .put('/api/v1/dataset')
             .set('Authorization', `Bearer ${token}`)
             .send({ foo: 'bar' });
@@ -257,7 +262,7 @@ describe('Dispatch PUT requests with filters', () => {
                 dataset: { body: { data: { foo: 'bar' } } },
             }
         });
-        const response = await microservice.put('/api/v1/dataset').send({ foo: 'bar' });
+        const response = await requester.put('/api/v1/dataset').send({ foo: 'bar' });
         response.status.should.equal(200);
         response.text.should.equal('ok');
     });
@@ -288,7 +293,7 @@ describe('Dispatch PUT requests with filters', () => {
             response: { data: { test: 'bar' } }
         });
 
-        const response = await microservice.put('/api/v1/dataset').send({ test: 'bar' });
+        const response = await requester.put('/api/v1/dataset').send({ test: 'bar' });
         ensureCorrectError(response, 'Endpoint not found', 404);
     });
 
@@ -316,7 +321,7 @@ describe('Dispatch PUT requests with filters', () => {
             method: 'put',
             replyStatus: 404
         });
-        const response = await microservice.put('/api/v1/dataset').send({ test: 'bar' });
+        const response = await requester.put('/api/v1/dataset').send({ test: 'bar' });
         ensureCorrectError(response, 'Endpoint not found', 404);
     });
 
@@ -382,16 +387,19 @@ describe('Dispatch PUT requests with filters', () => {
                 widget: { body: { data: { boo: 'tar' } } },
             }
         });
-        const response = await microservice.put('/api/v1/dataset').send({ foo: 'bar' });
+        const response = await requester.put('/api/v1/dataset').send({ foo: 'bar' });
         response.status.should.equal(200);
         response.text.should.equal('ok');
     });
 
     afterEach(async () => {
-        await Endpoint.deleteMany({}).exec();
+        await UserModel.deleteMany({}).exec();
+        await EndpointModel.deleteMany({}).exec();
 
         if (!nock.isDone()) {
             throw new Error(`Not all nock interceptors were used: ${nock.pendingMocks()}`);
         }
     });
+
+    after(closeTestAgent);
 });

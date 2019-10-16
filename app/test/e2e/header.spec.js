@@ -3,12 +3,9 @@ const chai = require('chai');
 const Microservice = require('models/microservice.model');
 const Endpoint = require('models/endpoint.model');
 const { TOKENS } = require('./test.constants');
-const { initHelpers } = require('./utils');
 const { getTestAgent, closeTestAgent } = require('./test-server');
 
 const should = chai.should();
-
-const helpers = initHelpers(getTestAgent);
 
 let requester;
 
@@ -20,7 +17,6 @@ describe('Headers', () => {
         }
 
         requester = await getTestAgent();
-        helpers.setRequester(requester);
         nock.cleanAll();
     });
 

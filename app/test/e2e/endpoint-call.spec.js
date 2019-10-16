@@ -1,15 +1,16 @@
 const nock = require('nock');
 
-const Microservice = require('models/microservice.model');
-const Endpoint = require('models/endpoint.model');
-const { TOKENS } = require('./test.constants');
+const MicroserviceModel = require('models/microservice.model');
+const EndpointModel = require('models/endpoint.model');
+const UserModel = require('plugins/sd-ct-oauth-plugin/models/user.model');
 
 const { getTestAgent, closeTestAgent } = require('./test-server');
+const { createUserAndToken } = require('./utils/helpers');
 
 let requester;
 
 
-describe('Endpoint calls', () => {
+describe('EndpointModel calls', () => {
 
     before(async () => {
         if (process.env.NODE_ENV !== 'test') {
@@ -18,8 +19,9 @@ describe('Endpoint calls', () => {
 
         requester = await getTestAgent();
 
-        Microservice.deleteMany({}).exec();
-        Endpoint.deleteMany({}).exec();
+        await UserModel.deleteMany({}).exec();
+        await MicroserviceModel.deleteMany({}).exec();
+        await EndpointModel.deleteMany({}).exec();
 
         nock.cleanAll();
     });
@@ -43,9 +45,11 @@ describe('Endpoint calls', () => {
     });
 
     it('Getting an ADMIN endpoint with a USER token should return a 401', async () => {
+        const { token } = await createUserAndToken({ role: 'USER' });
+
         const response = await requester
             .get(`/api/v1/microservice`)
-            .set('Authorization', `Bearer ${TOKENS.USER}`);
+            .set('Authorization', `Bearer ${token}`);
 
         response.status.should.equal(403);
         response.body.should.have.property('errors').and.be.an('array');
@@ -53,16 +57,15 @@ describe('Endpoint calls', () => {
         response.body.errors[0].detail.should.equal('Not authorized');
     });
 
-    afterEach(() => {
+    afterEach(async () => {
+        await UserModel.deleteMany({}).exec();
+        await MicroserviceModel.deleteMany({}).exec();
+        await EndpointModel.deleteMany({}).exec();
+
         if (!nock.isDone()) {
             throw new Error(`Not all nock interceptors were used: ${nock.pendingMocks()}`);
         }
     });
 
-    after(() => {
-        Microservice.deleteMany({}).exec();
-        Endpoint.deleteMany({}).exec();
-
-        closeTestAgent();
-    });
+    after(closeTestAgent);
 });

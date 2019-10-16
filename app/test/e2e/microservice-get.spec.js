@@ -1,9 +1,11 @@
 const nock = require('nock');
 const chai = require('chai');
 
-const Microservice = require('models/microservice.model');
-const Endpoint = require('models/endpoint.model');
+const MicroserviceModel = require('models/microservice.model');
+const EndpointModel = require('models/endpoint.model');
+const UserModel = require('plugins/sd-ct-oauth-plugin/models/user.model');
 
+const { createUserAndToken } = require('./utils/helpers');
 const { getTestAgent, closeTestAgent } = require('./test-server');
 const { TOKENS } = require('./test.constants');
 
@@ -21,10 +23,13 @@ describe('Microservices endpoints - GET endpoints', () => {
 
         requester = await getTestAgent();
 
-        Microservice.deleteMany({}).exec();
-        Endpoint.deleteMany({}).exec();
-
         nock.cleanAll();
+    });
+
+    beforeEach(async () => {
+        await UserModel.deleteMany({}).exec();
+        await MicroserviceModel.deleteMany({}).exec();
+        await EndpointModel.deleteMany({}).exec();
     });
 
     it('Getting a list of microservices without being authenticated should fail', async () => {
@@ -33,18 +38,22 @@ describe('Microservices endpoints - GET endpoints', () => {
     });
 
     it('Getting a list of microservices should return empty if no services are registered', async () => {
+        const { token } = await createUserAndToken({ role: 'ADMIN' });
+
         const response = await requester
             .get(`/api/v1/microservice`)
-            .set('Authorization', `Bearer ${TOKENS.ADMIN}`);
+            .set('Authorization', `Bearer ${token}`);
 
         response.status.should.equal(200);
         response.body.should.be.an('array').and.have.lengthOf(0);
     });
 
     it('Get documentation for existing endpoints should be successful (happy case)', async () => {
+        const { token } = await createUserAndToken({ role: 'ADMIN' });
+
         const response = await requester.get(`/api/v1/doc/swagger`)
             .send()
-            .set('Authorization', `Bearer ${TOKENS.ADMIN}`);
+            .set('Authorization', `Bearer ${token}`);
 
         response.status.should.equal(200);
         response.body.should.deep.equal({
@@ -159,16 +168,17 @@ describe('Microservices endpoints - GET endpoints', () => {
         });
     });
 
-    afterEach(() => {
+    afterEach(async () => {
+        await UserModel.deleteMany({}).exec();
+        await MicroserviceModel.deleteMany({}).exec();
+        await EndpointModel.deleteMany({}).exec();
+
         if (!nock.isDone()) {
             throw new Error(`Not all nock interceptors were used: ${nock.pendingMocks()}`);
         }
     });
 
     after(() => {
-        Microservice.deleteMany({}).exec();
-        Endpoint.deleteMany({}).exec();
-
         closeTestAgent();
     });
 });
