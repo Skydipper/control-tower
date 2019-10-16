@@ -101,9 +101,9 @@ describe('OAuth endpoints tests - Recover password post - JSON version', () => {
             token: 'myToken'
         }).save();
 
-        const endpoints = await RenewModel.find({});
-        endpoints.should.have.lengthOf(1);
-        endpoints[0]._id.toString().should.equal(renewModel._id.toString());
+        const loadedRenewModels = await RenewModel.find({});
+        loadedRenewModels.should.have.lengthOf(1);
+        loadedRenewModels[0]._id.toString().should.equal(renewModel._id.toString());
 
         const response = await requester
             .post(`/auth/reset-password/myToken`)

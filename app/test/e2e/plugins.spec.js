@@ -1,5 +1,6 @@
 const nock = require('nock');
 const UserModel = require('plugins/sd-ct-oauth-plugin/models/user.model');
+const PluginModel = require('models/plugin.model');
 const {
     isAdminOnly, isTokenRequired, createUserAndToken, createPlugin
 } = require('./utils/helpers');
@@ -47,6 +48,9 @@ describe('Plugins calls', () => {
     it('Update plugin authenticated should update', async () => {
         const plugin = await createPlugin();
 
+        const loadedPlugin = await PluginModel.findById(plugin._id.toString());
+        loadedPlugin._id.toString().should.equal(plugin._id.toString());
+
         const { token } = await createUserAndToken({ role: 'ADMIN' });
 
         const newData = {
@@ -78,6 +82,7 @@ describe('Plugins calls', () => {
 
     afterEach(async () => {
         await UserModel.deleteMany({}).exec();
+        await PluginModel.deleteMany({ name: 'test plugin name' }).exec();
 
         if (!nock.isDone()) {
             throw new Error(`Not all nock interceptors were used: ${nock.pendingMocks()}`);
