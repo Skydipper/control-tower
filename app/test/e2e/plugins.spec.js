@@ -74,8 +74,11 @@ describe('Plugins calls', () => {
             .set('Authorization', `Bearer ${token}`);
 
         newList.status.should.equal(200);
-        newList.body[0].active.should.equal(newData.active);
-        newList.body[0].config.should.deep.equal(newData.config);
+
+        const testPlugin = newList.body.find((iterator) => iterator._id === plugin._id.toString());
+
+        testPlugin.active.should.equal(newData.active);
+        testPlugin.config.should.deep.equal(newData.config);
 
         await plugin.delete();
     });
