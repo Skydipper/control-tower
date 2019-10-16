@@ -31,10 +31,10 @@ function middleware(app, plugin, generalConfig) {
         // eslint-disable-next-line consistent-return
         app.use(async (ctx, next) => {
             if (ctx.state.jwtOriginalError && ctx.state.jwtOriginalError.message === 'Token revoked') {
-                return ctx.throw(401, 'Your token is outdated, please use /auth/login to generate a new one');
+                return ctx.throw(401, 'Your token is outdated. Please use /auth/login to login and /auth/generate-token to generate a new token.');
             }
             if (ctx.state.jwtOriginalError && ctx.state.jwtOriginalError.message === 'jwt malformed') {
-                return ctx.throw(401, 'Your token is invalid, please use /auth/login to generate a new one');
+                return ctx.throw(401, 'Your token is invalid. Please use /auth/login to login and /auth/generate-token to generate a new token.');
             }
 
             await next();
