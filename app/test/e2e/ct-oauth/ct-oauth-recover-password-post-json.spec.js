@@ -24,16 +24,11 @@ describe('OAuth endpoints tests - Recover password post - JSON version', () => {
             throw Error(`Running the test suite with NODE_ENV ${process.env.NODE_ENV} may result in permanent data loss. Please use NODE_ENV=test.`);
         }
 
+        await UserModel.deleteMany({}).exec();
+        await UserTempModel.deleteMany({}).exec();
+        await RenewModel.deleteMany({}).exec();
+
         requester = await getTestAgent(true);
-
-        nock.cleanAll();
-    });
-
-    beforeEach(async () => {
-
-        UserModel.deleteMany({}).exec();
-        UserTempModel.deleteMany({}).exec();
-        RenewModel.deleteMany({}).exec();
 
         nock.cleanAll();
     });
@@ -101,13 +96,14 @@ describe('OAuth endpoints tests - Recover password post - JSON version', () => {
     });
 
     it('Recover password post with correct token and different password and repeatPassword should return an error message - JSON format', async () => {
-        await new RenewModel({
+        const renewModel = await new RenewModel({
             userId: mongoose.Types.ObjectId(),
             token: 'myToken'
         }).save();
 
         const endpoints = await RenewModel.find({});
         endpoints.should.have.lengthOf(1);
+        endpoints[0]._id.toString().should.equal(renewModel._id.toString());
 
         const response = await requester
             .post(`/auth/reset-password/myToken`)
@@ -173,9 +169,7 @@ describe('OAuth endpoints tests - Recover password post - JSON version', () => {
     });
 
 
-    after(async () => {
-        closeTestAgent();
-    });
+    after(closeTestAgent);
 
     afterEach(async () => {
         await UserModel.deleteMany({}).exec();
