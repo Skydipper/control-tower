@@ -62,7 +62,7 @@ const getUserFromToken = (token, isString = true) => {
     return isString ? JSON.stringify(userData) : userData;
 };
 
-const createPlugin = (pluginData) => (PluginModel({
+const createPlugin = async (pluginData) => (PluginModel({
     name: 'test plugin name',
     description: 'test plugin description',
     mainFile: 'test plugin main file',
@@ -73,7 +73,7 @@ const createPlugin = (pluginData) => (PluginModel({
 }).save());
 
 
-const createTempUser = (userData) => (TempUserModel({
+const createTempUser = async (userData) => (TempUserModel({
     _id: new ObjectId(),
     email: `${getUUID()}@control-tower.com`,
     password: '$password.hash',
@@ -87,7 +87,7 @@ const createTempUser = (userData) => (TempUserModel({
     ...userData
 }).save());
 
-const createMicroservice = (microserviceData) => (MicroserviceModel({
+const createMicroservice = async (microserviceData) => (MicroserviceModel({
     name: 'test microservice name',
     url: 'http://microservice.com',
     status: 'active',
