@@ -3,7 +3,7 @@ const nock = require('nock');
 const Endpoint = require('models/endpoint.model');
 const { getTestAgent } = require('./test-server');
 const { testAppKey, endpointTest } = require('./test.constants');
-const { createEndpoint, ensureCorrectError, updateVersion } = require('./utils');
+const { createEndpoint, ensureCorrectError, updateVersion } = require('./utils/helpers');
 const { createMockEndpoint, createMockEndpointWithBody, createMockEndpointWithHeaders } = require('./mock');
 
 const should = chai.should();

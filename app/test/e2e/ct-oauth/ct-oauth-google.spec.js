@@ -4,7 +4,7 @@ const jwt = require('jsonwebtoken');
 
 const UserModel = require('plugins/sd-ct-oauth-plugin/models/user.model');
 const { getTestAgent, closeTestAgent } = require('./../test-server');
-const { setPluginSetting } = require('./../utils');
+const { setPluginSetting } = require('../utils/helpers');
 
 const should = chai.should();
 

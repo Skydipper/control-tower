@@ -6,8 +6,8 @@ const Endpoint = require('models/endpoint.model');
 
 const { getTestAgent } = require('./../test-server');
 const {
-    updateVersion, createEndpoint, ensureCorrectError, createUserInDB, createToken
-} = require('../utils');
+    updateVersion, createEndpoint, ensureCorrectError, createUserAndToken
+} = require('../utils/helpers');
 const { createMockEndpoint } = require('../mock');
 const { TOKENS } = require('./../test.constants');
 
@@ -48,12 +48,20 @@ describe('Authorization tests', () => {
         ensureCorrectError(result, 'Unauthorized', 401);
     });
 
-    it('Sending request with token to authenticated request but ROLE is changed should be unsuccessful with unauthorized error ', async () => {
+    it('Sending request with bogus token to authenticated request should be unsuccessful with unauthorized error ', async () => {
         await updateVersion();
         await createEndpoint({ authenticated: true });
 
-        const user = await createUserInDB();
-        const token = createToken(user);
+        const result = await requester.post('/api/v1/dataset').set('Authorization', `Bearer 1234`);
+        result.status.should.equal(401);
+        ensureCorrectError(result, 'Your token is invalid, please use /auth/login to generate a new one', 401);
+    });
+
+    it('Sending request with token to authenticated request but ROLE is changed should be unsuccessful with unauthorized error ', async () => {
+        await updateVersion();
+        await createEndpoint();
+
+        const { user, token } = await createUserAndToken();
         await UserModel.update({ _id: user.id }, { $set: { role: 'ADMIN' } });
 
         const result = await requester.post('/api/v1/dataset').set('Authorization', `Bearer ${token}`);
@@ -64,8 +72,7 @@ describe('Authorization tests', () => {
         await updateVersion();
         await createEndpoint({ authenticated: true });
 
-        const user = await createUserInDB();
-        const token = createToken(user);
+        const { user, token } = await createUserAndToken();
         await UserModel.update({ _id: user.id }, { $set: { email: 'test123' } });
 
         const result = await requester.post('/api/v1/dataset').set('Authorization', `Bearer ${token}`);
@@ -76,8 +83,7 @@ describe('Authorization tests', () => {
         await updateVersion();
         await createEndpoint({ authenticated: true });
 
-        const user = await createUserInDB();
-        const token = createToken(user);
+        const { user, token } = await createUserAndToken();
         await UserModel.update({ _id: user.id }, { $set: { extraUserData: [] } });
 
         const result = await requester.post('/api/v1/dataset').set('Authorization', `Bearer ${token}`);
@@ -88,8 +94,7 @@ describe('Authorization tests', () => {
         await updateVersion();
         await createEndpoint({ authenticated: true });
 
-        const user = await createUserInDB();
-        const token = createToken(user);
+        const { token } = await createUserAndToken();
         await UserModel.deleteMany({}).exec();
 
         const result = await requester.post('/api/v1/dataset').set('Authorization', `Bearer ${token}`);
@@ -101,8 +106,7 @@ describe('Authorization tests', () => {
         await createEndpoint();
         createMockEndpoint('/api/v1/dataset');
 
-        const user = await createUserInDB();
-        const token = createToken(user);
+        const { token } = await createUserAndToken();
 
         const result = await requester.post('/api/v1/dataset').set('Authorization', `Bearer ${token}`);
         result.status.should.equal(200);

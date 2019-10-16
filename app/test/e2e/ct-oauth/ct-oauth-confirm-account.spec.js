@@ -5,7 +5,7 @@ const UserModel = require('plugins/sd-ct-oauth-plugin/models/user.model');
 const UserTempModel = require('plugins/sd-ct-oauth-plugin/models/user-temp.model');
 
 const { getTestAgent, closeTestAgent } = require('./../test-server');
-const { getUUID, setPluginSetting } = require('./../utils');
+const { getUUID, setPluginSetting } = require('../utils/helpers');
 
 const should = chai.should();
 

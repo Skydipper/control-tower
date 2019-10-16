@@ -28,6 +28,19 @@ exports.getTestAgent = async function getTestAgent(forceNew = false) {
     return requester;
 };
 
+exports.getTestServer = async function getTestServer() {
+    if (requester) {
+        return requester;
+    }
+
+    // eslint-disable-next-line global-require
+    const serverPromise = require('../../src/app');
+    const { server } = await serverPromise();
+    requester = chai.request(server).keepOpen();
+
+    return requester;
+};
+
 exports.closeTestAgent = function closeTestAgent() {
     if (!requester) {
         return;

@@ -3,10 +3,9 @@ extends: [airbnb, plugin:mocha/recommended]
 env:
   node: true
   es6: true
-parser: babel-eslint
 parserOptions:
   sourceType: module
-  ecmaVersion: 6
+  ecmaVersion: 2018
 plugins: [mocha]
 globals:
   describe: true

@@ -2,13 +2,12 @@
 const debug = require('debug')('oauth-plugin');
 const Router = require('koa-router');
 const passport = require('koa-passport');
-const { cloneDeep } = require('lodash');
+const { cloneDeep, omit } = require('lodash');
 const authServiceFunc = require('./services/auth.service');
 const UnprocessableEntityError = require('./errors/unprocessableEntity.error');
 const UnauthorizedError = require('./errors/unauthorized.error');
 const UserTempSerializer = require('./serializers/user-temp.serializer');
 const UserSerializer = require('./serializers/user.serializer');
-const { omit } = require('lodash');
 
 module.exports = (plugin, connection, generalConfig) => {
     const ApiRouter = new Router({

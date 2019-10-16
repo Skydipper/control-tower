@@ -1,12 +1,11 @@
 const logger = require('logger');
 const nock = require('nock');
-const Microservice = require('models/microservice.model');
-const Endpoint = require('models/endpoint.model');
-const { TOKENS, microserviceTest } = require('./test.constants');
-const { initHelpers } = require('./utils');
+const MicroserviceModel = require('models/microservice.model');
+const EndpointModel = require('models/endpoint.model');
+const UserModel = require('plugins/sd-ct-oauth-plugin/models/user.model');
+const { microserviceTest } = require('./test.constants');
+const { isTokenRequired, isAdminOnly, createUserAndToken } = require('./utils/helpers');
 const { getTestAgent, closeTestAgent } = require('./test-server');
-
-const helpers = initHelpers(getTestAgent);
 
 let requester;
 
@@ -27,10 +26,6 @@ const createMicroservice = () => {
     return requester.post('/api/v1/microservice').send(testMicroserviceOne);
 };
 
-const getListStatus = async () => requester
-    .get('/api/v1/microservice/status')
-    .set('Authorization', `Bearer ${TOKENS.ADMIN}`);
-
 describe('Microservice status calls', () => {
 
     before(async () => {
@@ -39,24 +34,32 @@ describe('Microservice status calls', () => {
         }
 
         requester = await getTestAgent();
-        helpers.setRequester(requester);
         nock.cleanAll();
     });
 
-    it('Getting a list of statuses without being authenticated should fail with a 401 error', helpers.isTokenRequired('get', 'plugin'));
+    it('Getting a list of statuses without being authenticated should fail with a 401 error', async () => isTokenRequired(requester, 'get', 'plugin'));
 
-    it('Getting a list of statuses authenticated without ADMIN role should fail with a 403 error', helpers.isAdminOnly('get', 'plugin'));
+    it('Getting a list of statuses authenticated without ADMIN role should fail with a 403 error', async () => isAdminOnly(requester, 'get', 'plugin'));
 
     it('Getting a list of statuses with created microservice should return empty array', async () => {
-        const list = await getListStatus();
+        const { token } = await createUserAndToken({ role: 'ADMIN' });
+
+        const list = await requester
+            .get('/api/v1/microservice/status')
+            .set('Authorization', `Bearer ${token}`);
         list.status.should.equal(200);
         list.body.should.be.an('array').and.lengthOf(0);
     });
 
     it('Getting a list of statuses with created microservice should return the result', async () => {
+        const { token } = await createUserAndToken({ role: 'ADMIN' });
+
         await createMicroservice();
 
-        const list = await getListStatus();
+        const list = await requester
+            .get('/api/v1/microservice/status')
+            .set('Authorization', `Bearer ${token}`);
+
         list.status.should.equal(200);
         list.body.should.be.an('array').and.length.above(0);
 
@@ -67,8 +70,9 @@ describe('Microservice status calls', () => {
     });
 
     afterEach(async () => {
-        Microservice.deleteMany({}).exec();
-        Endpoint.deleteMany({}).exec();
+        await MicroserviceModel.deleteMany({}).exec();
+        await EndpointModel.deleteMany({}).exec();
+        await UserModel.deleteMany({}).exec();
 
         if (!nock.isDone()) {
             throw new Error(`Not all nock interceptors were used: ${nock.pendingMocks()}`);

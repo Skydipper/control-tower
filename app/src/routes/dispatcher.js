@@ -1,16 +1,11 @@
 const Router = require('koa-router');
 const logger = require('logger');
-const config = require('config');
-const Promise = require('bluebird');
-const JWT = Promise.promisifyAll(require('jsonwebtoken'));
-const UserModel = require('plugins/sd-ct-oauth-plugin/models/user.model');
 const DispatcherService = require('services/dispatcher.service.js');
 const EndpointNotFound = require('errors/endpointNotFound');
 const NotAuthenticated = require('errors/notAuthenticated');
 const NotApplicationKey = require('errors/notApplicationKey');
 const FilterError = require('errors/filterError');
 const fs = require('fs');
-const { isEqual } = require('lodash');
 
 const router = new Router();
 const requestPromise = require('request-promise');
@@ -206,64 +201,14 @@ class DispatcherRouter {
 
 }
 
-// eslint-disable-next-line consistent-return
-async function isTokenValid(ctx, next) {
-    if (ctx.state && ctx.state.user && ctx.state.user.id !== 'microservice') {
-        const checkList = ['id', 'role', 'extraUserData', 'email'];
-
-        const user = await UserModel.findById(ctx.state.user.id);
-
-        if (!user) {
-            return ctx.throw(401, 'Your token is outdated, please use /auth/login to generate a new one');
-        }
-
-        // eslint-disable-next-line consistent-return
-        checkList.forEach((property) => {
-            if (!user[property] || !isEqual(user[property], ctx.state.user[property])) {
-                return ctx.throw(401, 'Your token is outdated, please use /auth/login to generate a new one');
-            }
-        });
-    }
-
-    return next();
-}
-
-async function authMicroservice(ctx, next) {
-    if (ctx.headers && ctx.headers.authentication) {
-        logger.debug('Attempting to authenticate microservice with token: ', ctx.headers.authentication);
-        try {
-            const service = await JWT.verify(ctx.headers.authentication, config.get('jwt.token'));
-            if (service) {
-                ctx.state.microservice = {
-                    id: service.id,
-                    name: service.name,
-                    url: service.url,
-                };
-            }
-        } catch (err) {
-            const errorJson = {
-                errorMessage: err.message,
-                authHeader: ctx.headers.authentication,
-                originalRequest: ctx.request.url,
-                method: ctx.request.method,
-                body: ctx.request.body
-            };
-
-            logger.error('Invalid authorization token from microservice: ', JSON.stringify(errorJson));
-        }
-    }
-
-    await next();
-}
-
 router.get('/healthz', async (ctx) => {
     ctx.body = 'OK';
 });
 
-router.get('/*', authMicroservice, isTokenValid, DispatcherRouter.dispatch);
-router.post('/*', authMicroservice, isTokenValid, DispatcherRouter.dispatch);
-router.delete('/*', authMicroservice, isTokenValid, DispatcherRouter.dispatch);
-router.put('/*', authMicroservice, isTokenValid, DispatcherRouter.dispatch);
-router.patch('/*', authMicroservice, isTokenValid, DispatcherRouter.dispatch);
+router.get('/*', DispatcherRouter.dispatch);
+router.post('/*', DispatcherRouter.dispatch);
+router.delete('/*', DispatcherRouter.dispatch);
+router.put('/*', DispatcherRouter.dispatch);
+router.patch('/*', DispatcherRouter.dispatch);
 
 module.exports = router;

@@ -3,11 +3,8 @@ const debug = require('debug')('oauth-plugin');
 const mongoose = require('mongoose');
 const jwt = require('koa-jwt');
 const views = require('koa-views');
-const Promise = require('bluebird');
-const JWT = Promise.promisifyAll(require('jsonwebtoken'));
 const passportService = require('./services/passport.service');
 const apiRouter = require('./auth.router');
-
 const authServiceFunc = require('./services/auth.service');
 
 function init() {
@@ -22,6 +19,7 @@ function middleware(app, plugin, generalConfig) {
     passportService(plugin, connection);
     app.use(passport.initialize());
     app.use(passport.session());
+
     if (plugin.config.jwt.active) {
         debug('JWT active');
         app.use(jwt({
@@ -29,25 +27,20 @@ function middleware(app, plugin, generalConfig) {
             passthrough: plugin.config.jwt.passthrough,
             isRevoked: AuthService.checkRevokedToken
         }));
+
+        // eslint-disable-next-line consistent-return
         app.use(async (ctx, next) => {
-            if (ctx.headers && ctx.headers.authentication) {
-                debug('Authenticated microservice with token: ', ctx.headers.authentication);
-                try {
-                    const service = await JWT.verify(ctx.headers.authentication, plugin.config.jwt.secret);
-                    if (service) {
-                        ctx.state.microservice = {
-                            id: service.id,
-                            name: service.name,
-                            url: service.url,
-                        };
-                    }
-                } catch (err) {
-                    debug('Token invalid', err);
-                }
+            if (ctx.state.jwtOriginalError && ctx.state.jwtOriginalError.message === 'Token revoked') {
+                return ctx.throw(401, 'Your token is outdated, please use /auth/login to generate a new one');
             }
+            if (ctx.state.jwtOriginalError && ctx.state.jwtOriginalError.message === 'jwt malformed') {
+                return ctx.throw(401, 'Your token is invalid, please use /auth/login to generate a new one');
+            }
+
             await next();
         });
     }
+
     app.use(apiRouter(plugin, connection, generalConfig).middleware());
 
 }

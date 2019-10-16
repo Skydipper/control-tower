@@ -4,6 +4,7 @@ const JWT = Promise.promisifyAll(require('jsonwebtoken'));
 const bcrypt = require('bcrypt');
 const crypto = require('crypto');
 const mongoose = require('mongoose');
+const { isEqual } = require('lodash');
 
 const { ObjectId } = mongoose.Types;
 
@@ -175,7 +176,7 @@ function authService(plugin, connection) {
                     user.role = data.role;
                 }
                 if (data.extraUserData && data.extraUserData.apps) {
-                    user.extraUserData = { ...user.extraUserData, apps: data.extraUserData.apps};
+                    user.extraUserData = { ...user.extraUserData, apps: data.extraUserData.apps };
                 }
             }
 
@@ -363,19 +364,32 @@ function authService(plugin, connection) {
 
         static async checkRevokedToken(ctx, payload, token) {
             debug('Checking if token is revoked');
-            try {
-                debug('token', token);
-                const find = await BlackListModel.findOne({ token });
+            const blacklistedToken = await BlackListModel.findOne({ token });
 
-                if (find) {
-                    debug('Token revoked!!!!');
-                    return true;
-                }
-                return false;
-            } catch (e) {
-                debug(e);
+            if (blacklistedToken) {
+                debug('Token blacklisted!');
                 return true;
             }
+
+            let isRevoked = false;
+            if (payload.id !== 'microservice') {
+                const checkList = ['id', 'role', 'extraUserData', 'email'];
+
+                const user = await UserModel.findById(payload.id);
+
+                if (!user) {
+                    return true;
+                }
+
+                // eslint-disable-next-line consistent-return
+                checkList.forEach((property) => {
+                    if (!user[property] || !isEqual(user[property], payload[property])) {
+                        isRevoked = true;
+                    }
+                });
+            }
+
+            return isRevoked;
         }
 
         static async updateApplicationsUser(id, applications) {
