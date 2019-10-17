@@ -20,12 +20,42 @@ function middleware(app, plugin, generalConfig) {
     app.use(passport.initialize());
     app.use(passport.session());
 
+    const getToken = (ctx, opts) => {
+        // External requests use the standard 'authorization' header, but internal requests use 'authentication' instead
+        // so we need a custom function to load the token. Why don't we use authorization on both will always elude me...
+
+        if (!ctx.header || (!ctx.header.authorization && !ctx.header.authentication)) {
+            return;
+        }
+
+        if (ctx.header.authentication) {
+            // eslint-disable-next-line consistent-return
+            return ctx.header.authentication;
+        }
+
+        const parts = ctx.header.authorization.split(' ');
+
+        if (parts.length === 2) {
+            const scheme = parts[0];
+            const credentials = parts[1];
+
+            if (/^Bearer$/i.test(scheme)) {
+                // eslint-disable-next-line consistent-return
+                return credentials;
+            }
+        }
+        if (!opts.passthrough) {
+            ctx.throw(401, 'Bad Authorization header format. Format is "Authorization: Bearer <token>"');
+        }
+    };
+
     if (plugin.config.jwt.active) {
         debug('JWT active');
         app.use(jwt({
             secret: plugin.config.jwt.secret,
             passthrough: plugin.config.jwt.passthrough,
-            isRevoked: AuthService.checkRevokedToken
+            isRevoked: AuthService.checkRevokedToken,
+            getToken
         }));
 
         // eslint-disable-next-line consistent-return
