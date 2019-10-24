@@ -1,6 +1,6 @@
 const nock = require('nock');
 const chai = require('chai');
-const jwt = require('jsonwebtoken');
+const JWT = require('jsonwebtoken');
 
 const UserModel = require('plugins/sd-ct-oauth-plugin/models/user.model');
 const { getTestAgent, closeTestAgent } = require('./../test-server');
@@ -169,7 +169,7 @@ describe('Google auth endpoint tests', () => {
         response.body.should.be.an('object');
         response.body.should.have.property('token').and.be.a('string');
 
-        jwt.verify(response.body.token, process.env.JWT_SECRET);
+        JWT.verify(response.body.token, process.env.JWT_SECRET);
 
         const userWithToken = await UserModel.findOne({ email: 'john.doe@vizzuality.com' }).exec();
         should.exist(userWithToken);

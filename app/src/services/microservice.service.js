@@ -11,6 +11,7 @@ const crypto = require('crypto');
 const pathToRegexp = require('path-to-regexp');
 const NotificationService = require('services/notification.service.js');
 const JWT = require('jsonwebtoken');
+const { promisify } = require('util');
 
 const MICRO_STATUS_PENDING = 'pending';
 const MICRO_STATUS_ACTIVE = 'active';
@@ -171,8 +172,7 @@ class Microservice {
     }
 
     static async generateToken(micro) {
-        const token = JWT.sign(micro.toJSON(), config.get('jwt.token'), {});
-        return token;
+        return promisify(JWT.sign)(micro.toJSON(), config.get('jwt.token'), {});
     }
 
     static async getInfoMicroservice(micro, version) {

@@ -132,7 +132,7 @@ describe('Dispatch PUT requests with filters', () => {
         createMockEndpointWithBody('/api/v1/dataset', {
             body: {
                 foo: 'bar',
-                loggedUser: getUserFromToken(token, false),
+                loggedUser: await getUserFromToken(token, false),
                 dataset: { body: { data: { foo: 'bar' } } },
             }
         });
@@ -217,7 +217,7 @@ describe('Dispatch PUT requests with filters', () => {
         createMockEndpointWithBody('/api/v1/dataset', {
             body: {
                 foo: 'bar',
-                loggedUser: getUserFromToken(token, false),
+                loggedUser: await getUserFromToken(token, false),
                 dataset: { body: { data: { foo: 'bar' } } },
             }
         });

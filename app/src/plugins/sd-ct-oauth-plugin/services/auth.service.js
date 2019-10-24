@@ -4,6 +4,7 @@ const bcrypt = require('bcrypt');
 const crypto = require('crypto');
 const mongoose = require('mongoose');
 const { isEqual } = require('lodash');
+const { promisify } = require('util');
 
 const { ObjectId } = mongoose.Types;
 
@@ -83,7 +84,7 @@ function authService(plugin, connection) {
                         photo: userData.photo,
                         name: userData.name
                     };
-                    token = await JWT.sign(dataToken, plugin.config.jwt.secret, options);
+                    token = await promisify(JWT.sign)(dataToken, plugin.config.jwt.secret, options);
                     if (saveInUser) {
                         await WhiteListModel.deleteOne({ token: userData.userToken });
                         userData.userToken = token;
@@ -93,7 +94,7 @@ function authService(plugin, connection) {
                     const dataToken = { ...user };
                     delete dataToken.exp;
                     dataToken.createdAt = Date.now();
-                    token = await JWT.sign(dataToken, plugin.config.jwt.secret, options);
+                    token = await promisify(JWT.sign)(dataToken, plugin.config.jwt.secret, options);
                 }
                 await new WhiteListModel({ token }).save();
 

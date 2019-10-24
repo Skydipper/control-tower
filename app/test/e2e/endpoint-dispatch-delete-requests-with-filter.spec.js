@@ -132,7 +132,7 @@ describe('Dispatch DELETE requests with filters', () => {
             method: 'delete'
         });
 
-        createMockEndpointWithBody(`/api/v1/dataset?foo=bar&dataset=${JSON.stringify({ body: { data: { foo: 'bar' } } })}&loggedUser=${getUserFromToken(token)}`, {
+        createMockEndpointWithBody(`/api/v1/dataset?foo=bar&dataset=${JSON.stringify({ body: { data: { foo: 'bar' } } })}&loggedUser=${await getUserFromToken(token)}`, {
             method: 'delete'
         });
         const response = await requester
@@ -206,7 +206,7 @@ describe('Dispatch DELETE requests with filters', () => {
             body: { loggedUser: null },
             response: { body: { data: { foo: 'bar' } } }
         });
-        createMockEndpointWithBody(`/api/v1/dataset?foo=bar&dataset=${JSON.stringify({ body: { data: { foo: 'bar' } } })}&loggedUser=${getUserFromToken(token)}`, {
+        createMockEndpointWithBody(`/api/v1/dataset?foo=bar&dataset=${JSON.stringify({ body: { data: { foo: 'bar' } } })}&loggedUser=${await getUserFromToken(token)}`, {
             method: 'delete'
         });
         const response = await requester
@@ -244,7 +244,7 @@ describe('Dispatch DELETE requests with filters', () => {
             body: { loggedUser: null },
             response: { body: { data: { foo: 'bar' } } }
         });
-        createMockEndpointWithBody(`/api/v1/dataset?foo=bar&dataset=${JSON.stringify({ body: { data: { foo: 'bar' } } })}&loggedUser=${getUserFromToken(token)}`, {
+        createMockEndpointWithBody(`/api/v1/dataset?foo=bar&dataset=${JSON.stringify({ body: { data: { foo: 'bar' } } })}&loggedUser=${await getUserFromToken(token)}`, {
             method: 'delete'
         });
 
@@ -384,7 +384,7 @@ describe('Dispatch DELETE requests with filters', () => {
             method: 'delete',
             response: { body: { data: { boo: 'tar' } } }
         });
-        createMockEndpointWithBody(`/api/v1/dataset?foo=bar&dataset=${JSON.stringify({ body: { data: { foo: 'bar' } } })}&loggedUser=${getUserFromToken(token)}&widget=${JSON.stringify({ body: { data: { boo: 'tar' } } })}`, {
+        createMockEndpointWithBody(`/api/v1/dataset?foo=bar&dataset=${JSON.stringify({ body: { data: { foo: 'bar' } } })}&loggedUser=${await getUserFromToken(token)}&widget=${JSON.stringify({ body: { data: { boo: 'tar' } } })}`, {
             method: 'delete'
         });
 

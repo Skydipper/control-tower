@@ -2,8 +2,6 @@ const logger = require('logger');
 const { promisify } = require('util');
 const JWT = require('jsonwebtoken');
 
-const verifyAsync = promisify(JWT.verify);
-
 function init() {
 
 }
@@ -23,7 +21,7 @@ function middleware(app, plugin) {
                 ctx.state.appKey = JSON.parse(token);
             } else {
                 try {
-                    const appKey = await verifyAsync(token, plugin.config.secret);
+                    const appKey = await promisify(JWT.verify)(token, plugin.config.secret);
                     if (appKey) {
                         ctx.state.appKey = appKey;
                     }

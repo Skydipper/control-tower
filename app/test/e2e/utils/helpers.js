@@ -8,6 +8,7 @@ const VersionModel = require('models/version.model');
 const appConstants = require('app.constants');
 // eslint-disable-next-line import/order
 const JWT = require('jsonwebtoken');
+const { promisify } = require('util');
 const UserModel = require('plugins/sd-ct-oauth-plugin/models/user.model');
 const TempUserModel = require('plugins/sd-ct-oauth-plugin/models/user-temp.model');
 const PluginModel = require('models/plugin.model');
@@ -33,7 +34,7 @@ const createUser = (userData) => ({
     ...userData
 });
 
-const createTokenForUser = (tokenData) => JWT.sign(tokenData, process.env.JWT_SECRET);
+const createTokenForUser = (tokenData) => promisify(JWT.sign)(tokenData, process.env.JWT_SECRET);
 
 const createUserInDB = async (userData) => {
     // eslint-disable-next-line no-undef
@@ -53,13 +54,13 @@ const createUserInDB = async (userData) => {
 
 const createUserAndToken = async (userData) => {
     const user = await createUserInDB(userData);
-    const token = createTokenForUser(user);
+    const token = await createTokenForUser(user);
 
     return { user, token };
 };
 
-const getUserFromToken = (token, isString = true) => {
-    const userData = JWT.verify(token, process.env.JWT_SECRET);
+const getUserFromToken = async (token, isString = true) => {
+    const userData = await promisify(JWT.verify)(token, process.env.JWT_SECRET);
     return isString ? JSON.stringify(userData) : userData;
 };
 
