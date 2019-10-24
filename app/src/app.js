@@ -1,6 +1,7 @@
 const Koa = require('koa');
 const logger = require('logger');
 const koaLogger = require('koa-logger');
+const koaBody = require('koa-body');
 const config = require('config');
 const mongoose = require('mongoose');
 const loader = require('loader');
@@ -8,13 +9,14 @@ const path = require('path');
 const convert = require('koa-convert');
 const sleep = require('sleep');
 const cors = require('@koa/cors');
+const mongooseOptions = require('../../config/mongoose');
 
 // const nock = require('nock');
 // nock.recorder.rec();
 
 const mongoUri = process.env.CT_MONGO_URI || `mongodb://${config.get('mongodb.host')}:${config.get('mongodb.port')}/${config.get('mongodb.database')}`;
 
-const koaBody = require('koa-body')({
+const koaBodyMiddleware = koaBody({
     multipart: true,
     jsonLimit: '50mb',
     formLimit: '50mb',
@@ -35,10 +37,11 @@ async function init() {
         async function onDbReady(err) {
             if (err) {
                 if (retries >= 0) {
+                    // eslint-disable-next-line no-plusplus
                     retries--;
                     logger.error(`Failed to connect to MongoDB uri ${mongoUri}, retrying...`);
                     sleep.sleep(5);
-                    mongoose.connect(mongoUri, { useNewUrlParser: true }, onDbReady);
+                    mongoose.connect(mongoUri, mongooseOptions, onDbReady);
                 } else {
                     logger.error('MongoURI', mongoUri);
                     logger.error(err);
@@ -47,9 +50,6 @@ async function init() {
 
                 return;
             }
-
-            // set promises in mongoose with bluebird
-            mongoose.Promise = Promise;
 
             logger.info('Executing migration...');
             try {
@@ -63,7 +63,7 @@ async function init() {
                 credentials: true
             }));
 
-            app.use(convert(koaBody));
+            app.use(convert(koaBodyMiddleware));
             await loader.loadPlugins(app);
             app.use(koaLogger());
 
@@ -76,7 +76,7 @@ async function init() {
         }
 
         logger.info(`Connecting to MongoDB URL ${mongoUri}`);
-        mongoose.connect(mongoUri, { useNewUrlParser: true }, onDbReady);
+        mongoose.connect(mongoUri, mongooseOptions, onDbReady);
     });
 }
 

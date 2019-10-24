@@ -1,6 +1,5 @@
 const debug = require('debug')('oauth-plugin');
-const Promise = require('bluebird');
-const JWT = Promise.promisifyAll(require('jsonwebtoken'));
+const JWT = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
 const crypto = require('crypto');
 const mongoose = require('mongoose');
@@ -210,7 +209,7 @@ function authService(plugin, connection) {
                 await WhiteListModel.deleteOne({ token: user.userToken });
             }
 
-            return user.remove();
+            return user.deleteOne();
         }
 
         static async existEmail(email) {

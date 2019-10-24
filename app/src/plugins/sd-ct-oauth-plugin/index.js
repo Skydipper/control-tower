@@ -6,6 +6,7 @@ const views = require('koa-views');
 const passportService = require('./services/passport.service');
 const apiRouter = require('./auth.router');
 const authServiceFunc = require('./services/auth.service');
+const mongooseOptions = require('../../../../config/mongoose');
 
 function init() {
 
@@ -13,7 +14,7 @@ function init() {
 
 function middleware(app, plugin, generalConfig) {
     debug('Loading oauth-plugin');
-    const connection = mongoose.createConnection(`${generalConfig.mongoUri}`);
+    const connection = mongoose.createConnection(`${generalConfig.mongoUri}`, mongooseOptions);
     const AuthService = authServiceFunc(plugin, connection);
     app.use(views(`${__dirname}/views`, { extension: 'ejs' }));
     passportService(plugin, connection);

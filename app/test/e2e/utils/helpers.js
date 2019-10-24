@@ -12,6 +12,7 @@ const UserModel = require('plugins/sd-ct-oauth-plugin/models/user.model');
 const TempUserModel = require('plugins/sd-ct-oauth-plugin/models/user-temp.model');
 const PluginModel = require('models/plugin.model');
 const { endpointTest } = require('../test.constants');
+const mongooseOptions = require('../../../../config/mongoose');
 
 const mongoUri = process.env.CT_MONGO_URI || `mongodb://${config.get('mongodb.host')}:${config.get('mongodb.port')}/${config.get('mongodb.database')}`;
 const getUUID = () => Math.random().toString(36).substring(7);
@@ -127,7 +128,7 @@ const ensureCorrectError = ({ body }, errMessage, expectedStatus) => {
     body.errors[0].should.have.property('status').and.equal(expectedStatus);
 };
 
-const updateVersion = () => VersionModel.update({
+const updateVersion = () => VersionModel.updateOne({
     name: appConstants.ENDPOINT_VERSION,
 }, {
     $set: {
@@ -156,7 +157,7 @@ async function setPluginSetting(pluginName, settingKey, settingValue) {
             return Plugin.updateOne({ name: pluginName }, { $set: newConfig }).exec().then(resolve);
         }
 
-        mongoose.connect(mongoUri, { useNewUrlParser: true }, onDbReady);
+        mongoose.connect(mongoUri, mongooseOptions, onDbReady);
     });
 }
 

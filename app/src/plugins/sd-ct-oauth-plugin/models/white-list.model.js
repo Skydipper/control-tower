@@ -1,9 +1,6 @@
 const mongoose = require('mongoose');
 
 const { Schema } = mongoose;
-const bluebird = require('bluebird');
-
-mongoose.Promise = bluebird;
 
 let whiteList = null;
 

@@ -62,7 +62,7 @@ describe('Authorization tests', () => {
         await createEndpoint();
 
         const { user, token } = await createUserAndToken();
-        await UserModel.update({ _id: user.id }, { $set: { role: 'ADMIN' } });
+        await UserModel.updateOne({ _id: user.id }, { $set: { role: 'ADMIN' } });
 
         const result = await requester.post('/api/v1/dataset').set('Authorization', `Bearer ${token}`);
         ensureCorrectError(result, 'Your token is outdated. Please use /auth/login to login and /auth/generate-token to generate a new token.', 401);
@@ -73,7 +73,7 @@ describe('Authorization tests', () => {
         await createEndpoint({ authenticated: true });
 
         const { user, token } = await createUserAndToken();
-        await UserModel.update({ _id: user.id }, { $set: { email: 'test123' } });
+        await UserModel.updateOne({ _id: user.id }, { $set: { email: 'test123' } });
 
         const result = await requester.post('/api/v1/dataset').set('Authorization', `Bearer ${token}`);
         ensureCorrectError(result, 'Your token is outdated. Please use /auth/login to login and /auth/generate-token to generate a new token.', 401);
@@ -84,7 +84,7 @@ describe('Authorization tests', () => {
         await createEndpoint({ authenticated: true });
 
         const { user, token } = await createUserAndToken();
-        await UserModel.update({ _id: user.id }, { $set: { extraUserData: [] } });
+        await UserModel.updateOne({ _id: user.id }, { $set: { extraUserData: [] } });
 
         const result = await requester.post('/api/v1/dataset').set('Authorization', `Bearer ${token}`);
         ensureCorrectError(result, 'Your token is outdated. Please use /auth/login to login and /auth/generate-token to generate a new token.', 401);
