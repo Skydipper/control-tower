@@ -1,6 +1,5 @@
 const SparkPost = require('sparkpost');
 const debug = require('debug')('oauth-plugin');
-const Promise = require('bluebird');
 
 function mailService(plugin) {
 

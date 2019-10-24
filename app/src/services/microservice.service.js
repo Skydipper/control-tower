@@ -10,8 +10,7 @@ const url = require('url');
 const crypto = require('crypto');
 const pathToRegexp = require('path-to-regexp');
 const NotificationService = require('services/notification.service.js');
-const Promise = require('bluebird');
-const JWT = Promise.promisifyAll(require('jsonwebtoken'));
+const JWT = require('jsonwebtoken');
 
 const MICRO_STATUS_PENDING = 'pending';
 const MICRO_STATUS_ACTIVE = 'active';
@@ -378,7 +377,7 @@ class Microservice {
             return;
         }
         for (let i = 0, { length } = micro.endpoints; i < length; i++) {
-            await EndpointModel.remove({
+            await EndpointModel.deleteMany({
                 method: micro.endpoints[i].method,
                 path: micro.endpoints[i].path,
                 toDelete: true
@@ -483,7 +482,7 @@ class Microservice {
             }
         }
         logger.info('Updating version of ENDPOINT_VERSION');
-        await VersionModel.update({
+        await VersionModel.updateOne({
             name: appConstants.ENDPOINT_VERSION,
         }, {
             $set: {
