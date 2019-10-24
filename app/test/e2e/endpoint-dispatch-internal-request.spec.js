@@ -49,7 +49,7 @@ describe('Dispatch internal requests', () => {
             response: { body: { data: { foo: 'bar' } } },
             method: 'get'
         });
-        createMockEndpointWithBody(`/api/v1/dataset?foo=bar&dataset=${JSON.stringify({ body: { data: { foo: 'bar' } } })}&loggedUser=${getUserFromToken(token)}`, {
+        createMockEndpointWithBody(`/api/v1/dataset?foo=bar&dataset=${JSON.stringify({ body: { data: { foo: 'bar' } } })}&loggedUser=${await getUserFromToken(token)}`, {
             method: 'get'
         });
         const response = await requester
