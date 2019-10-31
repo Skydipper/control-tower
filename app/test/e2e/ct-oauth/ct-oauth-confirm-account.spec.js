@@ -66,7 +66,7 @@ describe('OAuth endpoints tests - Confirm account', () => {
         response.status.should.equal(200);
         response.header['content-type'].should.equal('application/json; charset=utf-8');
 
-        const responseUser = response.body;
+        const responseUser = response.body.data;
         responseUser.should.have.property('email').and.equal('test@example.com');
         responseUser.should.have.property('role').and.equal('USER');
         responseUser.should.have.property('extraUserData').and.be.an('object');
@@ -91,7 +91,7 @@ describe('OAuth endpoints tests - Confirm account', () => {
         response.status.should.equal(200);
         response.header['content-type'].should.equal('application/json; charset=utf-8');
 
-        const responseUser = response.body;
+        const responseUser = response.body.data;
         responseUser.should.have.property('email').and.equal('test@example.com');
         responseUser.should.have.property('role').and.equal('USER');
         responseUser.should.have.property('extraUserData').and.be.an('object');
