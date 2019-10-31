@@ -16,7 +16,7 @@ let requester;
 nock.disableNetConnect();
 nock.enableNetConnect(process.env.HOST_IP);
 
-describe('OAuth endpoints tests - Sign up without auth', () => {
+describe('OAuth endpoints tests - Sign up with HTML UI', () => {
 
     before(async () => {
         if (process.env.NODE_ENV !== 'test') {
@@ -251,6 +251,69 @@ describe('OAuth endpoints tests - Sign up without auth', () => {
 
         const response = await requester
             .post(`/auth/sign-up`)
+            .set('Authorization', `Bearer ${token}`)
+            .type('form')
+            .send({
+                email: 'someotheremail@gmail.com',
+                password: 'somepassword',
+                repeatPassword: 'somepassword',
+                apps: ['rw']
+            });
+
+        response.status.should.equal(200);
+        response.text.should.include('Registration successful');
+        response.text.should.include('We\'ve sent you an email. Click the link in it to confirm your account.');
+
+        const user = await UserTempModel.findOne({ email: 'someotheremail@gmail.com' }).exec();
+        should.exist(user);
+        user.should.have.property('email').and.equal('someotheremail@gmail.com');
+        user.should.have.property('role').and.equal('USER');
+        // eslint-disable-next-line
+        user.should.have.property('confirmationToken').and.not.be.empty;
+        user.should.have.property('extraUserData').and.be.an('object');
+        user.extraUserData.apps.should.be.an('array').and.contain('rw');
+    });
+
+    // User registration - with app
+    it('Registering a user with correct data, app and a custom origin returns a 200 and sends the email with the corresponding logo', async () => {
+        const { token } = await createUserAndToken({ role: 'ADMIN' });
+
+        nock('https://api.sparkpost.com')
+            .post('/api/v1/transmissions', (body) => {
+                const expectedRequestBody = {
+                    content: {
+                        template_id: 'confirm-user'
+                    },
+                    recipients: [
+                        {
+                            address: {
+                                email: 'someotheremail@gmail.com'
+                            }
+                        }
+                    ],
+                    substitution_data: {
+                        fromName: 'GFW',
+                        appName: 'GFW',
+                        logo: 'https://www.globalforestwatch.org/packs/gfw-9c5fe396ee5b15cb5f5b639a7ef771bd.png'
+                    }
+                };
+
+                body.should.have.property('substitution_data').and.be.an('object');
+                body.substitution_data.should.have.property('urlConfirm').and.include(`${process.env.PUBLIC_URL}/auth/confirm/`);
+
+                delete body.substitution_data.urlConfirm;
+
+                body.should.deep.equal(expectedRequestBody);
+
+                return isEqual(body, expectedRequestBody);
+            })
+            .reply(200);
+
+        const missingUser = await UserTempModel.findOne({ email: 'someotheremail@gmail.com' }).exec();
+        should.not.exist(missingUser);
+
+        const response = await requester
+            .post(`/auth/sign-up?origin=gfw`)
             .set('Authorization', `Bearer ${token}`)
             .type('form')
             .send({
