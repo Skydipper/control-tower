@@ -444,7 +444,7 @@ module.exports = (plugin, connection, generalConfig) => {
                 ctx.redirect(plugin.config.local.confirmUrlRedirect);
                 return;
             }
-            ctx.body = user;
+            ctx.body = UserSerializer.serialize(user);
         }
 
         async function loginView(ctx) {
