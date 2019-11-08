@@ -1,3 +1,4 @@
+- Add healthcheck endpoint and readiness+liveliness checks to k8s config
 - Serialize user on response to account confirmation.
 
 # 2.0.7
