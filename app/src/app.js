@@ -9,6 +9,7 @@ const path = require('path');
 const convert = require('koa-convert');
 const sleep = require('sleep');
 const cors = require('@koa/cors');
+const koaSimpleHealthCheck = require('koa-simple-healthcheck');
 const mongooseOptions = require('../../config/mongoose');
 
 // const nock = require('nock');
@@ -66,6 +67,7 @@ async function init() {
             app.use(convert(koaBodyMiddleware));
             await loader.loadPlugins(app);
             app.use(koaLogger());
+            app.use(koaSimpleHealthCheck());
 
             loader.loadRoutes(app);
             app.use(require('routes/dispatcher.js').middleware()); // eslint-disable-line global-require
