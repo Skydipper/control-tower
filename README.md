@@ -31,14 +31,14 @@ After that, follow one of the instructions below:
 
 1 - Set up your environment variables. See `dev.env.sample` for a list of variables you should set, which are described in detail in [this section](#documentation-environment-variables) of the documentation. Native execution will NOT load the `dev.env` file content, so you need to use another way to define those values
 
-2 - Install node dependencies using NPM:
+2 - Install node dependencies using Yarn:
 ```
-npm install
+yarn install
 ```
 
 3 - Start the application server:
 ```
-npm start
+yarn start
 ```
 Control Tower should now be up and accessible. To confirm, open [http://localhost:9000](http://localhost:9000/) (assuming the default settings) on your browser, which should show a 404 'Endpoint not found' message.
 
@@ -70,7 +70,7 @@ There are two ways to run the included tests:
 Follow the instruction above for setting up the runtime environment for native execution, then run:
 
 ```
-npm test
+yarn test
 ```
 
 ### Using Docker
