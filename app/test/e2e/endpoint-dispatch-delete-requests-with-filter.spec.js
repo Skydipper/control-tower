@@ -2,6 +2,7 @@ const chai = require('chai');
 const nock = require('nock');
 const EndpointModel = require('models/endpoint.model');
 const UserModel = require('plugins/sd-ct-oauth-plugin/models/user.model');
+const querystring = require('querystring');
 const { getTestAgent, closeTestAgent } = require('./test-server');
 const {
     endpointTest, testFilter
@@ -11,7 +12,7 @@ const {
 } = require('./utils/helpers');
 const { createMockEndpointWithBody } = require('./mock');
 
-const should = chai.should();
+chai.should();
 
 let requester;
 
@@ -384,9 +385,17 @@ describe('Dispatch DELETE requests with filters', () => {
             method: 'delete',
             response: { body: { data: { boo: 'tar' } } }
         });
-        createMockEndpointWithBody(`/api/v1/dataset?foo=bar&dataset=${JSON.stringify({ body: { data: { foo: 'bar' } } })}&loggedUser=${await getUserFromToken(token)}&widget=${JSON.stringify({ body: { data: { boo: 'tar' } } })}`, {
-            method: 'delete'
+        const queryString = querystring.stringify({
+            dataset: JSON.stringify({ body: { data: { foo: 'bar' } } }),
+            loggedUser: await getUserFromToken(token),
+            widget: JSON.stringify({ body: { data: { boo: 'tar' } } }),
+            foo: 'bar'
         });
+
+        createMockEndpointWithBody(`/api/v1/dataset?${queryString}`,
+            {
+                method: 'delete'
+            });
 
         const response = await requester
             .delete('/api/v1/dataset')

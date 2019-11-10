@@ -1,3 +1,4 @@
+/* eslint-disable import/no-dynamic-require  */
 const logger = require('logger');
 const Plugin = require('models/plugin.model');
 const fs = require('fs');
@@ -22,7 +23,7 @@ async function loadPlugins(app) {
     plugins.forEach((plugin) => {
         try {
             logger.info(`Loading ${plugin.name} plugin`);
-            require(plugin.mainFile).middleware(app, plugin, generalConfig); // eslint-disable-line global-require
+            require(plugin.mainFile).middleware(app, plugin, generalConfig);
         } catch (e) {
             logger.error(e);
             throw e;

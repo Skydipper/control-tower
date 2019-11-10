@@ -11,7 +11,7 @@ const {
 const { createMockEndpoint } = require('../mock');
 const { TOKENS } = require('./../test.constants');
 
-const should = chai.should();
+chai.should();
 
 let requester;
 

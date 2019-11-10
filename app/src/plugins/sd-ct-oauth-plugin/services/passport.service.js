@@ -98,7 +98,7 @@ function passportService(plugin) {
 
     if (plugin.config.local && plugin.config.local.active) {
         debug('Loading local strategy');
-        const login = async function (username, password, done) {
+        const login = async function login(username, password, done) {
             const user = await UserModel.findOne({
                 email: username,
                 provider: 'local'

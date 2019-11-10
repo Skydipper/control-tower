@@ -17,7 +17,7 @@ class StatisticService {
             if (statistics[i].ip && statistics[i].ip.indexOf('127.0.0.1') === -1) {
                 let { ip } = statistics[i];
                 if (ip.indexOf(',') >= 0) {
-                    ip = ip.split(',')[1];
+                    [, ip] = ip.split(',');
                 }
                 const geo = geoip.lookup(ip);
                 if (geo) {

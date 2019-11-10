@@ -9,7 +9,7 @@ const {
 } = require('./utils/helpers');
 const { createMockEndpointWithBody } = require('./mock');
 
-const should = chai.should();
+chai.should();
 let requester;
 
 describe('Dispatch internal requests', () => {

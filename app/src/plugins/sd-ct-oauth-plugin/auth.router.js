@@ -19,7 +19,7 @@ module.exports = (plugin, connection, generalConfig) => {
 
     const getUser = (ctx) => ctx.req.user || ctx.state.user || ctx.state.microservice;
 
-    const getOriginApp = (ctx, plugin) => {
+    const getOriginApp = (ctx, pluginData) => {
         if (ctx.query.origin) {
             return ctx.query.origin;
         }
@@ -28,12 +28,12 @@ module.exports = (plugin, connection, generalConfig) => {
             return ctx.session.originApplication;
         }
 
-        return plugin.config.defaultApp;
+        return pluginData.config.defaultApp;
     };
 
-    const getApplicationsConfig = (ctx, plugin) => {
-        const app = getOriginApp(ctx, plugin);
-        const applicationConfig = plugin.config.applications && plugin.config.applications[app];
+    const getApplicationsConfig = (ctx, pluginData) => {
+        const app = getOriginApp(ctx, pluginData);
+        const applicationConfig = pluginData.config.applications && pluginData.config.applications[app];
 
         return applicationConfig;
     };

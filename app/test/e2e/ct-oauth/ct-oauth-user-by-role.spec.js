@@ -8,7 +8,7 @@ const { createUser, createUserAndToken } = require('../utils/helpers');
 const { getTestAgent, closeTestAgent } = require('./../test-server');
 const { TOKENS } = require('./../test.constants');
 
-const should = chai.should();
+chai.should();
 
 let requester;
 

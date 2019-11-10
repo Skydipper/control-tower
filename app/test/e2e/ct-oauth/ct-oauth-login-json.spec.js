@@ -7,7 +7,7 @@ const UserModel = require('plugins/sd-ct-oauth-plugin/models/user.model');
 const { getTestAgent, closeTestAgent } = require('./../test-server');
 const { createUserAndToken, createUserInDB } = require('../utils/helpers');
 
-const should = chai.should();
+chai.should();
 
 let requester;
 

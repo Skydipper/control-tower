@@ -6,7 +6,7 @@ const UserTempModel = require('plugins/sd-ct-oauth-plugin/models/user-temp.model
 const RenewModel = require('plugins/sd-ct-oauth-plugin/models/renew.model');
 const { isEqual } = require('lodash');
 
-const should = chai.should();
+chai.should();
 
 const { getTestAgent, closeTestAgent } = require('./../test-server');
 

@@ -7,14 +7,14 @@ class Notification {
         logger.debug('Initializing notification service');
     }
 
-    async sendAlertMicroserviceDown(name, url, err) {
+    static async sendAlertMicroserviceDown(name, url, err) {
         logger.warn('Microservice down: ', name, url, err.message);
     }
 
-    async sendAlertMicroserviceRestore(name, url) {
+    static async sendAlertMicroserviceRestore(name, url) {
         logger.warn('Microservice restore: ', name, url);
     }
 
 }
 
-module.exports = new Notification();
+module.exports = Notification;

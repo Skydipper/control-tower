@@ -5,7 +5,7 @@ const Endpoint = require('models/endpoint.model');
 const { TOKENS } = require('./test.constants');
 const { getTestAgent, closeTestAgent } = require('./test-server');
 
-const should = chai.should();
+chai.should();
 
 let requester;
 

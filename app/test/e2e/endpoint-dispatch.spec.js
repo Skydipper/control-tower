@@ -6,7 +6,7 @@ const { testAppKey, endpointTest } = require('./test.constants');
 const { createEndpoint, ensureCorrectError, updateVersion } = require('./utils/helpers');
 const { createMockEndpoint, createMockEndpointWithBody, createMockEndpointWithHeaders } = require('./mock');
 
-const should = chai.should();
+chai.should();
 let microservice;
 
 const changeMethod = (method) => ({ ...endpointTest, method, redirect: [{ ...endpointTest.redirect[0], method }] });

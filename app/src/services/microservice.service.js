@@ -124,9 +124,8 @@ class Microservice {
         }
     }
 
-    static generateUrlInfo(urlInfo, token, internalUrl) {
+    static generateUrlInfo(urlInfo) {
         logger.debug('Generating url info to microservice with url', urlInfo);
-        const queryParams = `token=${token}&url=${internalUrl}`;
         if (urlInfo.indexOf('?') >= 0) {
             return `${urlInfo}`;
         }
@@ -181,7 +180,7 @@ class Microservice {
             let urlInfo = url.resolve(micro.url, micro.pathInfo);
             logger.debug('Generating token');
             const token = await Microservice.generateToken(micro);
-            urlInfo = Microservice.generateUrlInfo(urlInfo, token, config.get('server.internalUrl'));
+            urlInfo = Microservice.generateUrlInfo(urlInfo);
             logger.debug(`Doing request to ${urlInfo}`);
 
             let result = await request({
@@ -347,19 +346,17 @@ class Microservice {
                 toDelete: false
             }).exec();
 
-            if (!endpoint) {
-                continue;
-            }
-
-            const redirects = endpoint.redirect.filter((red) => red.url !== micro.url);
-            if (redirects && redirects.length > 0) {
-                logger.debug('Updating endpoint');
-                endpoint.redirect = redirects;
-                await endpoint.save();
-            } else {
-                logger.debug('Endpoint empty. Removing endpoint');
-                endpoint.toDelete = true;
-                await endpoint.save();
+            if (endpoint) {
+                const redirects = endpoint.redirect.filter((red) => red.url !== micro.url);
+                if (redirects && redirects.length > 0) {
+                    logger.debug('Updating endpoint');
+                    endpoint.redirect = redirects;
+                    await endpoint.save();
+                } else {
+                    logger.debug('Endpoint empty. Removing endpoint');
+                    endpoint.toDelete = true;
+                    await endpoint.save();
+                }
             }
         }
     }

@@ -8,7 +8,7 @@ const UserSerializer = require('plugins/sd-ct-oauth-plugin/serializers/user.seri
 const { getTestAgent, closeTestAgent } = require('./../test-server');
 const { createUserAndToken } = require('./../utils/helpers');
 
-const should = chai.should();
+chai.should();
 chai.use(require('chai-datetime'));
 
 let requester;
