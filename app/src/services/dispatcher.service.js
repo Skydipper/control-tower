@@ -30,7 +30,8 @@ class Dispatcher {
         if (ctx.state) {
             if (ctx.state.user) {
                 return ctx.state.user;
-            } if (ctx.state.microservice) {
+            }
+            if (ctx.state.microservice) {
                 return ctx.state.microservice;
             }
         }
@@ -44,6 +45,7 @@ class Dispatcher {
         logger.debug('Building url');
         const result = endpoint.pathRegex.exec(sourcePath);
         let keys = {}; // eslint-disable-line prefer-const
+        // eslint-disable-next-line no-return-assign
         endpoint.pathKeys.map((key, i) => (
             keys[key] = result[i + 1]
         ));
@@ -57,6 +59,7 @@ class Dispatcher {
         logger.debug('Building url');
         const result = endpoint.pathRegex.exec(sourcePath);
         let keys = {}; // eslint-disable-line prefer-const
+        // eslint-disable-next-line no-return-assign
         endpoint.pathKeys.map((key, i) => (
             keys[filterEndpoint.params[key]] = result[i + 1]
         ));
@@ -90,7 +93,8 @@ class Dispatcher {
                     const match = Dispatcher.checkCompare(compare[j], dataFilter, condition);
                     if (match && condition === 'OR') {
                         return true;
-                    } if (!match && condition === 'AND') {
+                    }
+                    if (!match && condition === 'AND') {
                         return false;
                     }
                 }
@@ -114,7 +118,8 @@ class Dispatcher {
         }
         if (condition === 'OR') {
             return false;
-        } if (condition === 'AND') {
+        }
+        if (condition === 'AND') {
             return true;
         }
         return false;
@@ -256,9 +261,9 @@ class Dispatcher {
             logger.fatal('Endpoints is empty');
             return null;
         }
-        const endpoint = CACHE.endpoints.find((endpoint) => {
-            endpoint.pathRegex.lastIndex = 0;
-            return endpoint.method === method && endpoint.pathRegex && endpoint.pathRegex.test(pathname);
+        const endpoint = CACHE.endpoints.find((endpointData) => {
+            endpointData.pathRegex.lastIndex = 0;
+            return endpointData.method === method && endpointData.pathRegex && endpointData.pathRegex.test(pathname);
         });
         if (endpoint) {
             return endpoint.toObject();
@@ -303,7 +308,7 @@ class Dispatcher {
             redirectEndpoint = endpoint.redirect[pos];
         } else {
             logger.debug('Only one redirect found');
-            redirectEndpoint = endpoint.redirect[0];
+            [redirectEndpoint] = endpoint.redirect;
         }
         logger.info('Dispatching request from %s to %s%s private endpoint.',
             parsedUrl.pathname, redirectEndpoint.url, redirectEndpoint.path);

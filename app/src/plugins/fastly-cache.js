@@ -1,5 +1,4 @@
 const logger = require('logger');
-const request = require('request-promise');
 const FastlyPurge = require('fastly-purge');
 
 function init() {

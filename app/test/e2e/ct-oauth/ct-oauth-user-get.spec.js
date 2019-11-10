@@ -4,10 +4,10 @@ const chai = require('chai');
 
 const UserModel = require('plugins/sd-ct-oauth-plugin/models/user.model');
 
-const { createUser, createUserAndToken } = require('../utils/helpers');
+const { createUserAndToken } = require('../utils/helpers');
 const { getTestAgent, closeTestAgent } = require('./../test-server');
 
-const should = chai.should();
+chai.should();
 
 let requester;
 

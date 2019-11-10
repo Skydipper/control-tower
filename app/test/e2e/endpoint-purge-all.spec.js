@@ -5,7 +5,7 @@ const MicroserviceModel = require('models/microservice.model');
 const EndpointModel = require('models/endpoint.model');
 const UserModel = require('plugins/sd-ct-oauth-plugin/models/user.model');
 
-const should = chai.should();
+chai.should();
 
 const { getTestAgent, closeTestAgent } = require('./test-server');
 const { createUserAndToken } = require('./utils/helpers');

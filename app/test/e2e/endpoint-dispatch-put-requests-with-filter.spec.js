@@ -11,7 +11,7 @@ const {
 } = require('./utils/helpers');
 const { createMockEndpointWithBody } = require('./mock');
 
-const should = chai.should();
+chai.should();
 let requester;
 
 
@@ -146,7 +146,7 @@ describe('Dispatch PUT requests with filters', () => {
     });
 
     it('Endpoint with PUT filter that can be verified and matches return a 200 HTTP code (happy case) - Null user is passed as body content', async () => {
-        const { token } = await createUserAndToken({ role: 'USER' });
+        await createUserAndToken({ role: 'USER' });
 
         await updateVersion();
         // eslint-disable-next-line no-useless-escape

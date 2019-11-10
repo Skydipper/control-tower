@@ -32,6 +32,7 @@ class EndpointRouter {
             fastlyPurge.service(SERVICE_ID, (err) => {
                 if (err) {
                     logger.error('Error purging', err);
+                    // eslint-disable-next-line prefer-promise-reject-errors
                     reject({ message: err.message });
                 }
                 resolve();

@@ -6,7 +6,7 @@ const { endpointTest, testFilter } = require('./test.constants');
 const { createEndpoint, ensureCorrectError, updateVersion } = require('./utils/helpers');
 const { createMockEndpointWithBody } = require('./mock');
 
-const should = chai.should();
+chai.should();
 let microservice;
 
 describe('Endpoint dispatch tests', () => {

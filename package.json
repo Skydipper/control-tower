@@ -40,6 +40,8 @@
     "grunt-mocha-test": "^0.13.3",
     "grunt-notify": "^0.4.5",
     "grunt-simple-nyc": "^3.0.1",
+    "husky": "^3.0.9",
+    "lint-staged": "^9.4.2",
     "load-grunt-tasks": "^5.1.0",
     "mocha": "^6.2.0",
     "nock": "^11.3.4",
@@ -94,5 +96,16 @@
     "sleep": "^6.1.0",
     "sparkpost": "^2.1.2",
     "url-parse": "^1.4.3"
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "lint-staged"
+    }
+  },
+  "lint-staged": {
+    "*.js": [
+      "eslint --fix",
+      "git add"
+    ]
   }
 }

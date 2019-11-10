@@ -9,7 +9,7 @@ const UserModel = require('plugins/sd-ct-oauth-plugin/models/user.model');
 const { createUserAndToken, createMicroservice, createEndpoint } = require('./utils/helpers');
 const { getTestAgent, closeTestAgent } = require('./test-server');
 
-const should = chai.should();
+chai.should();
 
 let requester;
 
@@ -304,7 +304,7 @@ describe('Microservices endpoints', () => {
             ],
         };
 
-        const microservice = await createMicroservice(testMicroserviceOne);
+        await createMicroservice(testMicroserviceOne);
         await createEndpoint(
             {
                 pathKeys: [],
