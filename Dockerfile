@@ -1,5 +1,5 @@
-FROM node:12.6-alpine
-MAINTAINER tiago.garcia@vizzuality.com
+FROM node:12-alpine
+MAINTAINER info@vizzuality.com
 
 ENV NAME control-tower
 ENV USER control_tower
@@ -9,11 +9,12 @@ RUN apk update && apk upgrade && \
 
 RUN addgroup $USER && adduser -s /bin/bash -D -G $USER $USER
 
-RUN npm install --unsafe-perm -g grunt-cli bunyan pm2
+RUN yarn global add --unsafe-perm grunt-cli bunyan pm2
 
 RUN mkdir -p /opt/$NAME
 COPY package.json /opt/$NAME/package.json
-RUN cd /opt/$NAME && npm install
+COPY yarn.lock /opt/$NAME/yarn.lock
+RUN cd /opt/$NAME && yarn
 
 COPY entrypoint.sh /opt/$NAME/entrypoint.sh
 COPY config /opt/$NAME/config
