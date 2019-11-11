@@ -4,7 +4,7 @@ services:
     build: .
     ports:
       - "9000:9000"
-    container_name: control-tower
+    container_name: control-tower-test
     environment:
       NODE_ENV: test
       SESSION_KEY: test
