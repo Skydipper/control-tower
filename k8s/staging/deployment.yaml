@@ -17,10 +17,10 @@ spec:
           resources:
             requests:
               cpu: "0.35"
-              memory: "256Mi"
+              memory: "256M"
             limits:
               cpu: "1"
-              memory: "512Gi"
+              memory: "512M"
           args:
             - start
           env:
