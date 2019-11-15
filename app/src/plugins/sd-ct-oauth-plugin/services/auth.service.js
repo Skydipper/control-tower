@@ -1,4 +1,4 @@
-const debug = require('debug')('oauth-plugin');
+const logger = require('logger');
 const JWT = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
 const crypto = require('crypto');
@@ -27,7 +27,8 @@ function authService(plugin, connection) {
 
         static getFilteredQuery(query) {
             const allowedSearchFields = ['name', 'provider', 'email', 'role'];
-            debug('Object.keys(query)', Object.keys(query));
+            logger.info('[AuthService] getFilteredQuery');
+            logger.debug('[AuthService] getFilteredQuery Object.keys(query)', Object.keys(query));
             const filteredSearchFields = Object.keys(query).filter((param) => allowedSearchFields.includes(param));
             const filteredQuery = {};
 
@@ -59,7 +60,7 @@ function authService(plugin, connection) {
 
                 }
             });
-            debug(filteredQuery);
+            logger.debug(filteredQuery);
             return filteredQuery;
         }
 
@@ -100,13 +101,13 @@ function authService(plugin, connection) {
 
                 return token;
             } catch (e) {
-                debug('Error to generate token', e);
+                logger.info('[AuthService] Error to generate token', e);
                 return null;
             }
         }
 
         static async getUsers(app, query) {
-            debug('Get users with app', app);
+            logger.info('[AuthService] Get users with app', app);
 
             const filteredQuery = AuthService.getFilteredQuery({ ...query });
 
@@ -124,7 +125,7 @@ function authService(plugin, connection) {
             const isValidId = mongoose.Types.ObjectId.isValid(id);
 
             if (!isValidId) {
-                debug(`[Auth Service - getUserById] - Invalid id ${id} provided`);
+                logger.info(`[Auth Service - getUserById] - Invalid id ${id} provided`);
                 throw new UnprocessableEntityError(`Invalid id ${id} provided`);
             }
             return UserModel.findById(id).select('-password -salt -userToken -__v').exec();
@@ -155,7 +156,7 @@ function authService(plugin, connection) {
             const isValidId = mongoose.Types.ObjectId.isValid(id);
 
             if (!isValidId) {
-                debug(`[Auth Service - updateUserMe] Invalid id ${id} provided`);
+                logger.info(`[Auth Service - updateUserMe] Invalid id ${id} provided`);
                 throw new UnprocessableEntityError(`Invalid id ${id} provided`);
             }
 
@@ -189,7 +190,7 @@ function authService(plugin, connection) {
             const isValidId = mongoose.Types.ObjectId.isValid(id);
 
             if (!isValidId) {
-                debug(`[Auth Service - deleteUser] Invalid id ${id} provided`);
+                logger.info(`[Auth Service - deleteUser] Invalid id ${id} provided`);
                 throw new UnprocessableEntityError(`Invalid id ${id} provided`);
             }
 
@@ -197,12 +198,12 @@ function authService(plugin, connection) {
             try {
                 user = await UserModel.findById(id).exec();
             } catch (e) {
-                debug(`[Auth Service - deleteUser] Failed to load user by id '${id}'`);
+                logger.info(`[Auth Service - deleteUser] Failed to load user by id '${id}'`);
                 return null;
             }
 
             if (!user) {
-                debug(`[Auth Service - deleteUser] No user found with id '${id}'`);
+                logger.info(`[Auth Service - deleteUser] No user found with id '${id}'`);
                 return null;
             }
 
@@ -240,7 +241,7 @@ function authService(plugin, connection) {
                 extraUserData: { apps }
             }).save();
 
-            debug('Sending mail');
+            logger.info('Sending mail');
             try {
                 await MailService.sendConfirmationMail(
                     {
@@ -251,7 +252,7 @@ function authService(plugin, connection) {
                     generalConfig
                 );
             } catch (err) {
-                debug('Error', err);
+                logger.info('Error', err);
                 throw err;
             }
 
@@ -271,7 +272,7 @@ function authService(plugin, connection) {
                 extraUserData: data.extraUserData,
             }).save();
 
-            debug('Sending mail');
+            logger.info('Sending mail');
             try {
                 await MailService.sendConfirmationMailWithPassword(
                     {
@@ -284,7 +285,7 @@ function authService(plugin, connection) {
                     generalConfig
                 );
             } catch (err) {
-                debug('Error', err);
+                logger.info('Error', err);
                 throw err;
             }
 
@@ -311,17 +312,17 @@ function authService(plugin, connection) {
         }
 
         static async getRenewModel(token) {
-            debug('obtaining renew model of token', token);
+            logger.info('[AuthService]obtaining renew model of token', token);
             const renew = await RenewModel.findOne({ token });
             return renew;
         }
 
         static async sendResetMail(email, generalConfig, originApp) {
-            debug('Generating token to email', email);
+            logger.info('[AuthService] Generating token to email', email);
 
             const user = await UserModel.findOne({ email });
             if (!user) {
-                debug('User not found');
+                logger.info('[AuthService] User not found');
                 return null;
             }
 
@@ -344,15 +345,15 @@ function authService(plugin, connection) {
         }
 
         static async updatePassword(token, newPassword) {
-            debug('Updating password');
+            logger.info('[AuthService] Updating password');
             const renew = await RenewModel.findOne({ token });
             if (!renew) {
-                debug('Token not found');
+                logger.info('[AuthService] Token not found');
                 return null;
             }
             const user = await UserModel.findById(renew.userId);
             if (!user) {
-                debug('User not found');
+                logger.info('[AuthService] User not found');
                 return null;
             }
             const salt = bcrypt.genSaltSync();
@@ -363,11 +364,11 @@ function authService(plugin, connection) {
         }
 
         static async checkRevokedToken(ctx, payload, token) {
-            debug('Checking if token is revoked');
+            logger.info('Checking if token is revoked');
             const blacklistedToken = await BlackListModel.findOne({ token });
 
             if (blacklistedToken) {
-                debug('Token blacklisted!');
+                logger.info('[AuthService] Token blacklisted!');
                 return true;
             }
 
@@ -393,10 +394,10 @@ function authService(plugin, connection) {
         }
 
         static async updateApplicationsUser(id, applications) {
-            debug('Searching user with id ', id, applications);
+            logger.info('[AuthService] Searching user with id ', id, applications);
             const user = await UserModel.findById(id);
             if (!user) {
-                debug('User not found');
+                logger.info('[AuthService] User not found');
                 return null;
             }
             if (!user.extraUserData) {

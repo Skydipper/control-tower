@@ -1,18 +1,18 @@
-const debug = require('debug')('statistics-plugin');
+const logger = require('logger');
 const StatisticModel = require('plugins/sd-ct-statistics-plugin/models/statistic.model');
 const geoip = require('geoip-lite');
 
 class StatisticService {
 
     static async completeGeoInfo() {
-        debug('Loading statistics to complete geo info');
+        logger.info('Loading statistics to complete geo info');
         const statistics = await StatisticModel.find({
             ip: {
                 $exists: true,
             },
             'geo.completed': false,
         }).limit(10000).exec();
-        debug('Ips found ', statistics.length);
+        logger.info('Ips found ', statistics.length);
         for (let i = 0, { length } = statistics; i < length; i++) {
             if (statistics[i].ip && statistics[i].ip.indexOf('127.0.0.1') === -1) {
                 let { ip } = statistics[i];
@@ -40,7 +40,7 @@ class StatisticService {
             }
             await statistics[i].save();
         }
-        debug('Finish complete geo');
+        logger.info('Finish complete geo');
     }
 
     static async middleware(ctx, next) {
@@ -72,7 +72,7 @@ class StatisticService {
                     model.redirectMethod = ctx.state.redirect.method;
                 }
 
-                debug('Saving statistic');
+                logger.info('Saving statistic');
                 await new StatisticModel(model).save();
             } else {
                 const model = {
@@ -93,7 +93,7 @@ class StatisticService {
                 }
 
 
-                debug('Saving statistic');
+                logger.info('Saving statistic');
                 await new StatisticModel(model).save();
 
             }

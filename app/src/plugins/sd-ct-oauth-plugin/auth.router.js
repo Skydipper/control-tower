@@ -1,5 +1,5 @@
 /* eslint-disable no-underscore-dangle */
-const debug = require('debug')('oauth-plugin');
+const logger = require('logger');
 const Router = require('koa-router');
 const passport = require('koa-passport');
 const { cloneDeep, omit } = require('lodash');
@@ -14,7 +14,7 @@ module.exports = (plugin, connection, generalConfig) => {
         prefix: '/auth',
     });
 
-    debug('Initializing services');
+    logger.info('Initializing services');
     const AuthService = authServiceFunc(plugin, connection);
 
     const getUser = (ctx) => ctx.req.user || ctx.state.user || ctx.state.microservice;
@@ -108,7 +108,7 @@ module.exports = (plugin, connection, generalConfig) => {
 
             if (ctx.request.type === 'application/json') {
                 ctx.status = 200;
-                debug('Generating token');
+                logger.info('Generating token');
                 const token = await AuthService.createToken(user, false);
                 ctx.body = UserTempSerializer.serialize(user);
                 ctx.body.data.token = token;
@@ -120,19 +120,19 @@ module.exports = (plugin, connection, generalConfig) => {
         })(ctx);
 
         async function createToken(ctx, saveInUser) {
-            debug('Generating token');
+            logger.info('Generating token');
             return AuthService.createToken(getUser(ctx), saveInUser);
         }
 
         async function generateJWT(ctx) {
-            debug('Generating token');
+            logger.info('Generating token');
             try {
                 const token = await createToken(ctx, true);
                 ctx.body = {
                     token,
                 };
             } catch (e) {
-                debug(e);
+                logger.info(e);
             }
         }
 
@@ -160,7 +160,7 @@ module.exports = (plugin, connection, generalConfig) => {
         }
 
         async function getUsers(ctx) {
-            debug('Get Users');
+            logger.info('Get Users');
             const user = getUser(ctx);
             if (!user.extraUserData || !user.extraUserData.apps) {
                 ctx.throw(403, 'Not authorized');
@@ -182,7 +182,7 @@ module.exports = (plugin, connection, generalConfig) => {
         }
 
         async function getUserById(ctx) {
-            debug('Get User by id: ', ctx.params.id);
+            logger.info('Get User by id: ', ctx.params.id);
 
             const user = await AuthService.getUserById(ctx.params.id);
 
@@ -194,7 +194,7 @@ module.exports = (plugin, connection, generalConfig) => {
         }
 
         async function findByIds(ctx) {
-            debug('Find by ids');
+            logger.info('Find by ids');
             ctx.assert(ctx.request.body.ids, 400, 'Ids objects required');
             const data = await AuthService.getUsersByIds(ctx.request.body.ids);
             ctx.body = {
@@ -203,7 +203,7 @@ module.exports = (plugin, connection, generalConfig) => {
         }
 
         async function getIdsByRole(ctx) {
-            debug(`[getIdsByRole] Get ids by role: ${ctx.params.role}`);
+            logger.info(`[getIdsByRole] Get ids by role: ${ctx.params.role}`);
             const data = await AuthService.getIdsByRole(ctx.params.role);
             ctx.body = {
                 data
@@ -211,7 +211,7 @@ module.exports = (plugin, connection, generalConfig) => {
         }
 
         async function updateUser(ctx) {
-            debug(`Update user with id ${ctx.params.id}`);
+            logger.info(`Update user with id ${ctx.params.id}`);
             ctx.assert(ctx.params.id, 'Id param required');
 
             const user = getUser(ctx);
@@ -225,7 +225,7 @@ module.exports = (plugin, connection, generalConfig) => {
         }
 
         async function updateMe(ctx) {
-            debug(`Update user me`);
+            logger.info(`Update user me`);
 
             const user = getUser(ctx);
 
@@ -238,7 +238,7 @@ module.exports = (plugin, connection, generalConfig) => {
         }
 
         async function deleteUser(ctx) {
-            debug(`Delete user with id ${ctx.params.id}`);
+            logger.info(`Delete user with id ${ctx.params.id}`);
             ctx.assert(ctx.params.id, 'Id param required');
 
             const deletedUser = await AuthService.deleteUser(ctx.params.id);
@@ -250,7 +250,7 @@ module.exports = (plugin, connection, generalConfig) => {
         }
 
         async function createUser(ctx) {
-            debug(`Create user with body ${ctx.request.body}`);
+            logger.info(`Create user with body ${ctx.request.body}`);
             const { body } = ctx.request;
             const user = getUser(ctx);
             if (!user) {
@@ -259,18 +259,18 @@ module.exports = (plugin, connection, generalConfig) => {
             }
 
             if (user.role === 'MANAGER' && body.role === 'ADMIN') {
-                debug('User is manager but the new user is admin');
+                logger.info('User is manager but the new user is admin');
                 ctx.throw(403, 'Forbidden');
                 return;
             }
 
             if (!body.extraUserData || !body.extraUserData.apps) {
-                debug('Not send apps');
+                logger.info('Not send apps');
                 ctx.throw(400, 'Apps required');
                 return;
             }
             if (!user.extraUserData || !user.extraUserData.apps) {
-                debug('logged user does not contain apps');
+                logger.info('logged user does not contain apps');
                 ctx.throw(403, 'Forbidden');
                 return;
             }
@@ -296,7 +296,7 @@ module.exports = (plugin, connection, generalConfig) => {
 
         async function success(ctx) {
             if (ctx.session.callbackUrl) {
-                debug('Url redirect', ctx.session.callbackUrl);
+                logger.info('Url redirect', ctx.session.callbackUrl);
                 if (ctx.session.generateToken) {
                     // generate token and eliminate session
                     const token = await createToken(ctx, false);
@@ -321,7 +321,7 @@ module.exports = (plugin, connection, generalConfig) => {
         }
 
         async function failAuth(ctx) {
-            debug('Not authenticated');
+            logger.info('Not authenticated');
             const originApp = getOriginApp(ctx, plugin);
             const appConfig = plugin.config.thirdParty[originApp];
 
@@ -367,7 +367,7 @@ module.exports = (plugin, connection, generalConfig) => {
         }
 
         async function signUp(ctx) {
-            debug('Creating user');
+            logger.info('Creating user');
             let error = null;
             if (!ctx.request.body.email || !ctx.request.body.password || !ctx.request.body.repeatPassword) {
                 error = 'Email, Password and Repeat password are required';
@@ -404,7 +404,7 @@ module.exports = (plugin, connection, generalConfig) => {
                     });
                 }
             } catch (err) {
-                debug('Error', err);
+                logger.info('Error', err);
                 await ctx.render('sign-up', {
                     error: 'Error creating user.',
                     email: ctx.request.body.email,
@@ -422,7 +422,7 @@ module.exports = (plugin, connection, generalConfig) => {
         }
 
         async function confirmUser(ctx) {
-            debug('Confirming user');
+            logger.info('Confirming user');
             const user = await AuthService.confirmUser(ctx.params.token);
             if (!user) {
                 ctx.throw(400, 'User expired or token not found');
@@ -451,7 +451,7 @@ module.exports = (plugin, connection, generalConfig) => {
             // check if the user has session
             const user = getUser(ctx);
             if (user) {
-                debug('User has session');
+                logger.info('User has session');
 
                 if (ctx.request.type === 'application/json') {
                     ctx.status = 200;
@@ -490,7 +490,7 @@ module.exports = (plugin, connection, generalConfig) => {
             }
 
             const { allowPublicRegistration } = plugin.config;
-            debug(thirdParty);
+            logger.info(thirdParty);
             await ctx.render('login', {
                 error: false,
                 thirdParty,
@@ -528,7 +528,7 @@ module.exports = (plugin, connection, generalConfig) => {
         }
 
         async function sendResetMail(ctx) {
-            debug('Send reset mail');
+            logger.info('Send reset mail');
             if (!ctx.request.body.email) {
                 if (ctx.request.type === 'application/json') {
                     throw new UnprocessableEntityError('Mail required');
@@ -603,14 +603,14 @@ module.exports = (plugin, connection, generalConfig) => {
                 }
                 ctx.redirect('/auth/success');
             } catch (err) {
-                debug(err);
+                logger.info(err);
                 ctx.redirect('/auth/fail');
             }
 
         }
 
         async function resetPassword(ctx) {
-            debug('Resetting password');
+            logger.info('Resetting password');
             let error = null;
             if (!ctx.request.body.password || !ctx.request.body.repeatPassword) {
                 error = 'Password and Repeat password are required';
@@ -704,7 +704,7 @@ module.exports = (plugin, connection, generalConfig) => {
     }());
 
     async function setCallbackUrl(ctx, next) {
-        debug('Setting callbackUrl');
+        logger.info('Setting callbackUrl');
         if (!ctx.session.callbackUrl) {
             if (ctx.query.callbackUrl) {
                 ctx.session.callbackUrl = ctx.query.callbackUrl;
@@ -726,7 +726,7 @@ module.exports = (plugin, connection, generalConfig) => {
     }
 
     async function setCallbackUrlOnlyWithQueryParam(ctx, next) {
-        debug('Setting callbackUrl');
+        logger.info('Setting callbackUrl');
         if (ctx.query.callbackUrl) {
             ctx.session.callbackUrl = ctx.query.callbackUrl;
         }
@@ -741,59 +741,59 @@ module.exports = (plugin, connection, generalConfig) => {
     }
 
     async function isLogged(ctx, next) {
-        debug('Checking if user is logged');
+        logger.info('Checking if user is logged');
         if (getUser(ctx)) {
             await next();
         } else {
-            debug('Not logged');
+            logger.info('Not logged');
             ctx.throw(401, 'Not authenticated');
         }
     }
 
     async function isAdmin(ctx, next) {
-        debug('Checking if user is admin');
+        logger.info('Checking if user is admin');
         const user = getUser(ctx);
         if (!user) {
-            debug('Not authenticated');
+            logger.info('Not authenticated');
             ctx.throw(401, 'Not authenticated');
             return;
         }
         if (user.role === 'ADMIN') {
             await next();
         } else {
-            debug('Not admin');
+            logger.info('Not admin');
             ctx.throw(403, 'Not authorized');
         }
     }
 
     async function isAdminOrManager(ctx, next) {
-        debug('Checking if user is admin or manager');
+        logger.info('Checking if user is admin or manager');
         const user = getUser(ctx);
         if (!user) {
-            debug('Not authenticated');
+            logger.info('Not authenticated');
             ctx.throw(401, 'Not authenticated');
             return;
         }
         if (user.role === 'ADMIN' || user.role === 'MANAGER') {
             await next();
         } else {
-            debug('Not admin');
+            logger.info('Not admin');
             ctx.throw(403, 'Not authorized');
         }
     }
 
     async function isMicroservice(ctx, next) {
-        debug('Checking if user is a microservice');
+        logger.info('Checking if user is a microservice');
         const user = getUser(ctx);
         if (!user) {
-            debug('Not authenticated');
+            logger.info('Not authenticated');
             ctx.throw(401, 'Not authenticated');
             return;
         }
         if (user.id === 'microservice') {
             await next();
         } else {
-            debug('Not admin');
+            logger.info('Not admin');
             ctx.throw(403, 'Not authorized');
         }
     }
