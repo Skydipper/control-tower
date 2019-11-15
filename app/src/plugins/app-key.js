@@ -16,7 +16,7 @@ function middleware(app, plugin) {
             token = ctx.query[plugin.config.headerName];
         }
         if (token) {
-            logger.debug('Checking app_key');
+            logger.info('Checking app_key');
             if (ctx.state && ctx.state.microservice) {
                 ctx.state.appKey = JSON.parse(token);
             } else {
@@ -26,7 +26,7 @@ function middleware(app, plugin) {
                         ctx.state.appKey = appKey;
                     }
                 } catch (err) {
-                    logger.debug('Invalid appkey token', err);
+                    logger.info('Invalid appkey token', err);
                 }
             }
         }

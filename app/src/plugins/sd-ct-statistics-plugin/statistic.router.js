@@ -1,4 +1,4 @@
-const debug = require('debug')('statistics-plugin');
+const logger = require('logger');
 const Router = require('koa-router');
 const StatisticModel = require('plugins/sd-ct-statistics-plugin/models/statistic.model');
 
@@ -11,14 +11,14 @@ function getMiddleware() {
     class StatisticRouter {
 
         static async get(ctx) {
-            debug('Obtaining statistics');
+            logger.info('Obtaining statistics');
             ctx.body = await StatisticModel.find().sort('-date').exec();
         }
 
         static async timeByRequest(ctx) {
-            debug('Obtaining grouped statistics');
+            logger.info('Obtaining grouped statistics');
             let filter = null;
-            debug('start', ctx.query.from);
+            logger.info('start', ctx.query.from);
             if (ctx.query.from || ctx.query.to) {
                 filter = {
                     $match: {
@@ -52,9 +52,9 @@ function getMiddleware() {
         }
 
         static async avgByRequest(ctx) {
-            debug('Obtaining statistics aggrouped');
+            logger.info('Obtaining statistics aggrouped');
             let filter = null;
-            debug('start', ctx.query.from);
+            logger.info('start', ctx.query.from);
             if (ctx.query.from || ctx.query.to) {
                 filter = {
                     $match: {
@@ -88,7 +88,7 @@ function getMiddleware() {
         }
 
         static async countRequestToday(ctx) {
-            debug('Obtained request of today');
+            logger.info('Obtained request of today');
             const date = new Date();
             const today = new Date(date.getFullYear(), date.getMonth(), date.getDate(), 0, 0, 0);
             const tomorrowDate = new Date(Date.now() + 24 * 60 * 60 * 1000);
@@ -108,7 +108,7 @@ function getMiddleware() {
         }
 
         static async countRequestLastWeek(ctx) {
-            debug('Obtained request of today');
+            logger.info('Obtained request of today');
             const lastWeekDate = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
             const tomorrowDate = new Date(Date.now() + 24 * 60 * 60 * 1000);
             const lastWeek = new Date(lastWeekDate.getFullYear(), lastWeekDate.getMonth(), lastWeekDate.getDate(), 0, 0, 0);
@@ -130,7 +130,7 @@ function getMiddleware() {
         }
 
         static async countRequestTodayByCountry(ctx) {
-            debug('Obtaining num request today per country');
+            logger.info('Obtaining num request today per country');
             const date = new Date();
             const today = new Date(date.getFullYear(), date.getMonth(), date.getDate(), 0, 0, 0);
             const tomorrowDate = new Date(Date.now() + 24 * 60 * 60 * 1000);
@@ -155,7 +155,7 @@ function getMiddleware() {
         }
 
         static async requestByDay(ctx) {
-            debug('Obtaining grouped statistics');
+            logger.info('Obtaining grouped statistics');
             let filter = null;
             if (ctx.query.from || ctx.query.to) {
                 filter = {

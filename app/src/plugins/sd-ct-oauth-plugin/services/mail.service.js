@@ -1,5 +1,5 @@
 const SparkPost = require('sparkpost');
-const debug = require('debug')('oauth-plugin');
+const logger = require('logger');
 
 function mailService(plugin) {
 
@@ -14,7 +14,7 @@ function mailService(plugin) {
         }
 
         sendConfirmationMail(data, recipients, generalConfig) {
-            debug('Sending confirmation mail to ', recipients);
+            logger.info('[MailService] Sending confirmation mail to ', recipients);
             const reqOpts = {
                 substitution_data: {
                     urlConfirm: `${this.publicUrl}/auth/confirm/${data.confirmationToken}`,
@@ -29,13 +29,13 @@ function mailService(plugin) {
             };
 
             if (this.disableEmailSending) {
-                debug('Email sending disabled, skipping user account confirmation email');
-                debug(reqOpts);
+                logger.info('[MailService] Email sending disabled, skipping user account confirmation email');
+                logger.info(reqOpts);
                 return new Promise((resolve) => resolve());
             }
 
             return new Promise((resolve, reject) => {
-                debug(reqOpts);
+                logger.info(reqOpts);
                 this.client.transmissions.send(reqOpts, (error, res) => {
                     if (error) {
                         reject(error);
@@ -47,7 +47,7 @@ function mailService(plugin) {
         }
 
         sendConfirmationMailWithPassword(data, recipients, generalConfig) {
-            debug('Sending confirmation mail to ', recipients);
+            logger.info('[MailService] Sending confirmation mail to ', recipients);
             const reqOpts = {
                 substitution_data: {
                     urlConfirm: `${this.publicUrl}/auth/confirm/${data.confirmationToken}?${data.callbackUrl ? `callbackUrl=${data.callbackUrl}` : ''}`,
@@ -63,13 +63,13 @@ function mailService(plugin) {
             };
 
             if (this.disableEmailSending) {
-                debug('Email sending disabled, skipping user account confirmation with password email');
-                debug(reqOpts);
+                logger.info('[MailService] Email sending disabled, skipping user account confirmation with password email');
+                logger.info(reqOpts);
                 return new Promise((resolve) => resolve());
             }
 
             return new Promise((resolve, reject) => {
-                debug(reqOpts);
+                logger.info(reqOpts);
                 this.client.transmissions.send(reqOpts, (error, res) => {
                     if (error) {
                         reject(error);
@@ -81,7 +81,7 @@ function mailService(plugin) {
         }
 
         sendRecoverPasswordMail(data, recipients, generalConfig, originApp) {
-            debug('Sending confirmation mail to ', recipients);
+            logger.info('[MailService] Sending confirmation mail to ', recipients);
             const reqOpts = {
                 substitution_data: {
                     urlRecover: `${this.publicUrl}/auth/reset-password/${data.token}?origin=${originApp}`,
@@ -96,8 +96,8 @@ function mailService(plugin) {
             };
 
             if (this.disableEmailSending) {
-                debug('Email sending disabled, skipping password recover email');
-                debug(reqOpts);
+                logger.info('[MailService] Email sending disabled, skipping password recover email');
+                logger.info(reqOpts);
                 return new Promise((resolve) => resolve());
             }
 

@@ -1,5 +1,5 @@
 const passport = require('koa-passport');
-const debug = require('debug')('oauth-plugin');
+const logger = require('logger');
 const mongoose = require('mongoose');
 const jwt = require('koa-jwt');
 const views = require('koa-views');
@@ -13,7 +13,7 @@ function init() {
 }
 
 function middleware(app, plugin, generalConfig) {
-    debug('Loading oauth-plugin');
+    logger.info('Loading oauth-plugin');
     const connection = mongoose.createConnection(`${generalConfig.mongoUri}`, mongooseOptions);
     const AuthService = authServiceFunc(plugin, connection);
     app.use(views(`${__dirname}/views`, { extension: 'ejs' }));
@@ -51,7 +51,7 @@ function middleware(app, plugin, generalConfig) {
     };
 
     if (plugin.config.jwt.active) {
-        debug('JWT active');
+        logger.info('JWT active');
         app.use(jwt({
             secret: plugin.config.jwt.secret,
             passthrough: plugin.config.jwt.passthrough,

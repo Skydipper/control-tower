@@ -1,5 +1,5 @@
 const passport = require('koa-passport');
-const debug = require('debug')('oauth-plugin');
+const logger = require('logger');
 const { BasicStrategy } = require('passport-http');
 const TwitterStrategy = require('passport-twitter').Strategy;
 const FacebookStrategy = require('passport-facebook').Strategy;
@@ -13,15 +13,15 @@ const UserModel = require('plugins/sd-ct-oauth-plugin/models/user.model');
 
 function passportService(plugin) {
     async function registerUser(accessToken, refreshToken, profile, done) {
-        debug('Registering user', profile);
+        logger.info('[passportService] Registering user', profile);
 
         let user = await UserModel.findOne({
             provider: profile.provider ? profile.provider.split('-')[0] : profile.provider,
             providerId: profile.id,
         }).exec();
-        debug(user);
+        logger.info(user);
         if (!user) {
-            debug('Not exist user');
+            logger.info('[passportService] User does not exist');
             let name = null;
             let email = null;
             let photo = null;
@@ -51,12 +51,12 @@ function passportService(plugin) {
                 }
             }
             if (email) {
-                debug('Updating email');
+                logger.info('[passportService] Updating email');
                 user.email = email;
                 await user.save();
             }
         }
-        debug('Returning user');
+        logger.info('[passportService] Returning user');
         done(null, {
             // eslint-disable-next-line no-underscore-dangle
             id: user._id,
@@ -73,7 +73,7 @@ function passportService(plugin) {
 
     async function registerUserBasic(userId, password, done) {
         try {
-            debug('Verifying basic auth');
+            logger.info('[passportService] Verifying basic auth');
             if (userId === plugin.config.basic.userId && password === plugin.config.basic.password) {
                 done(null, {
                     id: '57ab3917d1d5fb2f00b20f2d',
@@ -84,7 +84,7 @@ function passportService(plugin) {
                 done(null, false);
             }
         } catch (e) {
-            debug(e);
+            logger.info(e);
         }
     }
 
@@ -97,7 +97,7 @@ function passportService(plugin) {
     });
 
     if (plugin.config.local && plugin.config.local.active) {
-        debug('Loading local strategy');
+        logger.info('[passportService] Loading local strategy');
         const login = async function login(username, password, done) {
             const user = await UserModel.findOne({
                 email: username,
@@ -128,20 +128,20 @@ function passportService(plugin) {
     }
 
     if (plugin.config.basic && plugin.config.basic.active) {
-        debug('Loading basic strategy');
+        logger.info('[passportService] Loading basic strategy');
         const basicStrategy = new BasicStrategy(registerUserBasic);
         passport.use(basicStrategy);
     }
 
     // third party oauth
     if (plugin.config.thirdParty) {
-        debug('Loading third-party oauth');
+        logger.info('[passportService] Loading third-party oauth');
         const apps = Object.keys(plugin.config.thirdParty);
         for (let i = 0, { length } = apps; i < length; i += 1) {
-            debug(`Loading third-party oauth of app: ${apps[i]}`);
+            logger.info(`[passportService] Loading third-party oauth of app: ${apps[i]}`);
             const app = plugin.config.thirdParty[apps[i]];
             if (app.twitter && app.twitter.active) {
-                debug(`Loading twitter strategy of ${apps[i]}`);
+                logger.info(`[passportService] Loading twitter strategy of ${apps[i]}`);
                 const configTwitter = {
                     consumerKey: app.twitter.consumerKey,
                     consumerSecret: app.twitter.consumerSecret,
@@ -154,7 +154,7 @@ function passportService(plugin) {
             }
 
             if (app.google && app.google.active) {
-                debug(`Loading google strategy ${apps[i]}`);
+                logger.info(`[passportService] Loading google strategy ${apps[i]}`);
                 const configGoogle = {
                     clientID: app.google.clientID,
                     clientSecret: app.google.clientSecret,
@@ -176,7 +176,7 @@ function passportService(plugin) {
             }
 
             if (app.facebook && app.facebook.active) {
-                debug(`Loading facebook strategy ${apps[i]}`);
+                logger.info(`[passportService] Loading facebook strategy ${apps[i]}`);
                 const configFacebook = {
                     clientID: app.facebook.clientID,
                     clientSecret: app.facebook.clientSecret,
