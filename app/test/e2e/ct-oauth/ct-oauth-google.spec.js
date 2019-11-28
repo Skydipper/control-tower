@@ -170,14 +170,15 @@ describe('Google auth endpoint tests', () => {
         response.body.should.have.property('token').and.be.a('string');
 
         JWT.verify(response.body.token, process.env.JWT_SECRET);
+        const decodedTokenData = JWT.decode(response.body.token, process.env.JWT_SECRET);
 
         const userWithToken = await UserModel.findOne({ email: 'john.doe@vizzuality.com' }).exec();
         should.exist(userWithToken);
-        userWithToken.should.have.property('email').and.equal('john.doe@vizzuality.com');
-        userWithToken.should.have.property('name').and.equal('John Doe');
-        userWithToken.should.have.property('photo').and.equal('https://images.pexels.com/photos/20787/pexels-photo.jpg?auto=compress&cs=tinysrgb&h=750&w=1260');
-        userWithToken.should.have.property('role').and.equal('USER');
-        userWithToken.should.have.property('provider').and.equal('google');
+        userWithToken.should.have.property('email').and.equal('john.doe@vizzuality.com').and.equal(decodedTokenData.email);
+        userWithToken.should.have.property('name').and.equal('John Doe').and.equal(decodedTokenData.name);
+        userWithToken.should.have.property('photo').and.equal('https://images.pexels.com/photos/20787/pexels-photo.jpg?auto=compress&cs=tinysrgb&h=750&w=1260').and.equal(decodedTokenData.photo);
+        userWithToken.should.have.property('role').and.equal('USER').and.equal(decodedTokenData.role);
+        userWithToken.should.have.property('provider').and.equal('google').and.equal(decodedTokenData.provider);
         userWithToken.should.have.property('providerId').and.equal('113994825016233013735');
         userWithToken.should.have.property('userToken').and.equal(response.body.token);
     });
