@@ -1,45 +1,6 @@
+# 01/12/2019
+- Fix regression where 3rd party auth users without email address would not be able to authenticate 
+
+# 08/11/2019
 - Add healthcheck endpoint and readiness+liveliness checks to k8s config
 - Serialize user on response to account confirmation.
-
-# 2.0.7
-- Update `sd-ct-oauth` to 2.0.7 - refer to [the plugin's changelog](https://github.com/Skydipper/ct-oauth-plugin/blob/2.0.7/CHANGELOG.md) for more details.
-- Added tests for Google authentication.
-
-# 2.0.6
-- Update `sd-ct-oauth` to 2.0.6 - refer to [the plugin's changelog](https://github.com/Skydipper/ct-oauth-plugin/blob/2.0.6/CHANGELOG.md) for more details.
-
-# 2.0.5
-- Add tests for `/auth/user/find-by-ids`
-
-# 2.0.4
-- Update `sd-ct-oauth` to 2.0.5 - refer to [the plugin's changelog](https://github.com/Skydipper/ct-oauth-plugin/blob/2.0.5/CHANGELOG.md) for more details.
-
-# 2.0.3
-- Update `nodejs` version to 11.x
-
-# 2.0.1
-- Update `sd-ct-oauth` to 2.0.4 - refer to [the plugin's changelog](https://github.com/Skydipper/ct-oauth-plugin/blob/2.0.4/CHANGELOG.md) for more details.
-
-# 2.0.0
-- Copy package to Skydipper repo; update dependencies to Skydipper versions
-
-# 1.0.79
-- Update `ct-oauth` to 1.8.15 - refer to [the plugin's changelog](https://github.com/control-tower/ct-oauth-plugin/blob/1.8.15/CHANGELOG.md) for more details.
-
-# 1.0.78
-- Update `ct-oauth` to 1.8.14 - refer to [the plugin's changelog](https://github.com/control-tower/ct-oauth-plugin/blob/1.8.14/CHANGELOG.md) for more details.
-
-# 1.0.77
-- Update `ct-oauth` to 1.8.13 - refer to [the plugin's changelog](https://github.com/control-tower/ct-oauth-plugin/blob/1.8.13/CHANGELOG.md) for more details.
-
-# 1.0.76
-- Update `ct-oauth` to 1.8.12 - refer to [the plugin's changelog](https://github.com/control-tower/ct-oauth-plugin/blob/1.8.12/CHANGELOG.md) for more details.
-
-# 1.0.72
-- Add env var to configure logger level
-
-# 1.0.71
-- Update `ct-oauth` to 1.8.9 - refer to [the plugin's changelog](https://github.com/control-tower/ct-oauth-plugin/blob/1.8.9/CHANGELOG.md) for more details.
-
-# 1.0.70
-- Update `ct-oauth` to 1.8.8 with support for registration by external users using email+password

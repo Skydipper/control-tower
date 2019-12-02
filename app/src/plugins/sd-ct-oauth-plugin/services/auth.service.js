@@ -17,7 +17,6 @@ const RenewModel = require('plugins/sd-ct-oauth-plugin/models/renew.model');
 const UserTempModel = require('plugins/sd-ct-oauth-plugin/models/user-temp.model');
 const BlackListModel = require('plugins/sd-ct-oauth-plugin/models/black-list.model');
 
-
 function authService(plugin, connection) {
 
     const MailService = mailServiceFunc(plugin);
@@ -378,13 +377,17 @@ function authService(plugin, connection) {
 
                 const user = await UserModel.findById(payload.id);
 
+                logger.info('[AuthService] User ID in token does not match an existing user');
+
                 if (!user) {
                     return true;
                 }
 
                 // eslint-disable-next-line consistent-return
                 checkList.forEach((property) => {
-                    if (!user[property] || !isEqual(user[property], payload[property])) {
+                    if (!isEqual(user[property], payload[property])) {
+                        logger.info(`[AuthService] ${property} in token does not match the database value - token value: "${payload[property]}" || database value: "${user[property]}" `);
+
                         isRevoked = true;
                     }
                 });
