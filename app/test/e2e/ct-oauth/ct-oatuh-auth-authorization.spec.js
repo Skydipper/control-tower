@@ -79,6 +79,40 @@ describe('Authorization tests', () => {
         ensureCorrectError(result, 'Your token is outdated. Please use /auth/login to login and /auth/generate-token to generate a new token.', 401);
     });
 
+    it('Sending request with token to authenticated request but EMAIL is absent on the database should be unsuccessful with unauthorized error ', async () => {
+        await updateVersion();
+        await createEndpoint({ authenticated: true });
+
+        const { user, token } = await createUserAndToken({ email: null });
+        await UserModel.updateOne({ _id: user.id }, { $set: { email: 'test123' } });
+
+        const result = await requester.post('/api/v1/dataset').set('Authorization', `Bearer ${token}`);
+        ensureCorrectError(result, 'Your token is outdated. Please use /auth/login to login and /auth/generate-token to generate a new token.', 401);
+    });
+
+    it('Sending request with token to authenticated request but EMAIL is absent on the token should be unsuccessful with unauthorized error ', async () => {
+        await updateVersion();
+        await createEndpoint({ authenticated: true });
+
+        const { user, token } = await createUserAndToken();
+        await UserModel.updateOne({ _id: user.id }, { $set: { email: null } });
+
+        const result = await requester.post('/api/v1/dataset').set('Authorization', `Bearer ${token}`);
+        ensureCorrectError(result, 'Your token is outdated. Please use /auth/login to login and /auth/generate-token to generate a new token.', 401);
+    });
+
+    it('Sending request with token to authenticated request and EMAIL is absent on both the token and the database should be successful ', async () => {
+        await updateVersion();
+        await createEndpoint({ authenticated: true });
+        createMockEndpoint('/api/v1/dataset');
+
+        const { token } = await createUserAndToken({ email: null });
+
+        const result = await requester.post('/api/v1/dataset').set('Authorization', `Bearer ${token}`);
+        result.status.should.equal(200);
+        result.text.should.equal('ok');
+    });
+
     it('Sending request with token to authenticated request but extraUserData is changed should be unsuccessful with unauthorized error ', async () => {
         await updateVersion();
         await createEndpoint({ authenticated: true });
