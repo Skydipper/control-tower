@@ -110,14 +110,28 @@ function authService(plugin, connection) {
 
             const filteredQuery = AuthService.getFilteredQuery({ ...query });
 
+
             if (app) {
                 filteredQuery['extraUserData.apps'] = {
                     $in: app
                 };
             }
-            return UserModel.find(filteredQuery, {
-                __v: 0,
-            }).select('-password -salt -userToken').exec();
+
+            const page = query['page[number]'] ? parseInt(query['page[number]'], 10) : 1;
+            const limit = query['page[size]'] ? parseInt(query['page[size]'], 10) : 10;
+
+            const paginationOptions = {
+                page,
+                limit,
+                select: {
+                    __v: 0,
+                    password: 0,
+                    salt: 0,
+                    userToken: 0
+                }
+            };
+
+            return UserModel.paginate(filteredQuery, paginationOptions);
         }
 
         static async getUserById(id) {
