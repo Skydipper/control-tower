@@ -129,6 +129,20 @@ const ensureCorrectError = ({ body }, errMessage, expectedStatus) => {
     body.errors[0].should.have.property('status').and.equal(expectedStatus);
 };
 
+const ensureHasPaginationElements = (response) => {
+    response.body.should.have.property('meta').and.be.an('object');
+    response.body.meta.should.have.property('total-pages').and.be.a('number');
+    response.body.meta.should.have.property('total-items').and.be.a('number');
+    response.body.meta.should.have.property('size').and.equal(10);
+
+    response.body.should.have.property('links').and.be.an('object');
+    response.body.links.should.have.property('self').and.be.a('string');
+    response.body.links.should.have.property('first').and.be.a('string');
+    response.body.links.should.have.property('last').and.be.a('string');
+    response.body.links.should.have.property('prev').and.be.a('string');
+    response.body.links.should.have.property('next').and.be.a('string');
+};
+
 const updateVersion = () => VersionModel.updateOne({
     name: appConstants.ENDPOINT_VERSION,
 }, {
@@ -176,5 +190,6 @@ module.exports = {
     createTempUser,
     getUserFromToken,
     isTokenRequired,
-    isAdminOnly
+    isAdminOnly,
+    ensureHasPaginationElements
 };

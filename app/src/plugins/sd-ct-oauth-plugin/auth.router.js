@@ -9,6 +9,12 @@ const UnauthorizedError = require('./errors/unauthorized.error');
 const UserTempSerializer = require('./serializers/user-temp.serializer');
 const UserSerializer = require('./serializers/user.serializer');
 
+const serializeObjToQuery = (obj) => Object.keys(obj).reduce((a, k) => {
+    a.push(`${k}=${encodeURIComponent(obj[k])}`);
+    return a;
+}, []).join('&');
+
+
 module.exports = (plugin, connection, generalConfig) => {
     const ApiRouter = new Router({
         prefix: '/auth',
@@ -167,18 +173,28 @@ module.exports = (plugin, connection, generalConfig) => {
                 return;
             }
 
-            if (ctx.query.app === 'all') {
-                ctx.body = await AuthService.getUsers(null, omit(ctx.query, ['app']));
-                return;
-            }
-            if (ctx.query.app) {
-                ctx.body = await AuthService.getUsers(ctx.query.app.split(','), omit(ctx.query, ['app']));
-                return;
-            }
-
             const { apps } = user.extraUserData;
             const { query } = ctx;
-            ctx.body = await AuthService.getUsers(apps, query);
+
+            const clonedQuery = { ...query };
+            delete clonedQuery['page[size]'];
+            delete clonedQuery['page[number]'];
+            delete clonedQuery.ids;
+            delete clonedQuery.loggedUser;
+            const serializedQuery = serializeObjToQuery(clonedQuery) ? `?${serializeObjToQuery(clonedQuery)}&` : '?';
+            const link = `${ctx.request.protocol}://${ctx.request.host}${ctx.request.path}${serializedQuery}`;
+
+            let users;
+
+            if (query.app === 'all') {
+                users = await AuthService.getUsers(null, omit(query, ['app']));
+            } else if (query.app) {
+                users = await AuthService.getUsers(query.app.split(','), omit(query, ['app']));
+            } else {
+                users = await AuthService.getUsers(apps, query);
+            }
+
+            ctx.body = UserSerializer.serialize(users, link);
         }
 
         async function getUserById(ctx) {
