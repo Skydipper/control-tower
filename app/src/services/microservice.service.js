@@ -392,7 +392,7 @@ class Microservice {
         }
         logger.debug('Removing endpoints');
         await Microservice.removeEndpointOfMicroservice(micro);
-        // await micro.remove();
+        await micro.remove();
         return micro;
     }
 
