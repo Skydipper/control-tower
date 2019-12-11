@@ -1,3 +1,6 @@
+# 11/12/2019
+- Refactor tests to better handle redirect cases
+
 # 02/12/2019
 - Add pagination to GET users
 
