@@ -61,7 +61,7 @@ describe('Facebook auth endpoint tests', () => {
         response.status.should.equal(200);
         response.header['content-type'].should.equal('application/xhtml+xml; charset=utf-8');
         response.redirects.should.be.an('array').and.length(3);
-        response.redirects[0].should.match(/^https:\/\/www\.facebook\.com\/dialog\/oauth/);
+        response.should.redirectTo(/^https:\/\/www\.facebook\.com\/dialog\/oauth/);
         response.redirects[1].should.match(/^https:\/\/m\.facebook\.com\/v2\.11\/dialog\/oauth/);
         response.redirects[2].should.match(/^https:\/\/m\.facebook\.com\/login\.php/);
     });
@@ -119,7 +119,7 @@ describe('Facebook auth endpoint tests', () => {
         response.status.should.equal(200);
         response.header['content-type'].should.equal('text/html; charset=utf-8');
         response.redirects.should.be.an('array').and.length(1);
-        response.redirects[0].should.match(new RegExp(`/auth/success$`));
+        response.should.redirectTo(new RegExp(`/auth/success$`));
 
         const confirmedUser = await UserModel.findOne({ email: 'john.doe@vizzuality.com' }).exec();
         should.exist(confirmedUser);

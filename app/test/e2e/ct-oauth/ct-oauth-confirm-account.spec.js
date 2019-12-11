@@ -124,13 +124,12 @@ describe('OAuth endpoints tests - Confirm account', () => {
         }).save();
 
         const response = await requester
-            .get(`/auth/confirm/${confirmationToken}`);
+            .get(`/auth/confirm/${confirmationToken}`).redirects(0);
 
 
-        response.status.should.equal(200);
+        response.should.redirect;
 
-        response.redirects.should.be.an('array').and.length(1);
-        response.redirects[0].should.equal('http://www.google.com/');
+        response.headers.location.should.equal('http://www.google.com/');
 
         const missingTempUser = await UserTempModel.findOne({ email: 'test@example.com' }).exec();
         should.not.exist(missingTempUser);
@@ -161,13 +160,13 @@ describe('OAuth endpoints tests - Confirm account', () => {
         }).save();
 
         const response = await requester
-            .get(`/auth/confirm/${confirmationToken}`);
+            .get(`/auth/confirm/${confirmationToken}`)
+            .redirects(0);
 
 
-        response.status.should.equal(200);
+        response.should.redirect;
 
-        response.redirects.should.be.an('array');
-        response.redirects[0].should.equal('https://resourcewatch.org/myrw/areas');
+        response.headers.location.should.equal('https://resourcewatch.org/myrw/areas');
 
         const missingTempUser = await UserTempModel.findOne({ email: 'test@example.com' }).exec();
         should.not.exist(missingTempUser);
@@ -198,13 +197,14 @@ describe('OAuth endpoints tests - Confirm account', () => {
         }).save();
 
         const response = await requester
-            .get(`/auth/confirm/${confirmationToken}`);
+            .get(`/auth/confirm/${confirmationToken}`)
+            .redirects(0);
 
 
-        response.status.should.equal(200);
+        response.should.redirect;
 
         response.redirects.should.be.an('array');
-        response.redirects[0].should.equal('http://www.google.com/');
+        response.headers.location.should.equal('http://www.google.com/');
 
         const missingTempUser = await UserTempModel.findOne({ email: 'test@example.com' }).exec();
         should.not.exist(missingTempUser);
@@ -235,13 +235,13 @@ describe('OAuth endpoints tests - Confirm account', () => {
         }).save();
 
         const response = await requester
-            .get(`/auth/confirm/${confirmationToken}?callbackUrl=http://vizzuality.com/`);
+            .get(`/auth/confirm/${confirmationToken}?callbackUrl=http://vizzuality.com/`)
+            .redirects(0);
 
 
-        response.status.should.equal(200);
+        response.should.redirect;
 
-        response.redirects.should.be.an('array');
-        response.redirects[0].should.equal('http://vizzuality.com/');
+        response.headers.location.should.equal('http://vizzuality.com/');
 
         const missingTempUser = await UserTempModel.findOne({ email: 'test@example.com' }).exec();
         should.not.exist(missingTempUser);

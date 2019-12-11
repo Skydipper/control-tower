@@ -176,9 +176,10 @@ describe('OAuth endpoints tests - Sign up with HTML UI', () => {
         const tempUser = await createTempUser({ email: 'someemail@gmail.com' });
 
         const response = await requester
-            .get(`/auth/confirm/${tempUser.confirmationToken}`);
+            .get(`/auth/confirm/${tempUser.confirmationToken}`)
+            .redirects(0);
 
-        response.status.should.equal(200);
+        response.should.redirect;
 
         const missingTempUser = await UserTempModel.findOne({ email: 'someemail@gmail.com' }).exec();
         should.not.exist(missingTempUser);
