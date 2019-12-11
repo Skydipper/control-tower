@@ -10,6 +10,7 @@ const { TOKENS } = require('./test.constants');
 
 let requester;
 
+const should = chai.should();
 
 describe('Microservices endpoints', () => {
 
@@ -110,10 +111,10 @@ describe('Microservices endpoints', () => {
         microservice.should.have.lengthOf(1);
 
         const endpoints = await Endpoint.find({ toDelete: false });
-        endpoints.should.have.lengthOf(2);
+        endpoints.should.have.lengthOf(3);
 
         const deletedEndpoints = await Endpoint.find({ toDelete: true });
-        deletedEndpoints.should.have.lengthOf(1);
+        deletedEndpoints.should.have.lengthOf(0);
     });
 
     it('Authorized status check and registered microservice (happy case)', async () => {
@@ -124,9 +125,9 @@ describe('Microservices endpoints', () => {
         response.status.should.equal(200);
     });
 
-    it('Deleting a microservice should delete endpoints but keep microservice document in the database (happy case)', async () => {
+    it('Deleting a microservice should delete endpoints and delete microservice document in the database (happy case)', async () => {
         (await Microservice.find()).should.have.lengthOf(1);
-        (await Endpoint.find({ toDelete: true })).should.have.lengthOf(1);
+        (await Endpoint.find({ toDelete: true })).should.have.lengthOf(0);
 
         const existingMicroservice = await requester.get(`/api/v1/microservice`)
             .set('Authorization', `Bearer ${TOKENS.ADMIN}`)
@@ -138,10 +139,8 @@ describe('Microservices endpoints', () => {
 
         response.status.should.equal(200);
 
-        (await Microservice.find()).should.have.lengthOf(1);
-        (await Endpoint.find({ toDelete: true })).should.have.lengthOf(3);
-        (await Endpoint.find({ toDelete: false })).should.have.lengthOf(0);
-
+        (await Endpoint.find({ toDelete: true })).should.have.lengthOf(2);
+        (await Endpoint.find({ toDelete: false })).should.have.lengthOf(1);
     });
 
     it('Getting endpoints for registered microservices should return a list of available endpoints (happy case)', async () => {
