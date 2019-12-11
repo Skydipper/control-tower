@@ -188,9 +188,10 @@ describe('OAuth endpoints tests - Sign up with JSON content type', () => {
 
         const response = await requester
             .get(`/auth/confirm/${tempUser.confirmationToken}`)
-            .set('Content-Type', 'application/json');
+            .set('Content-Type', 'application/json')
+            .redirects(0);
 
-        response.status.should.equal(200);
+        response.should.redirect;
 
         const missingTempUser = await UserTempModel.findOne({ email: 'someemail@gmail.com' }).exec();
         should.not.exist(missingTempUser);
@@ -299,9 +300,10 @@ describe('OAuth endpoints tests - Sign up with JSON content type', () => {
 
         const response = await requester
             .get(`/auth/confirm/${tempUser.confirmationToken}`)
-            .set('Content-Type', 'application/json');
+            .set('Content-Type', 'application/json')
+            .redirects(0);
 
-        response.status.should.equal(200);
+        response.should.redirect;
 
         const missingTempUser = await UserTempModel.findOne({ email: 'someotheremail@gmail.com' }).exec();
         should.not.exist(missingTempUser);

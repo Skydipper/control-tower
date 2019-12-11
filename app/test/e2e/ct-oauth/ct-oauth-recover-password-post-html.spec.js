@@ -125,14 +125,15 @@ describe('OAuth endpoints tests - Recover password post - HTML version', () => {
         const response = await requester
             .post(`/auth/reset-password/myToken`)
             .type('form')
+            .redirects(0)
             .send({
                 password: 'abcd',
                 repeatPassword: 'abcd'
             });
 
         return new Promise((resolve) => {
-            response.status.should.equal(200);
-            response.redirects.should.be.an('array').and.contain('https://resourcewatch.org/');
+            response.should.redirect;
+            response.should.redirectTo('http://resourcewatch.org');
             resolve();
         });
     });
@@ -150,14 +151,15 @@ describe('OAuth endpoints tests - Recover password post - HTML version', () => {
         const response = await requester
             .post(`/auth/reset-password/myToken?origin=gfw`)
             .type('form')
+            .redirects(0)
             .send({
                 password: 'abcd',
                 repeatPassword: 'abcd'
             });
 
         return new Promise((resolve) => {
-            response.status.should.equal(200);
-            response.redirects.should.be.an('array').and.contain('https://www.globalforestwatch.org/');
+            response.should.redirect;
+            response.should.redirectTo('https://www.globalforestwatch.org');
             resolve();
         });
     });

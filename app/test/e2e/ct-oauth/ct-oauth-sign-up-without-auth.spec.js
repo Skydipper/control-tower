@@ -162,9 +162,10 @@ describe('OAuth endpoints tests - Sign up without auth', () => {
         const tempUser = await UserTempModel.findOne({ email: 'someemail@gmail.com' }).exec();
 
         const response = await requester
-            .get(`/auth/confirm/${tempUser.confirmationToken}`);
+            .get(`/auth/confirm/${tempUser.confirmationToken}`)
+            .redirects(0);
 
-        response.status.should.equal(200);
+        response.should.redirect;
 
         const missingTempUser = await UserTempModel.findOne({ email: 'someemail@gmail.com' }).exec();
         should.not.exist(missingTempUser);
@@ -258,9 +259,10 @@ describe('OAuth endpoints tests - Sign up without auth', () => {
         const tempUser = await UserTempModel.findOne({ email: 'someotheremail@gmail.com' }).exec();
 
         const response = await requester
-            .get(`/auth/confirm/${tempUser.confirmationToken}`);
+            .get(`/auth/confirm/${tempUser.confirmationToken}`)
+            .redirects(0);
 
-        response.status.should.equal(200);
+        response.should.redirect;
 
         const missingTempUser = await UserTempModel.findOne({ email: 'someotheremail@gmail.com' }).exec();
         should.not.exist(missingTempUser);

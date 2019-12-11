@@ -130,7 +130,7 @@ describe('Google auth endpoint tests', () => {
         response.status.should.equal(200);
         response.header['content-type'].should.equalIgnoreCase('text/html; charset=utf-8');
         response.redirects.should.be.an('array').and.length(1);
-        response.redirects[0].should.match(new RegExp(`/auth/success$`));
+        response.should.redirectTo(new RegExp(`/auth/success$`));
 
         const confirmedUser = await UserModel.findOne({ email: 'john.doe@vizzuality.com' }).exec();
         should.exist(confirmedUser);
