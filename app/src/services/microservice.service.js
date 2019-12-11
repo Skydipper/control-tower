@@ -7,6 +7,7 @@ const VersionModel = require('models/version.model');
 const MicroserviceNotExist = require('errors/microserviceNotExist');
 const request = require('request-promise');
 const url = require('url');
+const { omitBy, isUndefined } = require('lodash');
 const crypto = require('crypto');
 const pathToRegexp = require('path-to-regexp');
 const NotificationService = require('services/notification.service.js');
@@ -200,10 +201,7 @@ class Microservice {
             micro.updatedAt = Date.now();
             micro.token = token;
             if (result.tags) {
-                if (!micro.tags) {
-                    micro.tags = [];
-                }
-                micro.tags = micro.tags.concat(result.tags);
+                micro.tags = result.tags;
             }
             await micro.save();
             await Microservice.saveEndpoints(micro, result, version);
@@ -227,19 +225,11 @@ class Microservice {
             }
             logger.info(`Registering new microservice with name ${info.name} and url ${info.url}`);
             logger.debug('Search if microservice already exist');
-            let existingMicroservice = await MicroserviceModel.findOne({
+            const existingMicroservice = await MicroserviceModel.findOne({
                 url: info.url,
                 version,
             });
             let micro = null;
-            if (existingMicroservice) {
-                existingMicroservice = await MicroserviceModel.findByIdAndUpdate(existingMicroservice._id, {
-                    $set: {
-                        status: MICRO_STATUS_PENDING
-                    }
-                });
-                micro = await MicroserviceModel.findById(existingMicroservice._id);
-            }
 
             if (existingMicroservice && existingMicroservice.status === MICRO_STATUS_PENDING) {
                 logger.error('Mutex active in microservice ', info.url);
@@ -248,7 +238,19 @@ class Microservice {
 
             try {
                 if (existingMicroservice) {
-                    await Microservice.remove(existingMicroservice._id);
+                    logger.debug(`Updating microservice with status ${MICRO_STATUS_PENDING}`);
+
+                    await MicroserviceModel.update({ _id: existingMicroservice._id }, omitBy({
+                        name: info.name,
+                        status: MICRO_STATUS_PENDING,
+                        url: info.url,
+                        pathInfo: info.pathInfo,
+                        swagger: info.swagger,
+                        token: crypto.randomBytes(20).toString('hex'),
+                        tags: info.tags,
+                        version,
+                    }, isUndefined));
+                    micro = await MicroserviceModel.findById(existingMicroservice._id);
                 } else {
                     logger.debug(`Creating microservice with status ${MICRO_STATUS_PENDING}`);
 
@@ -260,13 +262,12 @@ class Microservice {
                         swagger: info.swagger,
                         token: crypto.randomBytes(20).toString('hex'),
                         tags: info.tags,
-                        version,
+                        version
                     }).save();
-
                 }
-                logger.debug(`Creating microservice with status ${MICRO_STATUS_PENDING}`);
 
                 const correct = await Microservice.getInfoMicroservice(micro, version);
+
                 if (correct) {
                     logger.info(`Updating state of microservice with name ${micro.name}`);
                     micro.status = MICRO_STATUS_ACTIVE;
