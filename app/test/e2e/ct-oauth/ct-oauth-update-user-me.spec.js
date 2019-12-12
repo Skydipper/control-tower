@@ -27,7 +27,7 @@ describe('Auth endpoints tests - Update user', () => {
 
         UserModel.deleteMany({}).exec();
 
-        nock.cleanAll();
+
     });
 
     beforeEach(async () => {

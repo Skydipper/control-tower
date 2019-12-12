@@ -22,7 +22,7 @@ describe('Auth endpoints tests', () => {
 
         UserModel.deleteMany({}).exec();
 
-        nock.cleanAll();
+
     });
 
     beforeEach(async () => {

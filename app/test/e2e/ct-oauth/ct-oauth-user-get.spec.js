@@ -25,7 +25,7 @@ describe('GET users by id', () => {
 
         await UserModel.deleteMany({}).exec();
 
-        nock.cleanAll();
+
     });
 
     it('Get user without being logged in returns a 401', async () => {

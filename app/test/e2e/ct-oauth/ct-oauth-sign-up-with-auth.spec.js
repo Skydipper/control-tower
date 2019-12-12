@@ -33,7 +33,7 @@ describe('OAuth endpoints tests - Sign up with HTML UI', () => {
         UserModel.deleteMany({}).exec();
         UserTempModel.deleteMany({}).exec();
 
-        nock.cleanAll();
+
     });
 
     it('Registering a user without being logged in returns an 401 error (JSON format)', async () => {

@@ -27,7 +27,7 @@ describe('Auth endpoints tests - Update user by id', () => {
 
         UserModel.deleteMany({}).exec();
 
-        nock.cleanAll();
+
     });
 
     it('Updating a user while not logged in should return a 401', async () => {

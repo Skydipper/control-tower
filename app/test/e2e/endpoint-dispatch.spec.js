@@ -16,8 +16,6 @@ const changeMethod = (method) => ({ ...endpointTest, method, redirect: [{ ...end
 
 describe('Endpoint dispatch tests', () => {
     before(async () => {
-        nock.cleanAll();
-
         microservice = await getTestAgent();
     });
 

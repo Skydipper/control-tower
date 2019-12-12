@@ -26,7 +26,7 @@ describe('OAuth endpoints tests - Recover password post - HTML version', () => {
 
         requester = await getTestAgent(true);
 
-        nock.cleanAll();
+
     });
 
     beforeEach(async () => {
@@ -35,7 +35,7 @@ describe('OAuth endpoints tests - Recover password post - HTML version', () => {
         UserTempModel.deleteMany({}).exec();
         RenewModel.deleteMany({}).exec();
 
-        nock.cleanAll();
+
     });
 
     it('Recover password post with fake token should return an error - HTML format (TODO: this should return a 422)', async () => {

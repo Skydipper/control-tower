@@ -32,7 +32,7 @@ describe('OAuth endpoints tests - Sign up without auth', () => {
         UserModel.deleteMany({}).exec();
         UserTempModel.deleteMany({}).exec();
 
-        nock.cleanAll();
+
     });
 
     it('Registering a user without being logged in returns a 200 error (TODO: this should return a 422)', async () => {

@@ -22,8 +22,6 @@ describe('EndpointModel calls', () => {
         await UserModel.deleteMany({}).exec();
         await MicroserviceModel.deleteMany({}).exec();
         await EndpointModel.deleteMany({}).exec();
-
-        nock.cleanAll();
     });
 
     it('Getting an endpoint that doesn\'t exist should return a 404', async () => {

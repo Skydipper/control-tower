@@ -30,8 +30,6 @@ describe('Endpoint purge all', () => {
 
         MicroserviceModel.deleteMany({}).exec();
         EndpointModel.deleteMany({}).exec();
-
-        nock.cleanAll();
     });
 
     it('Purging endpoints without being logged in should fail', async () => {

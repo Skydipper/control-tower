@@ -25,7 +25,7 @@ describe('List users', () => {
 
         UserModel.deleteMany({}).exec();
 
-        nock.cleanAll();
+
     });
 
     it('Visiting /auth/user while not logged in should return a 401 error', async () => {

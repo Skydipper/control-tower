@@ -21,8 +21,6 @@ describe('Microservices endpoints - GET endpoints', () => {
         }
 
         requester = await getTestAgent();
-
-        nock.cleanAll();
     });
 
     beforeEach(async () => {

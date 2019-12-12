@@ -15,8 +15,6 @@ let requester;
 
 describe('Dispatch GET requests with filters', () => {
     before(async () => {
-        nock.cleanAll();
-
         requester = await getTestAgent();
     });
 

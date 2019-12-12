@@ -14,7 +14,6 @@ describe('GET Endpoints', () => {
         }
 
         requester = await getTestAgent();
-        nock.cleanAll();
     });
 
     it('Getting a list of endpoints without being authenticated should fail with a 401 error', () => {

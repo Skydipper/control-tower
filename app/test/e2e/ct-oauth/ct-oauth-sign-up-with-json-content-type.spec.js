@@ -32,7 +32,7 @@ describe('OAuth endpoints tests - Sign up with JSON content type', () => {
         UserModel.deleteMany({}).exec();
         UserTempModel.deleteMany({}).exec();
 
-        nock.cleanAll();
+
     });
 
     it('Registering a user without being logged in returns a 422 error - JSON version', async () => {

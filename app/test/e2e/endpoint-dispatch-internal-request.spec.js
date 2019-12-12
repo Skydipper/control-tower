@@ -14,8 +14,6 @@ let requester;
 
 describe('Dispatch internal requests', () => {
     before(async () => {
-        nock.cleanAll();
-
         requester = await getTestAgent();
     });
 

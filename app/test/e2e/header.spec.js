@@ -17,7 +17,6 @@ describe('Headers', () => {
         }
 
         requester = await getTestAgent();
-        nock.cleanAll();
     });
 
 
