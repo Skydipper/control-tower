@@ -1,9 +1,12 @@
 const chai = require('chai');
 const nock = require('nock');
 const Endpoint = require('models/endpoint.model');
+const fs = require('fs');
 const { getTestAgent } = require('./test-server');
 const { testAppKey, endpointTest } = require('./test.constants');
-const { createEndpoint, ensureCorrectError, updateVersion } = require('./utils/helpers');
+const {
+    createEndpoint, ensureCorrectError, updateVersion, createUserAndToken, hexToString
+} = require('./utils/helpers');
 const { createMockEndpoint, createMockEndpointWithBody, createMockEndpointWithHeaders } = require('./mock');
 
 chai.should();
@@ -58,9 +61,65 @@ describe('Endpoint dispatch tests', () => {
 
     it('External request\'s query params are passed along to the internal call on POST requests', async () => {
         await updateVersion();
-        await createEndpoint();
-        createMockEndpoint('/api/v1/dataset?test1=test&test2=test', { method: 'post' });
-        const result = await microservice.post('/api/v1/dataset').query({ test1: 'test', test2: 'test' });
+        await createEndpoint(changeMethod('POST'));
+
+        const { token, user } = await createUserAndToken();
+
+        nock('http://mymachine:6001')
+            .post('/api/v1/dataset', (body) => {
+                body.should.have.property('loggedUser').and.deep.include(user);
+                return true;
+            })
+            .query({
+                test1: 'test',
+                test2: 'test'
+            })
+            .reply(200, 'ok');
+
+        const result = await microservice
+            .post('/api/v1/dataset')
+            .set('Content-Type', 'application/json')
+            .set('Authorization', `Bearer ${token}`)
+            .query({ test1: 'test', test2: 'test' });
+
+        result.text.should.equal('ok');
+        result.status.should.equal(200);
+    });
+
+    it('External request\'s query params, files and post fields are passed along to the internal call on POST requests with multipart content type', async () => {
+        await updateVersion();
+        await createEndpoint(changeMethod('POST'));
+
+        const { token, user } = await createUserAndToken();
+
+
+        nock('http://mymachine:6001')
+            .post('/api/v1/dataset', (body) => {
+                const decodedBody = hexToString(body);
+
+                decodedBody.should.include('loggedUser');
+                // there's an extra field on the data, so we need to strip the last character (JSON object close) to have a match.
+                decodedBody.should.include(JSON.stringify(user).slice(0, -1));
+
+                decodedBody.should.include('name="foo"\r\n\r\nbar');
+                return true;
+            })
+            .query({
+                test1: 'test',
+                test2: 'test'
+            })
+            .reply(200, 'ok');
+
+        const fileData = fs.readFileSync(`${__dirname}/assets/sample.png`);
+
+        const result = await microservice
+            .post('/api/v1/dataset')
+            .set('Content-Type', 'multipart/form-data')
+            .set('Authorization', `Bearer ${token}`)
+            .query({ test1: 'test', test2: 'test' })
+            .field('foo', 'bar')
+            .attach('image', fileData, 'sample.png');
+
         result.text.should.equal('ok');
         result.status.should.equal(200);
     });
@@ -68,8 +127,64 @@ describe('Endpoint dispatch tests', () => {
     it('External request\'s query params are passed along to the internal call on PUT requests', async () => {
         await updateVersion();
         await createEndpoint(changeMethod('PUT'));
-        createMockEndpoint('/api/v1/dataset?test1=test&test2=test', { method: 'put' });
-        const result = await microservice.put('/api/v1/dataset').query({ test1: 'test', test2: 'test' });
+
+        const { token, user } = await createUserAndToken();
+
+        nock('http://mymachine:6001')
+            .put('/api/v1/dataset', (body) => {
+                body.should.have.property('loggedUser').and.deep.include(user);
+                return true;
+            })
+            .query({
+                test1: 'test',
+                test2: 'test'
+            })
+            .reply(200, 'ok');
+
+        const result = await microservice
+            .put('/api/v1/dataset')
+            .set('Content-Type', 'application/json')
+            .set('Authorization', `Bearer ${token}`)
+            .query({ test1: 'test', test2: 'test' });
+
+        result.text.should.equal('ok');
+        result.status.should.equal(200);
+    });
+
+    it('External request\'s query params, files and post fields are passed along to the internal call on PUT requests with multipart content type', async () => {
+        await updateVersion();
+        await createEndpoint(changeMethod('PUT'));
+
+        const { token, user } = await createUserAndToken();
+
+
+        nock('http://mymachine:6001')
+            .put('/api/v1/dataset', (body) => {
+                const decodedBody = hexToString(body);
+
+                decodedBody.should.include('loggedUser');
+                // there's an extra field on the data, so we need to strip the last character (JSON object close) to have a match.
+                decodedBody.should.include(JSON.stringify(user).slice(0, -1));
+
+                decodedBody.should.include('name="foo"\r\n\r\nbar');
+                return true;
+            })
+            .query({
+                test1: 'test',
+                test2: 'test'
+            })
+            .reply(200, 'ok');
+
+        const fileData = fs.readFileSync(`${__dirname}/assets/sample.png`);
+
+        const result = await microservice
+            .put('/api/v1/dataset')
+            .set('Content-Type', 'multipart/form-data')
+            .set('Authorization', `Bearer ${token}`)
+            .query({ test1: 'test', test2: 'test' })
+            .field('foo', 'bar')
+            .attach('image', fileData, 'sample.png');
+
         result.text.should.equal('ok');
         result.status.should.equal(200);
     });
@@ -86,8 +201,64 @@ describe('Endpoint dispatch tests', () => {
     it('External request\'s query params are passed along to the internal call on PATCH requests', async () => {
         await updateVersion();
         await createEndpoint(changeMethod('PATCH'));
-        createMockEndpoint('/api/v1/dataset?test1=test&test2=test', { method: 'patch' });
-        const result = await microservice.patch('/api/v1/dataset').query({ test1: 'test', test2: 'test' });
+
+        const { token, user } = await createUserAndToken();
+
+        nock('http://mymachine:6001')
+            .patch('/api/v1/dataset', (body) => {
+                body.should.have.property('loggedUser').and.deep.include(user);
+                return true;
+            })
+            .query({
+                test1: 'test',
+                test2: 'test'
+            })
+            .reply(200, 'ok');
+
+        const result = await microservice
+            .patch('/api/v1/dataset')
+            .set('Content-Type', 'application/json')
+            .set('Authorization', `Bearer ${token}`)
+            .query({ test1: 'test', test2: 'test' });
+
+        result.text.should.equal('ok');
+        result.status.should.equal(200);
+    });
+
+    it('External request\'s query params, files and post fields are passed along to the internal call on PATCH requests with multipart content type', async () => {
+        await updateVersion();
+        await createEndpoint(changeMethod('PATCH'));
+
+        const { token, user } = await createUserAndToken();
+
+
+        nock('http://mymachine:6001')
+            .patch('/api/v1/dataset', (body) => {
+                const decodedBody = hexToString(body);
+
+                decodedBody.should.include('loggedUser');
+                // there's an extra field on the data, so we need to strip the last character (JSON object close) to have a match.
+                decodedBody.should.include(JSON.stringify(user).slice(0, -1));
+
+                decodedBody.should.include('name="foo"\r\n\r\nbar');
+                return true;
+            })
+            .query({
+                test1: 'test',
+                test2: 'test'
+            })
+            .reply(200, 'ok');
+
+        const fileData = fs.readFileSync(`${__dirname}/assets/sample.png`);
+
+        const result = await microservice
+            .patch('/api/v1/dataset')
+            .set('Content-Type', 'multipart/form-data')
+            .set('Authorization', `Bearer ${token}`)
+            .query({ test1: 'test', test2: 'test' })
+            .field('foo', 'bar')
+            .attach('image', fileData, 'sample.png');
+
         result.text.should.equal('ok');
         result.status.should.equal(200);
     });
