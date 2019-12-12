@@ -28,8 +28,6 @@ describe('Find users by id', () => {
         requester = await getTestAgent();
 
         UserModel.deleteMany({}).exec();
-
-        nock.cleanAll();
     });
 
     it('Find users without being logged in returns a 401', async () => {

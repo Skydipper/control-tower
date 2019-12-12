@@ -50,8 +50,6 @@ describe('Google auth endpoint tests', () => {
 
         UserModel.deleteMany({}).exec();
 
-        nock.cleanAll();
-
         const plugin = await PluginModel.findOne({
             name: 'oauth',
         });

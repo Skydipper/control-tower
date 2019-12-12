@@ -20,8 +20,6 @@ describe('Dispatch PUT requests with filters', () => {
         await UserModel.deleteMany({}).exec();
         await EndpointModel.deleteMany({}).exec();
 
-        nock.cleanAll();
-
         requester = await getTestAgent();
     });
 

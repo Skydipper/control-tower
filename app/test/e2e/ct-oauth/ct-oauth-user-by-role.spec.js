@@ -26,7 +26,7 @@ describe('GET users ids by role', () => {
 
         UserModel.deleteMany({}).exec();
 
-        nock.cleanAll();
+
     });
 
     it('Get users ids by role without being logged in returns a 401', async () => {

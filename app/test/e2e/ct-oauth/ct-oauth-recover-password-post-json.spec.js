@@ -30,7 +30,7 @@ describe('OAuth endpoints tests - Recover password post - JSON version', () => {
 
         requester = await getTestAgent(true);
 
-        nock.cleanAll();
+
     });
 
     it('Recover password post with fake token returns a 422 error - JSON format', async () => {

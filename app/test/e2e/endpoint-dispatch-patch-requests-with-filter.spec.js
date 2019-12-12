@@ -18,8 +18,6 @@ describe('Dispatch PATCH requests with filters', () => {
     before(async () => {
         await UserModel.deleteMany({}).exec();
 
-        nock.cleanAll();
-
         requester = await getTestAgent();
     });
 

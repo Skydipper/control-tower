@@ -25,7 +25,7 @@ describe('Auth endpoints tests', () => {
 
         UserModel.deleteMany({}).exec();
 
-        nock.cleanAll();
+
     });
 
     // Default HTML request behavior

@@ -10,7 +10,6 @@ describe('GET healthcheck', () => {
         }
 
         requester = await getTestAgent();
-        nock.cleanAll();
     });
 
     it('Checking the application\'s health should return a 200', async () => {

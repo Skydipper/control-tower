@@ -28,7 +28,7 @@ describe('OAuth endpoints tests - Recover password request - JSON version', () =
         UserModel.deleteMany({}).exec();
         UserTempModel.deleteMany({}).exec();
 
-        nock.cleanAll();
+
     });
 
     beforeEach(async () => {
@@ -37,7 +37,7 @@ describe('OAuth endpoints tests - Recover password request - JSON version', () =
         UserTempModel.deleteMany({}).exec();
         RenewModel.deleteMany({}).exec();
 
-        nock.cleanAll();
+
     });
 
     it('Recover password request with no email should return an error - JSON format', async () => {

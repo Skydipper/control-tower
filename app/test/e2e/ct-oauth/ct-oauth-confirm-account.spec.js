@@ -32,8 +32,6 @@ describe('OAuth endpoints tests - Confirm account', () => {
 
         UserModel.deleteMany({}).exec();
         UserTempModel.deleteMany({}).exec();
-
-        nock.cleanAll();
     });
 
     it('Confirm account request with invalid token should return an error', async () => {
