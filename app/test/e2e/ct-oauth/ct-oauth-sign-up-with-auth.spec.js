@@ -41,7 +41,7 @@ describe('OAuth endpoints tests - Sign up with HTML UI', () => {
             .post(`/auth/sign-up`);
 
         response.status.should.equal(401);
-        response.header['content-type'].should.equal('application/json; charset=utf-8');
+        response.should.be.json;
         response.body.should.have.property('errors').and.be.an('array');
         response.body.errors[0].should.have.property('detail').and.equal(`Not authenticated`);
     });

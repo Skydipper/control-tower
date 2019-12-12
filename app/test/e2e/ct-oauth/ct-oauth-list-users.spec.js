@@ -34,7 +34,7 @@ describe('List users', () => {
             .set('Content-Type', 'application/json');
 
         response.status.should.equal(401);
-        response.header['content-type'].should.equal('application/json; charset=utf-8');
+        response.should.be.json;
         response.body.should.have.property('errors').and.be.an('array');
         response.body.errors[0].should.have.property('detail').and.equal(`Not authenticated`);
 
@@ -49,7 +49,7 @@ describe('List users', () => {
             .set('Authorization', `Bearer ${token}`);
 
         response.status.should.equal(403);
-        response.header['content-type'].should.equal('application/json; charset=utf-8');
+        response.should.be.json;
         response.body.should.have.property('errors').and.be.an('array');
         response.body.errors[0].should.have.property('detail').and.equal(`Not authorized`);
     });

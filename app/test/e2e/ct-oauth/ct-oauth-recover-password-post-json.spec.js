@@ -40,7 +40,7 @@ describe('OAuth endpoints tests - Recover password post - JSON version', () => {
 
         return new Promise((resolve) => {
             response.status.should.equal(422);
-            response.header['content-type'].should.equal('application/json; charset=utf-8');
+            response.should.be.json;
             response.body.should.have.property('errors').and.be.an('array');
             response.body.errors[0].should.have.property('detail').and.equal(`Token expired`);
 
@@ -61,7 +61,7 @@ describe('OAuth endpoints tests - Recover password post - JSON version', () => {
 
         return new Promise((resolve) => {
             response.status.should.equal(422);
-            response.header['content-type'].should.equal('application/json; charset=utf-8');
+            response.should.be.json;
             response.body.should.have.property('errors').and.be.an('array');
             response.body.errors[0].status.should.equal(422);
             response.body.errors[0].detail.should.equal('Password and Repeat password are required');
@@ -85,7 +85,7 @@ describe('OAuth endpoints tests - Recover password post - JSON version', () => {
 
         return new Promise((resolve) => {
             response.status.should.equal(422);
-            response.header['content-type'].should.equal('application/json; charset=utf-8');
+            response.should.be.json;
             response.body.should.have.property('errors').and.be.an('array');
             response.body.errors[0].status.should.equal(422);
             response.body.errors[0].detail.should.equal('Password and Repeat password not equal');
@@ -114,7 +114,7 @@ describe('OAuth endpoints tests - Recover password post - JSON version', () => {
             });
 
         response.status.should.equal(422);
-        response.header['content-type'].should.equal('application/json; charset=utf-8');
+        response.should.be.json;
         response.body.should.have.property('errors').and.be.an('array');
         response.body.errors[0].status.should.equal(422);
         response.body.errors[0].detail.should.equal('Password and Repeat password not equal');

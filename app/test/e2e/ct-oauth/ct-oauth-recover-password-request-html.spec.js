@@ -46,7 +46,7 @@ describe('OAuth endpoints tests - Recover password request - HTML version', () =
 
 
         response.status.should.equal(200);
-        response.header['content-type'].should.equal('text/html; charset=utf-8');
+        response.should.be.html;
         response.text.should.include(`Mail required`);
     });
 
@@ -59,7 +59,7 @@ describe('OAuth endpoints tests - Recover password request - HTML version', () =
             });
 
         response.status.should.equal(200);
-        response.header['content-type'].should.equal('text/html; charset=utf-8');
+        response.should.be.html;
         response.text.should.include(`User not found`);
     });
 
@@ -115,7 +115,7 @@ describe('OAuth endpoints tests - Recover password request - HTML version', () =
             });
 
         response.status.should.equal(200);
-        response.header['content-type'].should.equal('text/html; charset=utf-8');
+        response.should.be.html;
         response.text.should.include(`Email sent`);
     });
 

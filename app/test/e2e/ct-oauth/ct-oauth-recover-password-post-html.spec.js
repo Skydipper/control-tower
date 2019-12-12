@@ -44,7 +44,7 @@ describe('OAuth endpoints tests - Recover password post - HTML version', () => {
 
         return new Promise((resolve) => {
             response.status.should.equal(200);
-            response.header['content-type'].should.equal('text/html; charset=utf-8');
+            response.should.be.html;
             response.text.should.include(`Token expired`);
             resolve();
         });
@@ -63,7 +63,7 @@ describe('OAuth endpoints tests - Recover password post - HTML version', () => {
         return new Promise((resolve) => {
 
             response.status.should.equal(200);
-            response.header['content-type'].should.equal('text/html; charset=utf-8');
+            response.should.be.html;
             response.text.should.include(`Password and Repeat password are required`);
             resolve();
         });
@@ -84,7 +84,7 @@ describe('OAuth endpoints tests - Recover password post - HTML version', () => {
 
         return new Promise((resolve) => {
             response.status.should.equal(200);
-            response.header['content-type'].should.equal('text/html; charset=utf-8');
+            response.should.be.html;
             response.text.should.include(`Password and Repeat password not equal`);
             resolve();
         });
@@ -106,7 +106,7 @@ describe('OAuth endpoints tests - Recover password post - HTML version', () => {
 
         return new Promise((resolve) => {
             response.status.should.equal(200);
-            response.header['content-type'].should.equal('text/html; charset=utf-8');
+            response.should.be.html;
             response.text.should.include(`Password and Repeat password not equal`);
             resolve();
         });

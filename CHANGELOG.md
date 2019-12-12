@@ -1,3 +1,6 @@
+# 12/12/2019
+- Refactor tests to (even) better handle redirect cases
+
 # 11/12/2019
 - Refactor tests to better handle redirect cases
 
