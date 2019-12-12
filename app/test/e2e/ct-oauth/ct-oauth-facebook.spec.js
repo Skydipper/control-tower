@@ -56,17 +56,14 @@ describe('Facebook auth endpoint tests', () => {
         }
 
         const response = await requester
-            .get(`/auth/facebook`);
+            .get(`/auth/facebook`)
+            .redirects(0);
 
-        response.status.should.equal(200);
-        response.header['content-type'].should.equal('application/xhtml+xml; charset=utf-8');
-        response.redirects.should.be.an('array').and.length(3);
+        response.should.redirect;
         response.should.redirectTo(/^https:\/\/www\.facebook\.com\/dialog\/oauth/);
-        response.redirects[1].should.match(/^https:\/\/m\.facebook\.com\/v2\.11\/dialog\/oauth/);
-        response.redirects[2].should.match(/^https:\/\/m\.facebook\.com\/login\.php/);
     });
 
-    it('Visiting /auth/facebook/callback ', async () => {
+    it('Visiting /auth/facebook/callback while being logged in should redirect to the login successful page', async () => {
         if (skipTests) {
             return;
         }
@@ -114,11 +111,10 @@ describe('Facebook auth endpoint tests', () => {
             .get(`/auth`);
 
         const response = await requester
-            .get(`/auth/facebook/callback?code=TEST_FACEBOOK_OAUTH2_CALLBACK_CODE`);
+            .get(`/auth/facebook/callback?code=TEST_FACEBOOK_OAUTH2_CALLBACK_CODE`)
+            .redirects(0);
 
-        response.status.should.equal(200);
-        response.header['content-type'].should.equal('text/html; charset=utf-8');
-        response.redirects.should.be.an('array').and.length(1);
+        response.should.redirect;
         response.should.redirectTo(new RegExp(`/auth/success$`));
 
         const confirmedUser = await UserModel.findOne({ email: 'john.doe@vizzuality.com' }).exec();
@@ -130,6 +126,158 @@ describe('Facebook auth endpoint tests', () => {
         confirmedUser.should.have.property('provider').and.equal('facebook');
         confirmedUser.should.have.property('providerId').and.equal('10216001184997572');
     });
+
+    it('Visiting /auth/facebook/callback while being logged in with a callbackUrl param should redirect to the callback URL page', async () => {
+        if (skipTests) {
+            return;
+        }
+
+        const missingUser = await UserModel.findOne({ email: 'john.doe@vizzuality.com' }).exec();
+        should.not.exist(missingUser);
+
+        nock('https://graph.facebook.com')
+            .post('/oauth/access_token', {
+                grant_type: 'authorization_code',
+                redirect_uri: `${process.env.PUBLIC_URL}/auth/facebook/callback`,
+                client_id: process.env.TEST_FACEBOOK_OAUTH2_APP_ID,
+                client_secret: process.env.TEST_FACEBOOK_OAUTH2_APP_SECRET,
+                code: 'TEST_FACEBOOK_OAUTH2_CALLBACK_CODE'
+            })
+            .reply(200, {
+                access_token: 'facebook_access_token',
+                token_type: 'bearer',
+                expires_in: 5183974
+            });
+
+
+        nock('https://graph.facebook.com')
+            .get('/v2.5/me')
+            .query({
+                fields: 'id,name,picture,email',
+                access_token: 'facebook_access_token'
+            })
+            .reply(200, {
+                id: '10216001184997572',
+                name: 'John Doe',
+                picture: {
+                    data: {
+                        height: 50,
+                        is_silhouette: false,
+                        url: 'https://images.pexels.com/photos/20787/pexels-photo.jpg?auto=compress&cs=tinysrgb&h=750&w=1260',
+                        width: 50
+                    }
+                },
+                email: 'john.doe@vizzuality.com'
+            });
+
+
+        nock('https://www.wikipedia.org')
+            .get('/')
+            .reply(200, 'ok');
+
+
+        await requester
+            .get(`/auth?callbackUrl=https://www.wikipedia.org`);
+
+        const responseOne = await requester
+            .get(`/auth/facebook/callback?code=TEST_FACEBOOK_OAUTH2_CALLBACK_CODE`)
+            .redirects(0);
+
+        responseOne.should.redirect;
+        responseOne.should.redirectTo(new RegExp(`/auth/success$`));
+
+        const responseTwo = await requester
+            .get('/auth/success');
+
+        responseTwo.should.redirect;
+        responseTwo.should.redirectTo('https://www.wikipedia.org/');
+
+        const confirmedUser = await UserModel.findOne({ email: 'john.doe@vizzuality.com' }).exec();
+        should.exist(confirmedUser);
+        confirmedUser.should.have.property('email').and.equal('john.doe@vizzuality.com');
+        confirmedUser.should.have.property('name').and.equal('John Doe');
+        confirmedUser.should.have.property('photo').and.equal('https://images.pexels.com/photos/20787/pexels-photo.jpg?auto=compress&cs=tinysrgb&h=750&w=1260');
+        confirmedUser.should.have.property('role').and.equal('USER');
+        confirmedUser.should.have.property('provider').and.equal('facebook');
+        confirmedUser.should.have.property('providerId').and.equal('10216001184997572');
+    });
+
+    // it('Visiting /auth/facebook/callback while being logged in with an updated callbackUrl param should redirect to the new callback URL page', async () => {
+    //     if (skipTests) {
+    //         return;
+    //     }
+    //
+    //     const missingUser = await UserModel.findOne({ email: 'john.doe@vizzuality.com' }).exec();
+    //     should.not.exist(missingUser);
+    //
+    //     nock('https://graph.facebook.com')
+    //         .post('/oauth/access_token', {
+    //             grant_type: 'authorization_code',
+    //             redirect_uri: `${process.env.PUBLIC_URL}/auth/facebook/callback`,
+    //             client_id: process.env.TEST_FACEBOOK_OAUTH2_APP_ID,
+    //             client_secret: process.env.TEST_FACEBOOK_OAUTH2_APP_SECRET,
+    //             code: 'TEST_FACEBOOK_OAUTH2_CALLBACK_CODE'
+    //         })
+    //         .reply(200, {
+    //             access_token: 'facebook_access_token',
+    //             token_type: 'bearer',
+    //             expires_in: 5183974
+    //         });
+    //
+    //
+    //     nock('https://graph.facebook.com')
+    //         .get('/v2.5/me')
+    //         .query({
+    //             fields: 'id,name,picture,email',
+    //             access_token: 'facebook_access_token'
+    //         })
+    //         .reply(200, {
+    //             id: '10216001184997572',
+    //             name: 'John Doe',
+    //             picture: {
+    //                 data: {
+    //                     height: 50,
+    //                     is_silhouette: false,
+    //                     url: 'https://images.pexels.com/photos/20787/pexels-photo.jpg?auto=compress&cs=tinysrgb&h=750&w=1260',
+    //                     width: 50
+    //                 }
+    //             },
+    //             email: 'john.doe@vizzuality.com'
+    //         });
+    //
+    //     nock('https://www.wri.org')
+    //         .get('/')
+    //         .reply(200, 'ok');
+    //
+    //     // TODO: uncomment to reproduce current issue
+    //     // await requester
+    //     //     .get(`/auth?callbackUrl=https://www.google.com`);
+    //
+    //     await requester
+    //         .get(`/auth?callbackUrl=https://www.wri.org`);
+    //
+    //     const responseOne = await requester
+    //         .get(`/auth/facebook/callback?code=TEST_FACEBOOK_OAUTH2_CALLBACK_CODE`)
+    //         .redirects(0);
+    //
+    //     responseOne.should.redirect;
+    //     responseOne.should.redirectTo(new RegExp(`/auth/success$`));
+    //
+    //     const responseTwo = await requester
+    //         .get('/auth/success');
+    //
+    //     responseTwo.should.redirect;
+    //     responseTwo.should.redirectTo('https://www.wri.org/');
+    //
+    //     const confirmedUser = await UserModel.findOne({ email: 'john.doe@vizzuality.com' }).exec();
+    //     should.exist(confirmedUser);
+    //     confirmedUser.should.have.property('email').and.equal('john.doe@vizzuality.com');
+    //     confirmedUser.should.have.property('name').and.equal('John Doe');
+    //     confirmedUser.should.have.property('photo').and.equal('https://images.pexels.com/photos/20787/pexels-photo.jpg?auto=compress&cs=tinysrgb&h=750&w=1260');
+    //     confirmedUser.should.have.property('role').and.equal('USER');
+    //     confirmedUser.should.have.property('provider').and.equal('facebook');
+    //     confirmedUser.should.have.property('providerId').and.equal('10216001184997572');
+    // });
 
     it('Visiting /auth/facebook/token with a valid Facebook OAuth token should generate a new token', async () => {
         await new UserModel({
@@ -173,7 +321,7 @@ describe('Facebook auth endpoint tests', () => {
             .get(`/auth/facebook/token?access_token=TEST_FACEBOOK_OAUTH2_ACCESS_TOKEN`);
 
         response.status.should.equal(200);
-        response.header['content-type'].should.equal('application/json; charset=utf-8');
+        response.should.be.json;
         response.body.should.be.an('object');
         response.body.should.have.property('token').and.be.a('string');
 

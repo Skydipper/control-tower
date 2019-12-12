@@ -43,7 +43,7 @@ describe('OAuth endpoints tests - Confirm account', () => {
 
 
         response.status.should.equal(400);
-        response.header['content-type'].should.equal('application/json; charset=utf-8');
+        response.should.be.json;
         response.body.should.have.property('errors').and.be.an('array');
         response.body.errors[0].should.have.property('detail').and.equal(`User expired or token not found`);
     });
@@ -64,7 +64,7 @@ describe('OAuth endpoints tests - Confirm account', () => {
 
 
         response.status.should.equal(200);
-        response.header['content-type'].should.equal('application/json; charset=utf-8');
+        response.should.be.json;
 
         const responseUser = response.body.data;
         responseUser.should.have.property('email').and.equal('test@example.com');
@@ -89,7 +89,7 @@ describe('OAuth endpoints tests - Confirm account', () => {
 
 
         response.status.should.equal(200);
-        response.header['content-type'].should.equal('application/json; charset=utf-8');
+        response.should.be.json;
 
         const responseUser = response.body.data;
         responseUser.should.have.property('email').and.equal('test@example.com');
