@@ -18,6 +18,14 @@ const mongooseOptions = require('../../../../config/mongoose');
 const mongoUri = process.env.CT_MONGO_URI || `mongodb://${config.get('mongodb.host')}:${config.get('mongodb.port')}/${config.get('mongodb.database')}`;
 const getUUID = () => Math.random().toString(36).substring(7);
 
+const hexToString = (hex) => {
+    let str = '';
+    for (let i = 0; i < hex.length; i += 2) {
+        str += String.fromCharCode(parseInt(hex.substr(i, 2), 16));
+    }
+    return str;
+};
+
 const createUser = (userData) => ({
     _id: new ObjectId(),
     name: `${getUUID()} name`,
@@ -41,7 +49,7 @@ const createUserInDB = async (userData) => {
     const user = await new UserModel(createUser(userData)).save();
 
     return {
-        id: user._id,
+        id: user._id.toString(),
         role: user.role,
         provider: user.provider,
         email: user.email,
@@ -177,6 +185,7 @@ async function setPluginSetting(pluginName, settingKey, settingValue) {
 }
 
 module.exports = {
+    hexToString,
     createUser,
     setPluginSetting,
     updateVersion,
