@@ -218,81 +218,80 @@ describe('Google auth endpoint tests', () => {
         confirmedUser.should.have.property('providerId').and.equal('113994825016233013735');
     });
 
-    // it('Visiting /auth/google/callback while being logged in with an updated callbackUrl param should redirect to the new callback URL page', async () => {
-    //     if (skipTests) {
-    //         return;
-    //     }
-    //
-    //     const missingUser = await UserModel.findOne({ email: 'john.doe@vizzuality.com' }).exec();
-    //     should.not.exist(missingUser);
-    //
-    //     nock('https://www.googleapis.com')
-    //         .post('/oauth2/v4/token', {
-    //             grant_type: 'authorization_code',
-    //             redirect_uri: `${process.env.PUBLIC_URL}/auth/google/callback`,
-    //             client_id: process.env.TEST_GOOGLE_OAUTH2_CLIENT_ID,
-    //             client_secret: 'TEST_GOOGLE_OAUTH2_CLIENT_SECRET',
-    //             code: 'TEST_GOOGLE_OAUTH2_CALLBACK_CODE'
-    //         })
-    //         .reply(200, {
-    //             access_token: 'TEST_GOOGLE_OAUTH2_ACCESS_TOKEN',
-    //             expires_in: 3599,
-    //             scope: 'openid https://www.googleapis.com/auth/userinfo.email',
-    //             token_type: 'Bearer',
-    //             id_token: 'some_id_token'
-    //         });
-    //
-    //     nock('https://www.googleapis.com')
-    //         .get('/oauth2/v3/userinfo')
-    //         .query({
-    //             access_token: 'TEST_GOOGLE_OAUTH2_ACCESS_TOKEN'
-    //         })
-    //         .reply(200, {
-    //             sub: '113994825016233013735',
-    //             name: 'John Doe',
-    //             given_name: 'John',
-    //             family_name: 'Doe',
-    //             picture: 'https://images.pexels.com/photos/20787/pexels-photo.jpg?auto=compress&cs=tinysrgb&h=750&w=1260',
-    //             email: 'john.doe@vizzuality.com',
-    //             email_verified: true,
-    //             hd: 'vizzuality.com'
-    //         });
-    //
-    //     nock('https://www.wikipedia.org')
-    //         .get('/')
-    //         .reply(200, 'ok');
-    //
-    //
-    //     // TODO: uncomment to reproduce current issue
-    //     // await requester
-    //     //     .get(`/auth?callbackUrl=https://www.google.com`);
-    //
-    //     await requester
-    //         .get(`/auth?callbackUrl=https://www.wikipedia.org`);
-    //
-    //     const responseOne = await requester
-    //         .get(`/auth/google/callback?code=TEST_GOOGLE_OAUTH2_CALLBACK_CODE&scope=openid%20email%20https://www.googleapis.com/auth/userinfo.email`)
-    //         .redirects(0);
-    //
-    //     responseOne.should.redirect;
-    //     responseOne.should.redirectTo(new RegExp(`/auth/success$`));
-    //
-    //     const responseTwo = await requester
-    //         .get('/auth/success');
-    //
-    //     responseTwo.should.redirect;
-    //     responseTwo.should.redirectTo('https://www.wikipedia.org/');
-    //
-    //
-    //     const confirmedUser = await UserModel.findOne({ email: 'john.doe@vizzuality.com' }).exec();
-    //     should.exist(confirmedUser);
-    //     confirmedUser.should.have.property('email').and.equal('john.doe@vizzuality.com');
-    //     confirmedUser.should.have.property('name').and.equal('John Doe');
-    //     confirmedUser.should.have.property('photo').and.equal('https://images.pexels.com/photos/20787/pexels-photo.jpg?auto=compress&cs=tinysrgb&h=750&w=1260');
-    //     confirmedUser.should.have.property('role').and.equal('USER');
-    //     confirmedUser.should.have.property('provider').and.equal('google');
-    //     confirmedUser.should.have.property('providerId').and.equal('113994825016233013735');
-    // });
+    it('Visiting /auth/google/callback while being logged in with an updated callbackUrl param should redirect to the new callback URL page', async () => {
+        if (skipTests) {
+            return;
+        }
+
+        const missingUser = await UserModel.findOne({ email: 'john.doe@vizzuality.com' }).exec();
+        should.not.exist(missingUser);
+
+        nock('https://www.googleapis.com')
+            .post('/oauth2/v4/token', {
+                grant_type: 'authorization_code',
+                redirect_uri: `${process.env.PUBLIC_URL}/auth/google/callback`,
+                client_id: process.env.TEST_GOOGLE_OAUTH2_CLIENT_ID,
+                client_secret: 'TEST_GOOGLE_OAUTH2_CLIENT_SECRET',
+                code: 'TEST_GOOGLE_OAUTH2_CALLBACK_CODE'
+            })
+            .reply(200, {
+                access_token: 'TEST_GOOGLE_OAUTH2_ACCESS_TOKEN',
+                expires_in: 3599,
+                scope: 'openid https://www.googleapis.com/auth/userinfo.email',
+                token_type: 'Bearer',
+                id_token: 'some_id_token'
+            });
+
+        nock('https://www.googleapis.com')
+            .get('/oauth2/v3/userinfo')
+            .query({
+                access_token: 'TEST_GOOGLE_OAUTH2_ACCESS_TOKEN'
+            })
+            .reply(200, {
+                sub: '113994825016233013735',
+                name: 'John Doe',
+                given_name: 'John',
+                family_name: 'Doe',
+                picture: 'https://images.pexels.com/photos/20787/pexels-photo.jpg?auto=compress&cs=tinysrgb&h=750&w=1260',
+                email: 'john.doe@vizzuality.com',
+                email_verified: true,
+                hd: 'vizzuality.com'
+            });
+
+        nock('https://www.wikipedia.org')
+            .get('/')
+            .reply(200, 'ok');
+
+
+        await requester
+            .get(`/auth?callbackUrl=https://www.google.com`);
+
+        await requester
+            .get(`/auth?callbackUrl=https://www.wikipedia.org`);
+
+        const responseOne = await requester
+            .get(`/auth/google/callback?code=TEST_GOOGLE_OAUTH2_CALLBACK_CODE&scope=openid%20email%20https://www.googleapis.com/auth/userinfo.email`)
+            .redirects(0);
+
+        responseOne.should.redirect;
+        responseOne.should.redirectTo(new RegExp(`/auth/success$`));
+
+        const responseTwo = await requester
+            .get('/auth/success');
+
+        responseTwo.should.redirect;
+        responseTwo.should.redirectTo('https://www.wikipedia.org/');
+
+
+        const confirmedUser = await UserModel.findOne({ email: 'john.doe@vizzuality.com' }).exec();
+        should.exist(confirmedUser);
+        confirmedUser.should.have.property('email').and.equal('john.doe@vizzuality.com');
+        confirmedUser.should.have.property('name').and.equal('John Doe');
+        confirmedUser.should.have.property('photo').and.equal('https://images.pexels.com/photos/20787/pexels-photo.jpg?auto=compress&cs=tinysrgb&h=750&w=1260');
+        confirmedUser.should.have.property('role').and.equal('USER');
+        confirmedUser.should.have.property('provider').and.equal('google');
+        confirmedUser.should.have.property('providerId').and.equal('113994825016233013735');
+    });
 
     it('Visiting /auth/google/token with a valid Google OAuth token should generate a new token', async () => {
         await new UserModel({

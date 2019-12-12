@@ -721,13 +721,13 @@ module.exports = (plugin, connection, generalConfig) => {
 
     async function setCallbackUrl(ctx, next) {
         logger.info('Setting callbackUrl');
-        if (!ctx.session.callbackUrl) {
-            if (ctx.query.callbackUrl) {
-                ctx.session.callbackUrl = ctx.query.callbackUrl;
-            } else {
-                ctx.session.callbackUrl = ctx.headers.referer;
-            }
+        if (!ctx.session.callbackUrl && !ctx.query.callbackUrl) {
+            ctx.session.callbackUrl = ctx.headers.referer;
         }
+        if (ctx.query.callbackUrl) {
+            ctx.session.callbackUrl = ctx.query.callbackUrl;
+        }
+
         if (!ctx.session.applications && ctx.query.applications) {
             ctx.session.applications = ctx.query.applications.split(',');
         }
