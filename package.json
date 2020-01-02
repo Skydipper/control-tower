@@ -1,7 +1,7 @@
 {
   "name": "sd-control-tower",
   "version": "2.0.6",
-  "description": "Control Tower API gateway - Skydipper edition",
+  "description": "Control Tower API gateway - Resource Watch",
   "main": "index.js",
   "scripts": {
     "dev": "NODE_PATH=app/src DEBUG=oauth-plugin,statistics-plugin,redis-cache-plugin grunt --gruntfile app/Gruntfile.js | bunyan",
