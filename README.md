@@ -1,7 +1,7 @@
 # Control Tower API Gateway - Skydipper edition 
 
-[![Build Status](https://travis-ci.org/Skydipper/control-tower.svg?branch=develop)](https://travis-ci.org/Skydipper/control-tower)
-[![Test Coverage](https://api.codeclimate.com/v1/badges/b8b9bedf77eba1fd6e35/test_coverage)](https://codeclimate.com/github/Skydipper/control-tower/test_coverage)
+[![Build Status](https://travis-ci.org/resource-watch/control-tower.svg?branch=develop)](https://travis-ci.org/resource-watch/control-tower)
+[![Test Coverage](https://api.codeclimate.com/v1/badges/6998e7a532fb2d138ca3/test_coverage)](https://codeclimate.com/github/resource-watch/control-tower/test_coverage)
 
 ## Dependencies
 
