@@ -81,6 +81,7 @@ describe('OAuth endpoints tests - Recover password request - JSON version', () =
                         }
                     ],
                     substitution_data: {
+                        fromEmail: 'noreply@resourcewatch.org',
                         fromName: 'RW API',
                         appName: 'RW API',
                         logo: 'https://resourcewatch.org/static/images/logo-embed.png'
@@ -137,6 +138,7 @@ describe('OAuth endpoints tests - Recover password request - JSON version', () =
                         }
                     ],
                     substitution_data: {
+                        fromEmail: 'noreply@globalforestwatch.org',
                         fromName: 'GFW',
                         appName: 'GFW',
                         logo: 'https://www.globalforestwatch.org/packs/gfw-9c5fe396ee5b15cb5f5b639a7ef771bd.png'

@@ -1,5 +1,6 @@
 const nock = require('nock');
 const chai = require('chai');
+const config = require('config');
 
 const MicroserviceModel = require('models/microservice.model');
 const EndpointModel = require('models/endpoint.model');
@@ -60,7 +61,7 @@ describe('Microservices endpoints - GET endpoints', () => {
                 description: 'Control Tower - API',
                 version: '1.0.0'
             },
-            host: 'localhost:9000',
+            host: config.get('server.publicUrl').replace('http://', ''),
             schemes: [
                 'http'
             ],

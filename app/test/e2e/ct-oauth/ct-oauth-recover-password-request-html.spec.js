@@ -78,6 +78,7 @@ describe('OAuth endpoints tests - Recover password request - HTML version', () =
                         }
                     ],
                     substitution_data: {
+                        fromEmail: 'noreply@resourcewatch.org',
                         fromName: 'RW API',
                         appName: 'RW API',
                         logo: 'https://resourcewatch.org/static/images/logo-embed.png'
