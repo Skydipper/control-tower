@@ -27,23 +27,17 @@ describe('OAuth endpoints tests - Recover password request - HTML version', () =
 
         UserModel.deleteMany({}).exec();
         UserTempModel.deleteMany({}).exec();
-
-
     });
 
     beforeEach(async () => {
-
         UserModel.deleteMany({}).exec();
         UserTempModel.deleteMany({}).exec();
         RenewModel.deleteMany({}).exec();
-
-
     });
 
     it('Recover password request with no email should return an error - HTML format (TODO: this should return a 422)', async () => {
         const response = await requester
             .post(`/auth/reset-password`);
-
 
         response.status.should.equal(200);
         response.should.be.html;
