@@ -4,8 +4,20 @@ const Endpoint = require('models/endpoint.model');
 const Version = require('models/version.model');
 const appConstants = require('app.constants');
 const logger = require('logger');
+const UserModel = require('plugins/sd-ct-oauth-plugin/models/user.model');
+const config = require('config');
 
 module.exports = async function init() {
+    if (process.env.NODE_ENV === 'dev') {
+        const createdDevUser = await UserModel.findOne({ email: config.get('dev_user.email') });
+
+        if (createdDevUser) {
+            await createdDevUser.update(config.get('dev_user')).exec();
+        } else {
+            await new UserModel(config.get('dev_user')).save();
+        }
+    }
+
     const version = await Version.find();
     if (version && version.length > 0) {
         logger.info('Database ready!!');
