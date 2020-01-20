@@ -3,6 +3,8 @@ const logger = require('logger');
 const mongoose = require('mongoose');
 const jwt = require('koa-jwt');
 const views = require('koa-views');
+const config = require('config');
+const UserModel = require('plugins/sd-ct-oauth-plugin/models/user.model');
 const passportService = require('./services/passport.service');
 const apiRouter = require('./auth.router');
 const authServiceFunc = require('./services/auth.service');
@@ -22,6 +24,8 @@ function middleware(app, plugin, generalConfig) {
     app.use(passport.session());
 
     const getToken = (ctx, opts) => {
+        if (ctx.state.isLoggedAsDev) return config.get('dev_token');
+
         // External requests use the standard 'authorization' header, but internal requests use 'authentication' instead
         // so we need a custom function to load the token. Why don't we use authorization on both will always elude me...
 
@@ -52,6 +56,21 @@ function middleware(app, plugin, generalConfig) {
 
     if (plugin.config.jwt.active) {
         logger.info('JWT active');
+
+        app.use(async (ctx, next) => {
+            if (process.env.NODE_ENV === 'dev' && [config.get('dev_token'), `Bearer ${config.get('dev_token')}`].includes(ctx.header.authorization)) {
+                ctx.state.isLoggedAsDev = true;
+                const { _id, role, extraUserData } = await UserModel.findOne({ email: config.get('dev_user.email') });
+                ctx.state.user = {
+                    id: _id,
+                    role,
+                    extraUserData,
+                };
+            }
+
+            await next();
+        });
+
         app.use(jwt({
             secret: plugin.config.jwt.secret,
             passthrough: plugin.config.jwt.passthrough,
@@ -61,6 +80,11 @@ function middleware(app, plugin, generalConfig) {
 
         // eslint-disable-next-line consistent-return
         app.use(async (ctx, next) => {
+            if (ctx.state.isLoggedAsDev) {
+                await next();
+                return;
+            }
+
             if (ctx.state.jwtOriginalError && ctx.state.jwtOriginalError.message === 'Token revoked') {
                 return ctx.throw(401, 'Your token is outdated. Please use /auth/login to login and /auth/generate-token to generate a new token.');
             }

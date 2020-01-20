@@ -11,6 +11,18 @@
     "toFile": false,
     "stackdriver": false
   },
+  "dev_token": "dev_token",
+  "dev_user": {
+    "email": "dev@dev.com",
+    "provider": "local",
+    "password": "example",
+    "role": "ADMIN",
+    "extraUserData": {
+      "apps": [
+        "skydipper_test", "test", "7777"
+      ]
+    }
+  },
   "server": {
     "port": 9000,
     "publicUrl": "http://control.tower.dev:9000",

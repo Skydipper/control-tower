@@ -42,6 +42,33 @@ yarn start
 ```
 Control Tower should now be up and accessible. To confirm, open [http://localhost:9000](http://localhost:9000/) (assuming the default settings) on your browser, which should show a 404 'Endpoint not found' message.
 
+### Using development token
+
+Development token can only be used in dev mode, for start dev mode you will need to have the string `NODE_ENV=dev` in `dev.env` file.
+ 
+Dev user is created at startup CT stage. User data for dev user are stored in `config/default.json:dev_user`, default user dev are:
+```
+"email": "dev@dev.com",
+"provider": "local",
+"password": "example",
+"role": "ADMIN",
+"extraUserData": {
+  "apps": [
+    "skydipper_test", "test", "7777"
+  ]
+}
+```
+
+Value of dev token is stored in `config/default.json:dev_token`, default value is:
+```
+dev_token
+```
+
+For using dev token you need to add header:
+```
+Authorization: dev_token
+```
+
 ### Using Docker
 
 1 - Create and complete your `dev.env` file with your configuration. The meaning of the variables is available in this [section](#documentation-environment-variables). You can find an example `dev.env.sample` file in the project root.
