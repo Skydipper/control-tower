@@ -20,6 +20,8 @@ env:
     - COOKIE_DOMAIN=mymachine
     - SESSION_KEY=test
     - PUBLIC_URL=http://localhost:9000
+    - API_VERSION=v1
+    - CT_REGISTER_MODE=auto
     - SPARKPOST_KEY=fakeSparkpostKey
     - FASTLY_APIKEY=foo
     - FASTLY_SERVICEID=bar

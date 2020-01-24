@@ -61,7 +61,6 @@ describe('OAuth endpoints tests - Recover password post - HTML version', () => {
             .type('form');
 
         return new Promise((resolve) => {
-
             response.status.should.equal(200);
             response.should.be.html;
             response.text.should.include(`Password and Repeat password are required`);

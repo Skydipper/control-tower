@@ -1,3 +1,6 @@
+# 22/01/2020
+- Add and use `fromEmail` field on oauth plugin configuration (inside each application) as the name of the sender for auth-related emails
+
 # 12/12/2019
 - Change callback URL logic so that priority is:
     - Query param
@@ -12,7 +15,7 @@
 - Add pagination to GET users
 
 # 01/12/2019
-- Fix regression where 3rd party auth users without email address would not be able to authenticate 
+- Fix regression where 3rd party auth users without email address would not be able to authenticate
 
 # 08/11/2019
 - Add healthcheck endpoint and readiness+liveliness checks to k8s config

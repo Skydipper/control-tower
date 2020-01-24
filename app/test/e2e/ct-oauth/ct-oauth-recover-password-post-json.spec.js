@@ -154,7 +154,6 @@ describe('OAuth endpoints tests - Recover password post - JSON version', () => {
             response.redirects.should.be.an('array').and.length(0);
 
             const responseUser = response.body.data;
-            // eslint-disable-next-line no-unused-expressions
             responseUser.should.have.property('id').and.be.a('string').and.not.be.empty;
             responseUser.should.have.property('name').and.be.a('string').and.equal('lorem-ipsum');
             responseUser.should.have.property('photo').and.be.a('string').and.equal('http://www.random.rand/abc.jpg');
