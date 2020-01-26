@@ -180,7 +180,7 @@ describe('OAuth endpoints tests - Sign up with JSON content type', () => {
         response.should.be.json;
         response.body.should.have.property('errors').and.be.an('array');
         response.body.errors[0].status.should.equal(422);
-        response.body.errors[0].detail.should.equal('Email exist');
+        response.body.errors[0].detail.should.equal('Email exists');
     });
 
     it('Confirming a user\'s account using the email token should be successful (user without app)', async () => {
@@ -222,7 +222,7 @@ describe('OAuth endpoints tests - Sign up with JSON content type', () => {
         response.should.be.json;
         response.body.should.have.property('errors').and.be.an('array');
         response.body.errors[0].status.should.equal(422);
-        response.body.errors[0].detail.should.equal('Email exist');
+        response.body.errors[0].detail.should.equal('Email exists');
     });
 
 
