@@ -1,3 +1,6 @@
+# 27/01/2020
+- Fix grammar for `email exists` error when attempting to register and exisiting user. `email exist` -> `email exists`
+
 # 22/01/2020
 - Add and use `fromEmail` field on oauth plugin configuration (inside each application) as the name of the sender for auth-related emails
 

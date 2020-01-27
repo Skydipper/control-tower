@@ -293,7 +293,7 @@ module.exports = (plugin, connection, generalConfig) => {
 
             const exist = await AuthService.existEmail(body.email);
             if (exist) {
-                ctx.throw(400, 'Email exist');
+                ctx.throw(400, 'Email exists');
                 return;
             }
 
@@ -393,7 +393,7 @@ module.exports = (plugin, connection, generalConfig) => {
             }
             const exist = await AuthService.existEmail(ctx.request.body.email);
             if (exist) {
-                error = 'Email exist';
+                error = 'Email exists';
             }
             if (error) {
                 if (ctx.request.type === 'application/json') {
