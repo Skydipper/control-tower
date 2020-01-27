@@ -170,7 +170,7 @@ describe('OAuth endpoints tests - Sign up with HTML UI', () => {
             });
 
         response.status.should.equal(200);
-        response.text.should.include('Email exist');
+        response.text.should.include('Email exists');
     });
 
     it('Confirming a user\'s account using the email token should be successful', async () => {
@@ -210,7 +210,7 @@ describe('OAuth endpoints tests - Sign up with HTML UI', () => {
             });
 
         response.status.should.equal(200);
-        response.text.should.include('Email exist');
+        response.text.should.include('Email exists');
     });
 
     // User registration - with app

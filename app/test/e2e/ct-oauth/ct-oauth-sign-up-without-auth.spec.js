@@ -156,7 +156,7 @@ describe('OAuth endpoints tests - Sign up without auth', () => {
             });
 
         response.status.should.equal(200);
-        response.text.should.include('Email exist');
+        response.text.should.include('Email exists');
     });
 
     it('Confirming a user\'s account using the email token should be successful (user without app)', async () => {
@@ -194,7 +194,7 @@ describe('OAuth endpoints tests - Sign up without auth', () => {
             });
 
         response.status.should.equal(200);
-        response.text.should.include('Email exist');
+        response.text.should.include('Email exists');
     });
 
     it('Registering a user with correct data and app returns a 200', async () => {
