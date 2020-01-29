@@ -2,7 +2,7 @@
 
 ## 27/1/2020
 
-- Fix grammar for `email exists` error when attempting to register and exisiting user. `email exist` -> `email exists`.
+- Update `passport-facebook` NPM package version to its latest version.
 - Add and use `fromEmail` field on oauth plugin configuration (inside each application) as the name of the sender for auth-related emails.
 - Change callback URL logic so that priority is:
   - Query param

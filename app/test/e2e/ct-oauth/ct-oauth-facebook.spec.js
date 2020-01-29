@@ -53,12 +53,9 @@ describe('Facebook auth endpoint tests', () => {
             return;
         }
 
-        const response = await requester
-            .get(`/auth/facebook`)
-            .redirects(0);
-
+        const response = await requester.get(`/auth/facebook`).redirects(0);
         response.should.redirect;
-        response.should.redirectTo(/^https:\/\/www\.facebook\.com\/dialog\/oauth/);
+        response.should.redirectTo(/^https:\/\/www\.facebook\.com\/v3.2\/dialog\/oauth/);
     });
 
     it('Visiting /auth/facebook/callback while being logged in should redirect to the login successful page', async () => {
@@ -70,7 +67,7 @@ describe('Facebook auth endpoint tests', () => {
         should.not.exist(missingUser);
 
         nock('https://graph.facebook.com')
-            .post('/oauth/access_token', {
+            .post('/v3.2/oauth/access_token', {
                 grant_type: 'authorization_code',
                 redirect_uri: `${process.env.PUBLIC_URL}/auth/facebook/callback`,
                 client_id: process.env.TEST_FACEBOOK_OAUTH2_APP_ID,
@@ -85,7 +82,7 @@ describe('Facebook auth endpoint tests', () => {
 
 
         nock('https://graph.facebook.com')
-            .get('/v2.5/me')
+            .get('/v3.2/me')
             .query({
                 fields: 'id,name,picture,email',
                 access_token: 'facebook_access_token'
@@ -134,7 +131,7 @@ describe('Facebook auth endpoint tests', () => {
         should.not.exist(missingUser);
 
         nock('https://graph.facebook.com')
-            .post('/oauth/access_token', {
+            .post('/v3.2/oauth/access_token', {
                 grant_type: 'authorization_code',
                 redirect_uri: `${process.env.PUBLIC_URL}/auth/facebook/callback`,
                 client_id: process.env.TEST_FACEBOOK_OAUTH2_APP_ID,
@@ -149,7 +146,7 @@ describe('Facebook auth endpoint tests', () => {
 
 
         nock('https://graph.facebook.com')
-            .get('/v2.5/me')
+            .get('/v3.2/me')
             .query({
                 fields: 'id,name,picture,email',
                 access_token: 'facebook_access_token'
@@ -209,7 +206,7 @@ describe('Facebook auth endpoint tests', () => {
         should.not.exist(missingUser);
 
         nock('https://graph.facebook.com')
-            .post('/oauth/access_token', {
+            .post('/v3.2/oauth/access_token', {
                 grant_type: 'authorization_code',
                 redirect_uri: `${process.env.PUBLIC_URL}/auth/facebook/callback`,
                 client_id: process.env.TEST_FACEBOOK_OAUTH2_APP_ID,
@@ -224,7 +221,7 @@ describe('Facebook auth endpoint tests', () => {
 
 
         nock('https://graph.facebook.com')
-            .get('/v2.5/me')
+            .get('/v3.2/me')
             .query({
                 fields: 'id,name,picture,email',
                 access_token: 'facebook_access_token'
