@@ -9,3 +9,5 @@ IMPORTANT.txt
 processes.json
 .nyc_output
 coverage
+.idea/
+run.sh
