@@ -1,6 +1,6 @@
-# v1.0.0
+# v2.1.0
 
-## 27/1/2020
+## 27/01/2020
 
 - Update `passport-facebook` NPM package version to its latest version.
 - Add and use `fromEmail` field on oauth plugin configuration (inside each application) as the name of the sender for auth-related emails.

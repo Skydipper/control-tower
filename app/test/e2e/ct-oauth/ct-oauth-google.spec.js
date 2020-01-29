@@ -50,6 +50,8 @@ describe('Google auth endpoint tests', () => {
 
         UserModel.deleteMany({}).exec();
 
+        nock.cleanAll();
+
         const plugin = await PluginModel.findOne({
             name: 'oauth',
         });
@@ -71,10 +73,13 @@ describe('Google auth endpoint tests', () => {
             .get(`/auth/google`)
             .redirects(0);
 
+        response.status.should.equal(200);
+        response.header['content-type'].should.equalIgnoreCase('text/html; charset=UTF-8');
         // eslint-disable-next-line no-unused-expressions
-        response.should.redirect;
-        response.should.be.text;
-        response.should.redirectTo(/^https:\/\/accounts\.google\.com\//);
+        response.redirects.should.be.an('array').and.not.be.empty;
+        response.redirects.forEach((redirect) => {
+            redirect.should.match(/^https:\/\/accounts\.google\.com\//);
+        });
     });
 
     it('Visiting /auth/google/callback while being logged in should redirect to the login successful page', async () => {
@@ -280,7 +285,6 @@ describe('Google auth endpoint tests', () => {
         responseTwo.should.redirect;
         responseTwo.should.redirectTo('https://www.wikipedia.org/');
 
-
         const confirmedUser = await UserModel.findOne({ email: 'john.doe@vizzuality.com' }).exec();
         should.exist(confirmedUser);
         confirmedUser.should.have.property('email').and.equal('john.doe@vizzuality.com');
@@ -331,7 +335,7 @@ describe('Google auth endpoint tests', () => {
             .get(`/auth/google/token?access_token=TEST_GOOGLE_OAUTH2_ACCESS_TOKEN`);
 
         response.status.should.equal(200);
-        response.should.be.json;
+        response.header['content-type'].should.equalIgnoreCase('application/json; charset=utf-8');
         response.body.should.be.an('object');
         response.body.should.have.property('token').and.be.a('string');
 
@@ -389,7 +393,7 @@ describe('Google auth endpoint tests', () => {
             .get(`/auth/google/token?access_token=TEST_GOOGLE_OAUTH2_ACCESS_TOKEN`);
 
         response.status.should.equal(200);
-        response.should.be.json;
+        response.header['content-type'].should.equalIgnoreCase('application/json; charset=utf-8');
         response.body.should.be.an('object');
         response.body.should.have.property('token').and.be.a('string');
 
