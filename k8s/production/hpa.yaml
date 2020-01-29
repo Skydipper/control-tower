@@ -8,6 +8,6 @@ spec:
     apiVersion: apps/v1beta1
     kind: Deployment
     name: {name}
-  minReplicas: 10
-  maxReplicas: 100
-  targetCPUUtilizationPercentage: 80
+  minReplicas: 1
+  maxReplicas: 3
+  targetCPUUtilizationPercentage: 50

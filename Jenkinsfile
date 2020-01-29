@@ -41,7 +41,7 @@ node {
 //     }
 
     stage('Push Docker') {
-      withCredentials([usernamePassword(credentialsId: 'Vizzuality Docker Hub', usernameVariable: 'DOCKER_HUB_USERNAME', passwordVariable: 'DOCKER_HUB_PASSWORD')]) {
+      withCredentials([usernamePassword(credentialsId: 'Skydipper Docker Hub', usernameVariable: 'DOCKER_HUB_USERNAME', passwordVariable: 'DOCKER_HUB_PASSWORD')]) {
         sh("docker -H :2375 login -u ${DOCKER_HUB_USERNAME} -p ${DOCKER_HUB_PASSWORD}")
         sh("docker -H :2375 push ${imageTag}")
         sh("docker -H :2375 push ${dockerUsername}/${appName}:latest")
@@ -52,22 +52,8 @@ node {
     stage ("Deploy Application") {
       switch ("${env.BRANCH_NAME}") {
 
-        // Roll out to staging
-        case "develop":
-          sh("echo Deploying to STAGING cluster")
-          sh("kubectl config use-context gke_${GCLOUD_PROJECT}_${GCLOUD_GCE_ZONE}_${KUBE_STAGING_CLUSTER}")
-          def service = sh([returnStdout: true, script: "kubectl get deploy ${appName} || echo NotFound"]).trim()
-          if ((service && service.indexOf("NotFound") > -1) || (forceCompleteDeploy)){
-            sh("sed -i -e 's/{name}/${appName}/g' k8s/services/*.yaml")
-            sh("sed -i -e 's/{name}/${appName}/g' k8s/staging/*.yaml")
-            sh("kubectl apply -f k8s/services/")
-            sh("kubectl apply -f k8s/staging/")
-          }
-          sh("kubectl set image deployment ${appName} ${appName}=${imageTag} --record")
-          break
-
         // Roll out to production
-        case "master":
+        case "skydipper":
           def userInput = true
           def didTimeout = false
           try {
@@ -109,9 +95,13 @@ node {
           currentBuild.result = "SUCCESS"
       }
     }
+
+    // Notify Success
+
   } catch (err) {
 
     currentBuild.result = "FAILURE"
+    // Notify Error
     throw err
   }
 

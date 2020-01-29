@@ -15,26 +15,15 @@ spec:
           operator: "Equal"
           value: "gateway"
           effect: "NoSchedule"
-      affinity:
-        nodeAffinity:
-          requiredDuringSchedulingIgnoredDuringExecution:
-            nodeSelectorTerms:
-              - matchExpressions:
-                  - key: type
-                    operator: In
-                    values:
-                      - gateway
       containers:
         - name: {name}
           image: vizzuality/{name}
           imagePullPolicy: Always
           resources:
             requests:
-              cpu: "0.35"
-              memory: "256M"
+              memory: "128Mi"
             limits:
-              cpu: "1"
-              memory: "512M"
+              memory: "1Gi"
           args:
             - start
           env:
@@ -49,13 +38,13 @@ spec:
             - name: BASICAUTH_USERNAME
               value: vizzuality
             - name: CONFIRM_URL_REDIRECT
-              value: http://www.globalforestwatch.org
+              value: http://api.skydipper.com
             - name: PUBLIC_URL
-              value: http://production-api.globalforestwatch.org
+              value: http://api.skydipper.com
             - name: APP_NAME
-              value: "RW API"
+              value: "Skydipper API"
             - name: APP_LOGO
-              value: http://www.wri.org/sites/all/themes/wri/images/logo.png
+              value: http://developer.skydipper.com/images/logo-skydipper.png
             - name: APP_COLOR
               value: "#f1b319"
             - name: CT_MONGO_URI
@@ -73,96 +62,6 @@ spec:
                 secretKeyRef:
                   name: ctsecrets
                   key: JWT_SECRET
-            - name: GFW_TWITTER_CONSUMER_KEY
-              valueFrom:
-                secretKeyRef:
-                  name: ctsecrets
-                  key: GFW_TWITTER_CONSUMER_KEY
-            - name: GFW_TWITTER_CONSUMER_SECRET
-              valueFrom:
-                secretKeyRef:
-                  name: ctsecrets
-                  key: GFW_TWITTER_CONSUMER_SECRET
-            - name: GFW_FACEBOOK_CLIENT_ID
-              valueFrom:
-                secretKeyRef:
-                  name: ctsecrets
-                  key: GFW_FACEBOOK_CLIENT_ID
-            - name: GFW_FACEBOOK_CLIENT_SECRET
-              valueFrom:
-                secretKeyRef:
-                  name: ctsecrets
-                  key: GFW_FACEBOOK_CLIENT_SECRET
-            - name: GFW_GOOGLE_CLIENT_ID
-              valueFrom:
-                secretKeyRef:
-                  name: ctsecrets
-                  key: GFW_GOOGLE_CLIENT_ID
-            - name: GFW_GOOGLE_CLIENT_SECRET
-              valueFrom:
-                secretKeyRef:
-                  name: ctsecrets
-                  key: GFW_GOOGLE_CLIENT_SECRET
-            - name: RW_TWITTER_CONSUMER_KEY
-              valueFrom:
-                secretKeyRef:
-                  name: ctsecrets
-                  key: RW_TWITTER_CONSUMER_KEY
-            - name: RW_TWITTER_CONSUMER_SECRET
-              valueFrom:
-                secretKeyRef:
-                  name: ctsecrets
-                  key: RW_TWITTER_CONSUMER_SECRET
-            - name: RW_FACEBOOK_CLIENT_ID
-              valueFrom:
-                secretKeyRef:
-                  name: ctsecrets
-                  key: RW_FACEBOOK_CLIENT_ID
-            - name: RW_FACEBOOK_CLIENT_SECRET
-              valueFrom:
-                secretKeyRef:
-                  name: ctsecrets
-                  key: RW_FACEBOOK_CLIENT_SECRET
-            - name: RW_GOOGLE_CLIENT_ID
-              valueFrom:
-                secretKeyRef:
-                  name: ctsecrets
-                  key: RW_GOOGLE_CLIENT_ID
-            - name: RW_GOOGLE_CLIENT_SECRET
-              valueFrom:
-                secretKeyRef:
-                  name: ctsecrets
-                  key: RW_GOOGLE_CLIENT_SECRET
-            - name: PREP_TWITTER_CONSUMER_KEY
-              valueFrom:
-                secretKeyRef:
-                  name: ctsecrets
-                  key: PREP_TWITTER_CONSUMER_KEY
-            - name: PREP_TWITTER_CONSUMER_SECRET
-              valueFrom:
-                secretKeyRef:
-                  name: ctsecrets
-                  key: PREP_TWITTER_CONSUMER_SECRET
-            - name: PREP_FACEBOOK_CLIENT_ID
-              valueFrom:
-                secretKeyRef:
-                  name: ctsecrets
-                  key: PREP_FACEBOOK_CLIENT_ID
-            - name: PREP_FACEBOOK_CLIENT_SECRET
-              valueFrom:
-                secretKeyRef:
-                  name: ctsecrets
-                  key: PREP_FACEBOOK_CLIENT_SECRET
-            - name: PREP_GOOGLE_CLIENT_ID
-              valueFrom:
-                secretKeyRef:
-                  name: ctsecrets
-                  key: PREP_GOOGLE_CLIENT_ID
-            - name: PREP_GOOGLE_CLIENT_SECRET
-              valueFrom:
-                secretKeyRef:
-                  name: ctsecrets
-                  key: PREP_GOOGLE_CLIENT_SECRET
             - name: BASICAUTH_PASSWORD
               valueFrom:
                 secretKeyRef:
@@ -173,49 +72,7 @@ spec:
                 secretKeyRef:
                   name: ctsecrets
                   key: SPARKPOST_KEY
-            - name: INSTAPUSH_TOKEN
-              valueFrom:
-                secretKeyRef:
-                  name: ctsecrets
-                  key: INSTAPUSH_TOKEN
-            - name: INSTAPUSH_ID
-              valueFrom:
-                secretKeyRef:
-                  name: ctsecrets
-                  key: INSTAPUSH_ID
-            - name: INSTAPUSH_SECRET
-              valueFrom:
-                secretKeyRef:
-                  name: ctsecrets
-                  key: INSTAPUSH_SECRET
-            - name: FASTLY_APIKEY
-              valueFrom:
-                secretKeyRef:
-                  name: ctsecrets
-                  key: FASTLY_APIKEY
-            - name: FASTLY_SERVICEID
-              valueFrom:
-                secretKeyRef:
-                  name: ctsecrets
-                  key: FASTLY_SERVICEID
 
           ports:
             - containerPort: 9000
-          readinessProbe:
-            httpGet:
-              scheme: HTTP
-              path: /healthcheck
-              port: 9000
-            initialDelaySeconds: 30
-            timeoutSeconds: 5
-            periodSeconds: 15
-          livenessProbe:
-            httpGet:
-              scheme: HTTP
-              path: /healthcheck
-              port: 9000
-            failureThreshold: 3
-            initialDelaySeconds: 30
-            timeoutSeconds: 5
-            periodSeconds: 15
       restartPolicy: Always
