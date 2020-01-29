@@ -32,7 +32,7 @@ describe('OAuth endpoints tests - Sign up without auth', () => {
         UserModel.deleteMany({}).exec();
         UserTempModel.deleteMany({}).exec();
 
-        nock.cleanAll();
+
     });
 
     it('Registering a user without being logged in returns a 200 error (TODO: this should return a 422)', async () => {
@@ -97,6 +97,7 @@ describe('OAuth endpoints tests - Sign up without auth', () => {
                         }
                     ],
                     substitution_data: {
+                        fromEmail: 'noreply@resourcewatch.org',
                         fromName: 'RW API',
                         appName: 'RW API',
                         logo: 'https://resourcewatch.org/static/images/logo-embed.png'
@@ -155,16 +156,17 @@ describe('OAuth endpoints tests - Sign up without auth', () => {
             });
 
         response.status.should.equal(200);
-        response.text.should.include('Email exist');
+        response.text.should.include('Email exists');
     });
 
     it('Confirming a user\'s account using the email token should be successful (user without app)', async () => {
         const tempUser = await UserTempModel.findOne({ email: 'someemail@gmail.com' }).exec();
 
         const response = await requester
-            .get(`/auth/confirm/${tempUser.confirmationToken}`);
+            .get(`/auth/confirm/${tempUser.confirmationToken}`)
+            .redirects(0);
 
-        response.status.should.equal(200);
+        response.should.redirect;
 
         const missingTempUser = await UserTempModel.findOne({ email: 'someemail@gmail.com' }).exec();
         should.not.exist(missingTempUser);
@@ -192,7 +194,7 @@ describe('OAuth endpoints tests - Sign up without auth', () => {
             });
 
         response.status.should.equal(200);
-        response.text.should.include('Email exist');
+        response.text.should.include('Email exists');
     });
 
     it('Registering a user with correct data and app returns a 200', async () => {
@@ -210,6 +212,7 @@ describe('OAuth endpoints tests - Sign up without auth', () => {
                         }
                     ],
                     substitution_data: {
+                        fromEmail: 'noreply@resourcewatch.org',
                         fromName: 'RW API',
                         appName: 'RW API',
                         logo: 'https://resourcewatch.org/static/images/logo-embed.png'
@@ -258,9 +261,10 @@ describe('OAuth endpoints tests - Sign up without auth', () => {
         const tempUser = await UserTempModel.findOne({ email: 'someotheremail@gmail.com' }).exec();
 
         const response = await requester
-            .get(`/auth/confirm/${tempUser.confirmationToken}`);
+            .get(`/auth/confirm/${tempUser.confirmationToken}`)
+            .redirects(0);
 
-        response.status.should.equal(200);
+        response.should.redirect;
 
         const missingTempUser = await UserTempModel.findOne({ email: 'someotheremail@gmail.com' }).exec();
         should.not.exist(missingTempUser);

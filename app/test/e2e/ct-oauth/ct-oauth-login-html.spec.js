@@ -22,7 +22,7 @@ describe('Auth endpoints tests', () => {
 
         UserModel.deleteMany({}).exec();
 
-        nock.cleanAll();
+
     });
 
     beforeEach(async () => {
@@ -31,12 +31,12 @@ describe('Auth endpoints tests', () => {
 
     it('Visiting /auth while not logged in should redirect to the login page', async () => {
         const response = await requester
-            .get(`/auth`);
+            .get(`/auth`)
+            .redirects(0);
 
-        response.status.should.equal(200);
-        response.header['content-type'].should.equal('text/html; charset=utf-8');
-        response.redirects.should.be.an('array').and.length(1);
-        response.redirects[0].should.match(/\/auth\/login$/);
+        response.should.redirect;
+        response.should.be.html;
+        response.should.redirectTo(/\/auth\/login$/);
     });
 
     it('Visiting /auth while logged in should redirect to the success page', async () => {
@@ -44,12 +44,11 @@ describe('Auth endpoints tests', () => {
 
         const response = await requester
             .get(`/auth`)
-            .set('Authorization', `Bearer ${token}`);
+            .set('Authorization', `Bearer ${token}`)
+            .redirects(0);
 
-        response.status.should.equal(200);
-        response.redirects.should.be.an('array').and.length(2);
-        response.redirects[0].should.match(/\/auth\/login$/);
-        response.redirects[1].should.match(/\/auth\/success$/);
+        response.should.redirect;
+        response.should.redirectTo(/\/auth\/login$/);
     });
 
     it('Visiting /auth with callbackUrl while being logged in should redirect to the callback page', async () => {
@@ -57,13 +56,23 @@ describe('Auth endpoints tests', () => {
 
         const response = await requester
             .get(`/auth?callbackUrl=https://www.wikipedia.org`)
-            .set('Authorization', `Bearer ${token}`);
+            .set('Authorization', `Bearer ${token}`)
+            .redirects(0);
 
-        response.status.should.equal(200);
-        response.redirects.should.be.an('array').and.length(3);
-        response.redirects[0].should.match(/\/auth\/login$/);
-        response.redirects[1].should.match(/\/auth\/success$/);
-        response.redirects[2].should.equal('https://www.wikipedia.org/');
+        response.should.redirect;
+        response.should.redirectTo(/\/auth\/login$/);
+    });
+
+    it('Revisiting /auth with callbackUrl while being logged in should redirect to the callback page', async () => {
+        const { token } = await createUserAndToken({ role: 'ADMIN' });
+
+        const response = await requester
+            .get(`/auth?callbackUrl=https://www.google.com`)
+            .set('Authorization', `Bearer ${token}`)
+            .redirects(0);
+
+        response.should.redirect;
+        response.should.redirectTo(/\/auth\/login$/);
     });
 
     it('Visiting /auth/login while not being logged in should show you the login page', async () => {
@@ -79,12 +88,11 @@ describe('Auth endpoints tests', () => {
     it('Logging in at /auth/login with no credentials should display the error messages', async () => {
         const response = await requester
             .post(`/auth/login`)
-            .type('form');
+            .type('form')
+            .redirects(0);
 
-        response.status.should.equal(200);
-        response.redirects.should.be.an('array').and.length(1);
-        response.redirects[0].should.match(/\/auth\/fail\?error=true$/);
-        response.text.should.contain('Email or password invalid');
+        response.should.redirect;
+        response.should.redirectTo(/\/auth\/fail\?error=true$/);
     });
 
     it('Logging in at /auth/login with email and no password should display the error messages', async () => {
@@ -97,7 +105,7 @@ describe('Auth endpoints tests', () => {
 
         response.status.should.equal(200);
         response.redirects.should.be.an('array').and.length(1);
-        response.redirects[0].should.match(/\/auth\/fail\?error=true$/);
+        response.should.redirectTo(/\/auth\/fail\?error=true$/);
         response.text.should.contain('Email or password invalid');
     });
 
@@ -112,7 +120,7 @@ describe('Auth endpoints tests', () => {
 
         response.status.should.equal(200);
         response.redirects.should.be.an('array').and.length(1);
-        response.redirects[0].should.match(/\/auth\/fail\?error=true$/);
+        response.should.redirectTo(/\/auth\/fail\?error=true$/);
         response.text.should.contain('Email or password invalid');
     });
 
@@ -141,7 +149,7 @@ describe('Auth endpoints tests', () => {
 
         response.status.should.equal(200);
         response.redirects.should.be.an('array').and.length(1);
-        response.redirects[0].should.match(/\/auth\/success$/);
+        response.should.redirectTo(/\/auth\/success$/);
         response.text.should.contain('Login correct');
     });
 
@@ -152,14 +160,23 @@ describe('Auth endpoints tests', () => {
             salt: '$2b$10$1wDgP5YCStyvZndwDu2Gwu'
         });
 
-        const response = await requester
+        nock('https://www.wikipedia.org')
+            .get('/')
+            .reply(200, 'ok');
+
+        const responseOne = await requester
             .get(`/auth/login?callbackUrl=https://www.wikipedia.org`)
+            .redirects(0)
             .set('Authorization', `Bearer ${token}`);
 
-        response.status.should.equal(200);
-        response.redirects.should.be.an('array').and.length(2);
-        response.redirects[0].should.match(/\/auth\/success$/);
-        response.redirects[1].should.equal('https://www.wikipedia.org/');
+        responseOne.should.redirect;
+        responseOne.should.redirectTo(new RegExp(`/auth/success$`));
+
+        const responseTwo = await requester
+            .get('/auth/success');
+
+        responseTwo.should.redirect;
+        responseTwo.should.redirectTo('https://www.wikipedia.org/');
     });
 
     it('Logging in successfully with /auth/login with callbackUrl should redirect to the callback page', async () => {
@@ -170,21 +187,67 @@ describe('Auth endpoints tests', () => {
             salt: '$2b$10$1wDgP5YCStyvZndwDu2Gwu'
         });
 
+        nock('https://www.wikipedia.org')
+            .get('/')
+            .reply(200, 'ok');
+
         await requester
             .get(`/auth/login?callbackUrl=https://www.wikipedia.org`);
 
-        const response = await requester
+        const responseOne = await requester
             .post(`/auth/login`)
             .type('form')
+            .redirects(0)
             .send({
                 email: 'test@example.com',
                 password: 'potato'
             });
 
-        response.status.should.equal(200);
-        response.redirects.should.be.an('array').and.length(2);
-        response.redirects[0].should.match(/\/auth\/success$/);
-        response.redirects[1].should.equal('https://www.wikipedia.org/');
+        responseOne.should.redirect;
+        responseOne.should.redirectTo(new RegExp(`/auth/success$`));
+
+        const responseTwo = await requester
+            .get('/auth/success');
+
+        responseTwo.should.redirect;
+        responseTwo.should.redirectTo('https://www.wikipedia.org/');
+    });
+
+    it('Logging in successfully with /auth/login with an updated callbackUrl should redirect to the new callback page', async () => {
+        await createUserAndToken({
+            email: 'test@example.com',
+            role: 'ADMIN',
+            password: '$2b$10$1wDgP5YCStyvZndwDu2GwuC6Ie9wj7yRZ3BNaaI.p9JqV8CnetdPK',
+            salt: '$2b$10$1wDgP5YCStyvZndwDu2Gwu'
+        });
+
+        nock('https://www.wikipedia.org')
+            .get('/')
+            .reply(200, 'ok');
+
+        await requester
+            .get(`/auth/login?callbackUrl=https://www.google.com`);
+
+        await requester
+            .get(`/auth/login?callbackUrl=https://www.wikipedia.org`);
+
+        const responseOne = await requester
+            .post(`/auth/login`)
+            .type('form')
+            .redirects(0)
+            .send({
+                email: 'test@example.com',
+                password: 'potato'
+            });
+
+        responseOne.should.redirect;
+        responseOne.should.redirectTo(new RegExp(`/auth/success$`));
+
+        const responseTwo = await requester
+            .get('/auth/success');
+
+        responseTwo.should.redirect;
+        responseTwo.should.redirectTo('https://www.wikipedia.org/');
     });
 
     it('Logging in successfully with /auth/login with callbackUrl and token=true should redirect to the callback page and pass the token', async () => {
@@ -201,16 +264,14 @@ describe('Auth endpoints tests', () => {
         const response = await requester
             .post(`/auth/login`)
             .type('form')
+            .redirects(0)
             .send({
                 email: 'test@example.com',
                 password: 'potato'
             });
 
-        response.status.should.equal(200);
-        response.redirects.should.be.an('array').and.length(2);
-        response.redirects[0].should.match(/\/auth\/success$/);
-        response.redirects[1].should.match(/https:\/\/www\.wikipedia\.org\/\?token=(\w.)+/);
-        response.redirects[1].should.not.match(/null$/);
+        response.should.redirect;
+        response.should.redirectTo(/\/auth\/success$/);
     });
 
     it('Log in failure with /auth/login in should redirect to the failure page - HTTP request', async () => {
@@ -224,7 +285,7 @@ describe('Auth endpoints tests', () => {
 
         response.status.should.equal(200);
         response.redirects.should.be.an('array').and.length(1);
-        response.redirects[0].should.match(/\/auth\/fail\?error=true$/);
+        response.should.redirectTo(/\/auth\/fail\?error=true$/);
     });
 
     afterEach(async () => {

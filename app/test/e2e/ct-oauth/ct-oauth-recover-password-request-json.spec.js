@@ -28,7 +28,7 @@ describe('OAuth endpoints tests - Recover password request - JSON version', () =
         UserModel.deleteMany({}).exec();
         UserTempModel.deleteMany({}).exec();
 
-        nock.cleanAll();
+
     });
 
     beforeEach(async () => {
@@ -37,7 +37,7 @@ describe('OAuth endpoints tests - Recover password request - JSON version', () =
         UserTempModel.deleteMany({}).exec();
         RenewModel.deleteMany({}).exec();
 
-        nock.cleanAll();
+
     });
 
     it('Recover password request with no email should return an error - JSON format', async () => {
@@ -47,7 +47,7 @@ describe('OAuth endpoints tests - Recover password request - JSON version', () =
 
 
         response.status.should.equal(422);
-        response.header['content-type'].should.equal('application/json; charset=utf-8');
+        response.should.be.json;
         response.body.should.have.property('errors').and.be.an('array');
         response.body.errors[0].should.have.property('detail').and.equal(`Mail required`);
     });
@@ -61,7 +61,7 @@ describe('OAuth endpoints tests - Recover password request - JSON version', () =
             });
 
         response.status.should.equal(422);
-        response.header['content-type'].should.equal('application/json; charset=utf-8');
+        response.should.be.json;
         response.body.should.have.property('errors').and.be.an('array');
         response.body.errors[0].should.have.property('detail').and.equal(`User not found`);
     });
@@ -81,6 +81,7 @@ describe('OAuth endpoints tests - Recover password request - JSON version', () =
                         }
                     ],
                     substitution_data: {
+                        fromEmail: 'noreply@resourcewatch.org',
                         fromName: 'RW API',
                         appName: 'RW API',
                         logo: 'https://resourcewatch.org/static/images/logo-embed.png'
@@ -118,7 +119,7 @@ describe('OAuth endpoints tests - Recover password request - JSON version', () =
             });
 
         response.status.should.equal(200);
-        response.header['content-type'].should.equal('application/json; charset=utf-8');
+        response.should.be.json;
         response.body.should.have.property('message').and.equal(`Email sent`);
     });
 
@@ -137,6 +138,7 @@ describe('OAuth endpoints tests - Recover password request - JSON version', () =
                         }
                     ],
                     substitution_data: {
+                        fromEmail: 'noreply@globalforestwatch.org',
                         fromName: 'GFW',
                         appName: 'GFW',
                         logo: 'https://www.globalforestwatch.org/packs/gfw-9c5fe396ee5b15cb5f5b639a7ef771bd.png'
@@ -168,7 +170,7 @@ describe('OAuth endpoints tests - Recover password request - JSON version', () =
             });
 
         response.status.should.equal(200);
-        response.header['content-type'].should.equal('application/json; charset=utf-8');
+        response.should.be.json;
         response.body.should.have.property('message').and.equal(`Email sent`);
     });
 

@@ -33,7 +33,7 @@ describe('OAuth endpoints tests - Sign up with HTML UI', () => {
         UserModel.deleteMany({}).exec();
         UserTempModel.deleteMany({}).exec();
 
-        nock.cleanAll();
+
     });
 
     it('Registering a user without being logged in returns an 401 error (JSON format)', async () => {
@@ -41,7 +41,7 @@ describe('OAuth endpoints tests - Sign up with HTML UI', () => {
             .post(`/auth/sign-up`);
 
         response.status.should.equal(401);
-        response.header['content-type'].should.equal('application/json; charset=utf-8');
+        response.should.be.json;
         response.body.should.have.property('errors').and.be.an('array');
         response.body.errors[0].should.have.property('detail').and.equal(`Not authenticated`);
     });
@@ -107,6 +107,7 @@ describe('OAuth endpoints tests - Sign up with HTML UI', () => {
                         }
                     ],
                     substitution_data: {
+                        fromEmail: 'noreply@resourcewatch.org',
                         fromName: 'RW API',
                         appName: 'RW API',
                         logo: 'https://resourcewatch.org/static/images/logo-embed.png'
@@ -169,16 +170,17 @@ describe('OAuth endpoints tests - Sign up with HTML UI', () => {
             });
 
         response.status.should.equal(200);
-        response.text.should.include('Email exist');
+        response.text.should.include('Email exists');
     });
 
     it('Confirming a user\'s account using the email token should be successful', async () => {
         const tempUser = await createTempUser({ email: 'someemail@gmail.com' });
 
         const response = await requester
-            .get(`/auth/confirm/${tempUser.confirmationToken}`);
+            .get(`/auth/confirm/${tempUser.confirmationToken}`)
+            .redirects(0);
 
-        response.status.should.equal(200);
+        response.should.redirect;
 
         const missingTempUser = await UserTempModel.findOne({ email: 'someemail@gmail.com' }).exec();
         should.not.exist(missingTempUser);
@@ -208,7 +210,7 @@ describe('OAuth endpoints tests - Sign up with HTML UI', () => {
             });
 
         response.status.should.equal(200);
-        response.text.should.include('Email exist');
+        response.text.should.include('Email exists');
     });
 
     // User registration - with app
@@ -229,6 +231,7 @@ describe('OAuth endpoints tests - Sign up with HTML UI', () => {
                         }
                     ],
                     substitution_data: {
+                        fromEmail: 'noreply@resourcewatch.org',
                         fromName: 'RW API',
                         appName: 'RW API',
                         logo: 'https://resourcewatch.org/static/images/logo-embed.png'
@@ -292,6 +295,7 @@ describe('OAuth endpoints tests - Sign up with HTML UI', () => {
                         }
                     ],
                     substitution_data: {
+                        fromEmail: 'noreply@globalforestwatch.org',
                         fromName: 'GFW',
                         appName: 'GFW',
                         logo: 'https://www.globalforestwatch.org/packs/gfw-9c5fe396ee5b15cb5f5b639a7ef771bd.png'

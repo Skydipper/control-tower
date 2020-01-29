@@ -32,7 +32,7 @@ describe('OAuth endpoints tests - Sign up with JSON content type', () => {
         UserModel.deleteMany({}).exec();
         UserTempModel.deleteMany({}).exec();
 
-        nock.cleanAll();
+
     });
 
     it('Registering a user without being logged in returns a 422 error - JSON version', async () => {
@@ -41,7 +41,7 @@ describe('OAuth endpoints tests - Sign up with JSON content type', () => {
             .set('Content-Type', 'application/json');
 
         response.status.should.equal(422);
-        response.header['content-type'].should.equal('application/json; charset=utf-8');
+        response.should.be.json;
         response.body.should.have.property('errors').and.be.an('array');
         response.body.errors[0].status.should.equal(422);
         response.body.errors[0].detail.should.equal('Email, Password and Repeat password are required');
@@ -53,7 +53,7 @@ describe('OAuth endpoints tests - Sign up with JSON content type', () => {
             .set('Content-Type', 'application/json');
 
         response.status.should.equal(422);
-        response.header['content-type'].should.equal('application/json; charset=utf-8');
+        response.should.be.json;
         response.body.should.have.property('errors').and.be.an('array');
         response.body.errors[0].status.should.equal(422);
         response.body.errors[0].detail.should.equal('Email, Password and Repeat password are required');
@@ -68,7 +68,7 @@ describe('OAuth endpoints tests - Sign up with JSON content type', () => {
             });
 
         response.status.should.equal(422);
-        response.header['content-type'].should.equal('application/json; charset=utf-8');
+        response.should.be.json;
         response.body.should.have.property('errors').and.be.an('array');
         response.body.errors[0].status.should.equal(422);
         response.body.errors[0].detail.should.equal('Email, Password and Repeat password are required');
@@ -86,7 +86,7 @@ describe('OAuth endpoints tests - Sign up with JSON content type', () => {
             });
 
         response.status.should.equal(422);
-        response.header['content-type'].should.equal('application/json; charset=utf-8');
+        response.should.be.json;
         response.body.should.have.property('errors').and.be.an('array');
         response.body.errors[0].status.should.equal(422);
         response.body.errors[0].detail.should.equal('Password and Repeat password not equal');
@@ -110,6 +110,7 @@ describe('OAuth endpoints tests - Sign up with JSON content type', () => {
                         }
                     ],
                     substitution_data: {
+                        fromEmail: 'noreply@resourcewatch.org',
                         fromName: 'RW API',
                         appName: 'RW API',
                         logo: 'https://resourcewatch.org/static/images/logo-embed.png'
@@ -140,7 +141,7 @@ describe('OAuth endpoints tests - Sign up with JSON content type', () => {
             });
 
         response.status.should.equal(200);
-        response.header['content-type'].should.equal('application/json; charset=utf-8');
+        response.should.be.json;
         // eslint-disable-next-line
         response.body.should.have.property('data').and.not.be.empty;
 
@@ -177,10 +178,10 @@ describe('OAuth endpoints tests - Sign up with JSON content type', () => {
             });
 
         response.status.should.equal(422);
-        response.header['content-type'].should.equal('application/json; charset=utf-8');
+        response.should.be.json;
         response.body.should.have.property('errors').and.be.an('array');
         response.body.errors[0].status.should.equal(422);
-        response.body.errors[0].detail.should.equal('Email exist');
+        response.body.errors[0].detail.should.equal('Email exists');
     });
 
     it('Confirming a user\'s account using the email token should be successful (user without app)', async () => {
@@ -188,9 +189,10 @@ describe('OAuth endpoints tests - Sign up with JSON content type', () => {
 
         const response = await requester
             .get(`/auth/confirm/${tempUser.confirmationToken}`)
-            .set('Content-Type', 'application/json');
+            .set('Content-Type', 'application/json')
+            .redirects(0);
 
-        response.status.should.equal(200);
+        response.should.redirect;
 
         const missingTempUser = await UserTempModel.findOne({ email: 'someemail@gmail.com' }).exec();
         should.not.exist(missingTempUser);
@@ -218,10 +220,10 @@ describe('OAuth endpoints tests - Sign up with JSON content type', () => {
             });
 
         response.status.should.equal(422);
-        response.header['content-type'].should.equal('application/json; charset=utf-8');
+        response.should.be.json;
         response.body.should.have.property('errors').and.be.an('array');
         response.body.errors[0].status.should.equal(422);
-        response.body.errors[0].detail.should.equal('Email exist');
+        response.body.errors[0].detail.should.equal('Email exists');
     });
 
 
@@ -241,6 +243,7 @@ describe('OAuth endpoints tests - Sign up with JSON content type', () => {
                         }
                     ],
                     substitution_data: {
+                        fromEmail: 'noreply@resourcewatch.org',
                         fromName: 'RW API',
                         appName: 'RW API',
                         logo: 'https://resourcewatch.org/static/images/logo-embed.png'
@@ -272,7 +275,7 @@ describe('OAuth endpoints tests - Sign up with JSON content type', () => {
             });
 
         response.status.should.equal(200);
-        response.header['content-type'].should.equal('application/json; charset=utf-8');
+        response.should.be.json;
         // eslint-disable-next-line
         response.body.should.have.property('data').and.not.be.empty;
 
@@ -299,9 +302,10 @@ describe('OAuth endpoints tests - Sign up with JSON content type', () => {
 
         const response = await requester
             .get(`/auth/confirm/${tempUser.confirmationToken}`)
-            .set('Content-Type', 'application/json');
+            .set('Content-Type', 'application/json')
+            .redirects(0);
 
-        response.status.should.equal(200);
+        response.should.redirect;
 
         const missingTempUser = await UserTempModel.findOne({ email: 'someotheremail@gmail.com' }).exec();
         should.not.exist(missingTempUser);

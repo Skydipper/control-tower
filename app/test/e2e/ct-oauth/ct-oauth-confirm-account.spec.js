@@ -32,8 +32,6 @@ describe('OAuth endpoints tests - Confirm account', () => {
 
         UserModel.deleteMany({}).exec();
         UserTempModel.deleteMany({}).exec();
-
-        nock.cleanAll();
     });
 
     it('Confirm account request with invalid token should return an error', async () => {
@@ -43,7 +41,7 @@ describe('OAuth endpoints tests - Confirm account', () => {
 
 
         response.status.should.equal(400);
-        response.header['content-type'].should.equal('application/json; charset=utf-8');
+        response.should.be.json;
         response.body.should.have.property('errors').and.be.an('array');
         response.body.errors[0].should.have.property('detail').and.equal(`User expired or token not found`);
     });
@@ -64,7 +62,7 @@ describe('OAuth endpoints tests - Confirm account', () => {
 
 
         response.status.should.equal(200);
-        response.header['content-type'].should.equal('application/json; charset=utf-8');
+        response.should.be.json;
 
         const responseUser = response.body.data;
         responseUser.should.have.property('email').and.equal('test@example.com');
@@ -89,7 +87,7 @@ describe('OAuth endpoints tests - Confirm account', () => {
 
 
         response.status.should.equal(200);
-        response.header['content-type'].should.equal('application/json; charset=utf-8');
+        response.should.be.json;
 
         const responseUser = response.body.data;
         responseUser.should.have.property('email').and.equal('test@example.com');
@@ -124,13 +122,12 @@ describe('OAuth endpoints tests - Confirm account', () => {
         }).save();
 
         const response = await requester
-            .get(`/auth/confirm/${confirmationToken}`);
+            .get(`/auth/confirm/${confirmationToken}`).redirects(0);
 
 
-        response.status.should.equal(200);
+        response.should.redirect;
 
-        response.redirects.should.be.an('array').and.length(1);
-        response.redirects[0].should.equal('http://www.google.com/');
+        response.headers.location.should.equal('http://www.google.com/');
 
         const missingTempUser = await UserTempModel.findOne({ email: 'test@example.com' }).exec();
         should.not.exist(missingTempUser);
@@ -161,13 +158,13 @@ describe('OAuth endpoints tests - Confirm account', () => {
         }).save();
 
         const response = await requester
-            .get(`/auth/confirm/${confirmationToken}`);
+            .get(`/auth/confirm/${confirmationToken}`)
+            .redirects(0);
 
 
-        response.status.should.equal(200);
+        response.should.redirect;
 
-        response.redirects.should.be.an('array');
-        response.redirects[0].should.equal('https://resourcewatch.org/myrw/areas');
+        response.headers.location.should.equal('https://resourcewatch.org/myrw/areas');
 
         const missingTempUser = await UserTempModel.findOne({ email: 'test@example.com' }).exec();
         should.not.exist(missingTempUser);
@@ -198,13 +195,14 @@ describe('OAuth endpoints tests - Confirm account', () => {
         }).save();
 
         const response = await requester
-            .get(`/auth/confirm/${confirmationToken}`);
+            .get(`/auth/confirm/${confirmationToken}`)
+            .redirects(0);
 
 
-        response.status.should.equal(200);
+        response.should.redirect;
 
         response.redirects.should.be.an('array');
-        response.redirects[0].should.equal('http://www.google.com/');
+        response.headers.location.should.equal('http://www.google.com/');
 
         const missingTempUser = await UserTempModel.findOne({ email: 'test@example.com' }).exec();
         should.not.exist(missingTempUser);
@@ -235,13 +233,13 @@ describe('OAuth endpoints tests - Confirm account', () => {
         }).save();
 
         const response = await requester
-            .get(`/auth/confirm/${confirmationToken}?callbackUrl=http://vizzuality.com/`);
+            .get(`/auth/confirm/${confirmationToken}?callbackUrl=http://vizzuality.com/`)
+            .redirects(0);
 
 
-        response.status.should.equal(200);
+        response.should.redirect;
 
-        response.redirects.should.be.an('array');
-        response.redirects[0].should.equal('http://vizzuality.com/');
+        response.headers.location.should.equal('http://vizzuality.com/');
 
         const missingTempUser = await UserTempModel.findOne({ email: 'test@example.com' }).exec();
         should.not.exist(missingTempUser);

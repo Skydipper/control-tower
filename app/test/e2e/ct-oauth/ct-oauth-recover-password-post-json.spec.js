@@ -30,7 +30,7 @@ describe('OAuth endpoints tests - Recover password post - JSON version', () => {
 
         requester = await getTestAgent(true);
 
-        nock.cleanAll();
+
     });
 
     it('Recover password post with fake token returns a 422 error - JSON format', async () => {
@@ -40,7 +40,7 @@ describe('OAuth endpoints tests - Recover password post - JSON version', () => {
 
         return new Promise((resolve) => {
             response.status.should.equal(422);
-            response.header['content-type'].should.equal('application/json; charset=utf-8');
+            response.should.be.json;
             response.body.should.have.property('errors').and.be.an('array');
             response.body.errors[0].should.have.property('detail').and.equal(`Token expired`);
 
@@ -61,7 +61,7 @@ describe('OAuth endpoints tests - Recover password post - JSON version', () => {
 
         return new Promise((resolve) => {
             response.status.should.equal(422);
-            response.header['content-type'].should.equal('application/json; charset=utf-8');
+            response.should.be.json;
             response.body.should.have.property('errors').and.be.an('array');
             response.body.errors[0].status.should.equal(422);
             response.body.errors[0].detail.should.equal('Password and Repeat password are required');
@@ -85,7 +85,7 @@ describe('OAuth endpoints tests - Recover password post - JSON version', () => {
 
         return new Promise((resolve) => {
             response.status.should.equal(422);
-            response.header['content-type'].should.equal('application/json; charset=utf-8');
+            response.should.be.json;
             response.body.should.have.property('errors').and.be.an('array');
             response.body.errors[0].status.should.equal(422);
             response.body.errors[0].detail.should.equal('Password and Repeat password not equal');
@@ -114,7 +114,7 @@ describe('OAuth endpoints tests - Recover password post - JSON version', () => {
             });
 
         response.status.should.equal(422);
-        response.header['content-type'].should.equal('application/json; charset=utf-8');
+        response.should.be.json;
         response.body.should.have.property('errors').and.be.an('array');
         response.body.errors[0].status.should.equal(422);
         response.body.errors[0].detail.should.equal('Password and Repeat password not equal');
@@ -154,7 +154,6 @@ describe('OAuth endpoints tests - Recover password post - JSON version', () => {
             response.redirects.should.be.an('array').and.length(0);
 
             const responseUser = response.body.data;
-            // eslint-disable-next-line no-unused-expressions
             responseUser.should.have.property('id').and.be.a('string').and.not.be.empty;
             responseUser.should.have.property('name').and.be.a('string').and.equal('lorem-ipsum');
             responseUser.should.have.property('photo').and.be.a('string').and.equal('http://www.random.rand/abc.jpg');

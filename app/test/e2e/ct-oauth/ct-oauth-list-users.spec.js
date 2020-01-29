@@ -5,7 +5,7 @@ const chai = require('chai');
 const UserModel = require('plugins/sd-ct-oauth-plugin/models/user.model');
 
 const { getTestAgent, closeTestAgent } = require('./../test-server');
-const { createUserAndToken, createUserInDB } = require('../utils/helpers');
+const { createUserAndToken, createUserInDB, ensureHasPaginationElements } = require('../utils/helpers');
 
 chai.should();
 
@@ -25,7 +25,7 @@ describe('List users', () => {
 
         UserModel.deleteMany({}).exec();
 
-        nock.cleanAll();
+
     });
 
     it('Visiting /auth/user while not logged in should return a 401 error', async () => {
@@ -34,7 +34,7 @@ describe('List users', () => {
             .set('Content-Type', 'application/json');
 
         response.status.should.equal(401);
-        response.header['content-type'].should.equal('application/json; charset=utf-8');
+        response.should.be.json;
         response.body.should.have.property('errors').and.be.an('array');
         response.body.errors[0].should.have.property('detail').and.equal(`Not authenticated`);
 
@@ -49,7 +49,7 @@ describe('List users', () => {
             .set('Authorization', `Bearer ${token}`);
 
         response.status.should.equal(403);
-        response.header['content-type'].should.equal('application/json; charset=utf-8');
+        response.should.be.json;
         response.body.should.have.property('errors').and.be.an('array');
         response.body.errors[0].should.have.property('detail').and.equal(`Not authorized`);
     });
@@ -75,8 +75,11 @@ describe('List users', () => {
             .set('Authorization', `Bearer ${token}`);
 
         response.status.should.equal(200);
-        response.body.should.be.an('array').and.length(1);
-        response.body[0].should.have.property('_id').and.equal(user.id.toString());
+        response.body.should.have.property('data').and.be.an('array').and.have.length(1);
+
+        response.body.data[0].should.have.property('id').and.equal(user.id.toString());
+
+        ensureHasPaginationElements(response);
     });
 
     it('Visiting /auth/user while logged in as ADMIN should return the list of users - just current user if no other matches the current user\'s apps', async () => {
@@ -94,8 +97,10 @@ describe('List users', () => {
             .set('Authorization', `Bearer ${token}`);
 
         response.status.should.equal(200);
-        response.body.should.be.an('array').and.length(1);
-        response.body[0].should.have.property('_id').and.equal(user.id.toString());
+        response.body.should.have.property('data').and.be.an('array').and.have.length(1);
+        response.body.data[0].should.have.property('id').and.equal(user.id.toString());
+
+        ensureHasPaginationElements(response);
     });
 
     it('Visiting /auth/user while logged in as ADMIN should return the list of users - only return users that match current user\'s app', async () => {
@@ -120,9 +125,10 @@ describe('List users', () => {
             .set('Authorization', `Bearer ${token}`);
 
         response.status.should.equal(200);
-        response.body.should.be.an('array').and.length(3);
-        response.body.map((e) => e.email).should.include('rw-user-two@example.com').and.to.include('rw-user-one@example.com').and.to.include(user.email);
+        response.body.should.have.property('data').and.be.an('array').and.have.length(3);
+        response.body.data.map((e) => e.email).should.include('rw-user-two@example.com').and.to.include('rw-user-one@example.com').and.to.include(user.email);
 
+        ensureHasPaginationElements(response);
     });
 
     it('Visiting /auth/user while logged in as ADMIN should return the list of users - filter by email address is supported', async () => {
@@ -134,8 +140,10 @@ describe('List users', () => {
             .set('Authorization', `Bearer ${token}`);
 
         response.status.should.equal(200);
-        response.body.should.be.an('array').and.length(1);
-        response.body.map((e) => e.email).should.include(user.email);
+        response.body.should.have.property('data').and.be.an('array').and.have.length(1);
+        response.body.data.map((e) => e.email).should.include(user.email);
+
+        ensureHasPaginationElements(response);
     });
 
     it('Visiting /auth/user while logged in as ADMIN should return the list of users - filter by provider is supported', async () => {
@@ -148,8 +156,10 @@ describe('List users', () => {
             .set('Authorization', `Bearer ${token}`);
 
         responseOne.status.should.equal(200);
-        responseOne.body.should.be.an('array').and.length(1);
-        responseOne.body.map((e) => e.email).should.include(userOne.email);
+        responseOne.body.should.have.property('data').and.be.an('array').and.have.length(1);
+        responseOne.body.data.map((e) => e.email).should.include(userOne.email);
+
+        ensureHasPaginationElements(responseOne);
 
         const responseTwo = await requester
             .get(`/auth/user?provider=google`)
@@ -157,9 +167,10 @@ describe('List users', () => {
             .set('Authorization', `Bearer ${token}`);
 
         responseTwo.status.should.equal(200);
-        responseTwo.body.should.be.an('array').and.length(1);
-        responseTwo.body.map((e) => e.email).should.include(userTwo.email);
+        responseTwo.body.should.have.property('data').and.be.an('array').and.have.length(1);
+        responseTwo.body.data.map((e) => e.email).should.include(userTwo.email);
 
+        ensureHasPaginationElements(responseTwo);
     });
 
     it('Visiting /auth/user while logged in as ADMIN should return the list of users - filter by name is supported', async () => {
@@ -172,8 +183,10 @@ describe('List users', () => {
             .set('Authorization', `Bearer ${token}`);
 
         responseOne.status.should.equal(200);
-        responseOne.body.should.be.an('array').and.length(1);
-        responseOne.body.map((e) => e.email).should.include(userOne.email);
+        responseOne.body.should.have.property('data').and.be.an('array').and.have.length(1);
+        responseOne.body.data.map((e) => e.email).should.include(userOne.email);
+
+        ensureHasPaginationElements(responseOne);
 
         const responseTwo = await requester
             .get(`/auth/user?name=${userTwo.name}`)
@@ -181,9 +194,10 @@ describe('List users', () => {
             .set('Authorization', `Bearer ${token}`);
 
         responseTwo.status.should.equal(200);
-        responseTwo.body.should.be.an('array').and.length(1);
-        responseTwo.body.map((e) => e.email).should.include(userTwo.email);
+        responseTwo.body.should.have.property('data').and.be.an('array').and.have.length(1);
+        responseTwo.body.data.map((e) => e.email).should.include(userTwo.email);
 
+        ensureHasPaginationElements(responseTwo);
     });
 
     it('Visiting /auth/user while logged in as ADMIN should return the list of users - filter by role is supported', async () => {
@@ -197,8 +211,10 @@ describe('List users', () => {
             .set('Authorization', `Bearer ${token}`);
 
         responseOne.status.should.equal(200);
-        responseOne.body.should.be.an('array').and.length(1);
-        responseOne.body.map((e) => e.email).should.include(userUser.email);
+        responseOne.body.should.have.property('data').and.be.an('array').and.have.length(1);
+        responseOne.body.data.map((e) => e.email).should.include(userUser.email);
+
+        ensureHasPaginationElements(responseOne);
 
         const responseTwo = await requester
             .get(`/auth/user?role=MANAGER`)
@@ -206,8 +222,10 @@ describe('List users', () => {
             .set('Authorization', `Bearer ${token}`);
 
         responseTwo.status.should.equal(200);
-        responseTwo.body.should.be.an('array').and.length(1);
-        responseTwo.body.map((e) => e.email).should.include(userManager.email);
+        responseTwo.body.should.have.property('data').and.be.an('array').and.have.length(1);
+        responseTwo.body.data.map((e) => e.email).should.include(userManager.email);
+
+        ensureHasPaginationElements(responseTwo);
 
         const responseThree = await requester
             .get(`/auth/user?role=ADMIN`)
@@ -215,10 +233,10 @@ describe('List users', () => {
             .set('Authorization', `Bearer ${token}`);
 
         responseThree.status.should.equal(200);
-        responseThree.body.should.be.an('array').and.length(1);
-        responseThree.body.map((e) => e.email).should.include(userAdmin.email);
+        responseThree.body.should.have.property('data').and.be.an('array').and.have.length(1);
+        responseThree.body.data.map((e) => e.email).should.include(userAdmin.email);
 
-
+        ensureHasPaginationElements(responseThree);
     });
 
     it('Visiting /auth/user while logged in as ADMIN should return the list of users - filter by password not supported', async () => {
@@ -230,8 +248,10 @@ describe('List users', () => {
             .set('Authorization', `Bearer ${token}`);
 
         response.status.should.equal(200);
-        response.body.should.be.an('array').and.length(1);
-        response.body.map((e) => e.email).should.include(user.email);
+        response.body.should.have.property('data').and.be.an('array').and.have.length(1);
+        response.body.data.map((e) => e.email).should.include(user.email);
+
+        ensureHasPaginationElements(response);
     });
 
     it('Visiting /auth/user while logged in as ADMIN and query app=all should return the list of users - even if apps of users are not match to current user\'s app', async () => {
@@ -259,8 +279,10 @@ describe('List users', () => {
             .send();
 
         response.status.should.equal(200);
-        response.body.should.be.an('array').and.length(3);
-        response.body.map((e) => e.email).should.include(userOne.email).and.to.include(userTwo.email).and.to.include(userThree.email);
+        response.body.should.have.property('data').and.be.an('array').and.have.length(3);
+        response.body.data.map((e) => e.email).should.include(userOne.email).and.to.include(userTwo.email).and.to.include(userThree.email);
+
+        ensureHasPaginationElements(response);
     });
 
     it('Visiting /auth/user while logged in as ADMIN and filtering by app should return the list of users with apps which provided in the query app', async () => {
@@ -283,8 +305,10 @@ describe('List users', () => {
             .send();
 
         response.status.should.equal(200);
-        response.body.should.be.an('array').and.length(2);
-        response.body.map((e) => e.extraUserData.apps[0]).should.include(userThree.extraUserData.apps[0]).and.to.include(userTwo.extraUserData.apps[0]);
+        response.body.should.have.property('data').and.be.an('array').and.have.length(2);
+        response.body.data.map((e) => e.extraUserData.apps[0]).should.include(userThree.extraUserData.apps[0]).and.to.include(userTwo.extraUserData.apps[0]);
+
+        ensureHasPaginationElements(response);
     });
 
     it('Visiting /auth/user while logged in as ADMIN and an invalid query param should return the list of users ignoring the invalid query param', async () => {
@@ -303,7 +327,9 @@ describe('List users', () => {
             .send();
 
         response.status.should.equal(200);
-        response.body.should.deep.equal(filteredResponse.body);
+        response.body.data.should.deep.equal(filteredResponse.body.data);
+
+        ensureHasPaginationElements(response);
     });
 
     after(() => {

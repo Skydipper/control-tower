@@ -16,8 +16,6 @@ let requester;
 
 describe('Dispatch POST requests with filters', () => {
     before(async () => {
-        nock.cleanAll();
-
         await EndpointModel.deleteMany({}).exec();
         await UserModel.deleteMany({}).exec();
 

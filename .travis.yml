@@ -8,10 +8,11 @@ cache:
   - "node_modules"
 env:
   global:
-    - CC_TEST_REPORTER_ID=cbef27efebac45f676a4a44ac1cc1257d32178cd2858f9bc66678a7ab35996fb
+    - CC_TEST_REPORTER_ID=9f1173797b3aca65254ee1d50b06d0ad27f81eeeb9db3b0567ece66eefbb1b9f
     - NODE_ENV=test
     - PORT=9000
     - LOGGER_TYPE=console
+    - HOST_IP=127.0.0.1
     - DEBUG=redis-cache-plugin
     - NODE_PATH=app/src
     - EXEC_MIGRATION=true
@@ -19,6 +20,8 @@ env:
     - COOKIE_DOMAIN=mymachine
     - SESSION_KEY=test
     - PUBLIC_URL=http://localhost:9000
+    - API_VERSION=v1
+    - CT_REGISTER_MODE=auto
     - SPARKPOST_KEY=fakeSparkpostKey
     - FASTLY_APIKEY=foo
     - FASTLY_SERVICEID=bar

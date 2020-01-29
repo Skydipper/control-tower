@@ -34,7 +34,6 @@ describe('Microservice status calls', () => {
         }
 
         requester = await getTestAgent();
-        nock.cleanAll();
     });
 
     it('Getting a list of statuses without being authenticated should fail with a 401 error', async () => isTokenRequired(requester, 'get', 'plugin'));

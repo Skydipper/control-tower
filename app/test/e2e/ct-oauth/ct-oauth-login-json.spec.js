@@ -25,7 +25,7 @@ describe('Auth endpoints tests', () => {
 
         UserModel.deleteMany({}).exec();
 
-        nock.cleanAll();
+
     });
 
     // Default HTML request behavior
@@ -35,9 +35,9 @@ describe('Auth endpoints tests', () => {
             .set('Content-Type', 'application/json');
 
         response.status.should.equal(200);
-        response.header['content-type'].should.equal('text/html; charset=utf-8');
+        response.should.be.html;
         response.redirects.should.be.an('array').and.length(1);
-        response.redirects[0].should.match(/\/auth\/login$/);
+        response.should.redirectTo(/\/auth\/login$/);
     });
 
     // Default HTML request behavior
@@ -51,7 +51,7 @@ describe('Auth endpoints tests', () => {
 
         response.status.should.equal(200);
         response.redirects.should.be.an('array').and.length(2);
-        response.redirects[0].should.match(/\/auth\/login$/);
+        response.should.redirectTo(/\/auth\/login$/);
         response.redirects[1].should.match(/\/auth\/success$/);
     });
 
@@ -62,13 +62,11 @@ describe('Auth endpoints tests', () => {
         const response = await requester
             .get(`/auth?callbackUrl=https://www.wikipedia.org`)
             .set('Content-Type', 'application/json')
-            .set('Authorization', `Bearer ${token}`);
+            .set('Authorization', `Bearer ${token}`)
+            .redirects(0);
 
-        response.status.should.equal(200);
-        response.redirects.should.be.an('array').and.length(3);
-        response.redirects[0].should.match(/\/auth\/login$/);
-        response.redirects[1].should.match(/\/auth\/success$/);
-        response.redirects[2].should.equal('https://www.wikipedia.org/');
+        response.should.redirect;
+        response.should.redirectTo(/\/auth\/login$/);
     });
 
     it('Visiting /auth/login while not being logged in should show you the login page', async () => {
@@ -77,7 +75,7 @@ describe('Auth endpoints tests', () => {
             .set('Content-Type', 'application/json');
 
         response.status.should.equal(401);
-        response.header['content-type'].should.equal('application/json; charset=utf-8');
+        response.should.be.json;
         response.body.should.have.property('errors').and.be.an('array');
         response.body.errors[0].status.should.equal(401);
         response.body.errors[0].detail.should.equal('Not logged in');
@@ -89,7 +87,7 @@ describe('Auth endpoints tests', () => {
             .set('Content-Type', 'application/json');
 
         response.status.should.equal(401);
-        response.header['content-type'].should.equal('application/json; charset=utf-8');
+        response.should.be.json;
         response.body.should.have.property('errors').and.be.an('array');
         response.body.errors[0].status.should.equal(401);
         response.body.errors[0].detail.should.equal('Invalid email or password');
@@ -104,7 +102,7 @@ describe('Auth endpoints tests', () => {
             });
 
         response.status.should.equal(401);
-        response.header['content-type'].should.equal('application/json; charset=utf-8');
+        response.should.be.json;
         response.body.should.have.property('errors').and.be.an('array');
         response.body.errors[0].status.should.equal(401);
         response.body.errors[0].detail.should.equal('Invalid email or password');
@@ -120,7 +118,7 @@ describe('Auth endpoints tests', () => {
             });
 
         response.status.should.equal(401);
-        response.header['content-type'].should.equal('application/json; charset=utf-8');
+        response.should.be.json;
         response.body.should.have.property('errors').and.be.an('array');
         response.body.errors[0].status.should.equal(401);
         response.body.errors[0].detail.should.equal('Invalid email or password');
@@ -206,7 +204,7 @@ describe('Auth endpoints tests', () => {
             });
 
         response.status.should.equal(401);
-        response.header['content-type'].should.equal('application/json; charset=utf-8');
+        response.should.be.json;
         response.body.should.have.property('errors').and.be.an('array');
         response.body.errors[0].status.should.equal(401);
         response.body.errors[0].detail.should.equal('Invalid email or password');
