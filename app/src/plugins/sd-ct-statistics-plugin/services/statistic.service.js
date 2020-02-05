@@ -54,48 +54,50 @@ class StatisticService {
             errorCode = e.status || 500;
             throw e;
         } finally {
-            if (ctx.state.source && ctx.state.source.path) {
-                const model = {
-                    sourcePath: ctx.state.source.path,
-                    sourceMethod: ctx.state.source.method,
-                    error,
-                    errorCode,
-                    cached: false,
-                    time: Date.now() - first,
-                    ip: ctx.headers['x-forwarded-for'],
-                    anonymous: (!ctx.state.user && !ctx.req.user && !ctx.state.microservice),
-                    loggedUser: ctx.state.user || ctx.req.user || ctx.state.microservice,
-                };
-                if (ctx.state.redirect) {
-                    model.endpointPath = ctx.state.redirect.endpoint.path;
-                    model.redirectUrl = ctx.state.redirect.url;
-                    model.redirectMethod = ctx.state.redirect.method;
+            if (ctx.request.url !== '/healthcheck') {
+                if (ctx.state.source && ctx.state.source.path) {
+                    const model = {
+                        sourcePath: ctx.state.source.path,
+                        sourceMethod: ctx.state.source.method,
+                        error,
+                        errorCode,
+                        cached: false,
+                        time: Date.now() - first,
+                        ip: ctx.headers['x-forwarded-for'],
+                        anonymous: (!ctx.state.user && !ctx.req.user && !ctx.state.microservice),
+                        loggedUser: ctx.state.user || ctx.req.user || ctx.state.microservice,
+                    };
+                    if (ctx.state.redirect) {
+                        model.endpointPath = ctx.state.redirect.endpoint.path;
+                        model.redirectUrl = ctx.state.redirect.url;
+                        model.redirectMethod = ctx.state.redirect.method;
+                    }
+
+                    logger.info('Saving statistic');
+                    await new StatisticModel(model).save();
+                } else {
+                    const model = {
+                        sourcePath: ctx.path,
+                        sourceMethod: ctx.request.method,
+                        error,
+                        errorCode,
+                        cached: ctx.state.isCached || false,
+                        time: Date.now() - first,
+                        ip: ctx.headers['x-forwarded-for'],
+                        anonymous: (!ctx.state.user && !ctx.req.user && !ctx.state.microservice),
+                        loggedUser: ctx.state.user || ctx.req.user || ctx.state.microservice
+                    };
+                    if (ctx.state.redirect) {
+                        model.endpointPath = ctx.state.redirect.endpoint.path;
+                        model.redirectUrl = ctx.state.redirect.url;
+                        model.redirectMethod = ctx.state.redirect.method;
+                    }
+
+
+                    logger.info('Saving statistic');
+                    await new StatisticModel(model).save();
+
                 }
-
-                logger.info('Saving statistic');
-                await new StatisticModel(model).save();
-            } else {
-                const model = {
-                    sourcePath: ctx.path,
-                    sourceMethod: ctx.request.method,
-                    error,
-                    errorCode,
-                    cached: ctx.state.isCached || false,
-                    time: Date.now() - first,
-                    ip: ctx.headers['x-forwarded-for'],
-                    anonymous: (!ctx.state.user && !ctx.req.user && !ctx.state.microservice),
-                    loggedUser: ctx.state.user || ctx.req.user || ctx.state.microservice
-                };
-                if (ctx.state.redirect) {
-                    model.endpointPath = ctx.state.redirect.endpoint.path;
-                    model.redirectUrl = ctx.state.redirect.url;
-                    model.redirectMethod = ctx.state.redirect.method;
-                }
-
-
-                logger.info('Saving statistic');
-                await new StatisticModel(model).save();
-
             }
         }
     }

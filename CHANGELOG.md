@@ -1,3 +1,6 @@
+# 05/02/2020
+- Prevent statistics logging for `/healthcheck` endpoint.
+
 # 27/01/2020
 - Update `passport-facebook` NPM package version to its latest version.
 
