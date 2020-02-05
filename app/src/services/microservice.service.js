@@ -50,7 +50,7 @@ class Microservice {
 
     static async saveEndpoint(endpoint, micro, version) {
         logger.info(`Saving endpoint ${endpoint.path} with version ${version}`);
-        logger.debug(`Searching if exist ${endpoint.path} in endpoints`);
+        logger.debug(`Searching if path ${endpoint.path} exists in endpoints`);
         endpoint.redirect.url = micro.url;
         // searching
         const oldEndpoint = await EndpointModel.findOne({
@@ -60,7 +60,7 @@ class Microservice {
             toDelete: false
         }).exec();
         if (oldEndpoint) {
-            logger.debug(`Exist path. Check if exist redirect with url ${endpoint.redirect.url}`);
+            logger.debug(`Path ${endpoint.path} exists. Checking if redirect with url ${endpoint.redirect.url} exists.`);
             const oldRedirect = await EndpointModel.findOne({
                 path: endpoint.path,
                 method: endpoint.method,
@@ -68,14 +68,14 @@ class Microservice {
                 version,
             }).exec();
             if (!oldRedirect) {
-                logger.debug('Not exist redirect');
+                logger.debug(`Redirect doesn't exist`);
                 endpoint.redirect.filters = Microservice.getFilters(endpoint);
                 oldEndpoint.redirect.push(endpoint.redirect);
                 oldEndpoint.uncache = micro.uncache;
                 oldEndpoint.cache = micro.cache;
                 await oldEndpoint.save();
             } else {
-                logger.debug('Exist redirect. Updating', oldRedirect);
+                logger.debug('Redirect exists. Updating', oldRedirect);
                 for (let i = 0, { length } = oldRedirect.redirect; i < length; i++) {
                     if (oldRedirect.redirect[i].url === endpoint.redirect.url) {
                         oldRedirect.uncache = micro.uncache;
@@ -89,7 +89,7 @@ class Microservice {
             }
 
         } else {
-            logger.debug('Not exist path. Registering new');
+            logger.debug(`Path ${endpoint.path} doesn't exist. Registering new`);
             let pathKeys = [];
             const pathRegex = pathToRegexp(endpoint.path, pathKeys);
             if (pathKeys && pathKeys.length > 0) {
