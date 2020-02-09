@@ -128,37 +128,26 @@ class Microservice {
         }
     }
 
-    static generateUrlInfo(urlInfo) {
-        logger.debug('Generating url info to microservice with url', urlInfo);
-        if (urlInfo.indexOf('?') >= 0) {
-            return `${urlInfo}`;
-        }
-        return `${urlInfo}`;
-    }
-
     static formatFilters(endpoint) {
-        if (endpoint) {
-            if (endpoint.filters) {
-                if (endpoint.filters) {
-                    const filters = [];
-                    filters.push({
-                        name: endpoint.paramProvider || 'dataset',
-                        path: endpoint.pathProvider || '/v1/dataset/:dataset',
-                        method: 'GET',
-                        params: {
-                            dataset: 'dataset',
-                        },
-                        compare: endpoint.filters,
-                    });
-                    return filters;
-                }
-            }
+        if (!endpoint || !endpoint.filters) {
+            return null;
         }
-        return null;
+
+        const filters = [];
+        filters.push({
+            name: endpoint.paramProvider || 'dataset',
+            path: endpoint.pathProvider || '/v1/dataset/:dataset',
+            method: 'GET',
+            params: {
+                dataset: 'dataset',
+            },
+            compare: endpoint.filters,
+        });
+        return filters;
     }
 
     static transformToNewVersion(info) {
-        logger.info('Checking if is necesary transform to new version');
+        logger.info('Checking if is necessary transform to new version');
         if (info.urls) {
             info.endpoints = info.urls.map((endpoint) => ({
                 path: endpoint.url,
@@ -181,10 +170,9 @@ class Microservice {
     static async getInfoMicroservice(micro, version) {
         try {
             logger.info(`Obtaining info of the microservice with name ${micro.name} and version ${version}`);
-            let urlInfo = url.resolve(micro.url, micro.pathInfo);
+            const urlInfo = url.resolve(micro.url, micro.pathInfo);
             logger.debug('Generating token');
             const token = await Microservice.generateToken(micro);
-            urlInfo = Microservice.generateUrlInfo(urlInfo);
             logger.debug(`Doing request to ${urlInfo}`);
 
             let result = await request({
@@ -441,7 +429,7 @@ class Microservice {
         return true;
     }
 
-    static async checkLiveMicroservice() {
+    static async checkLiveMicroservices() {
         logger.info('Check live microservices');
 
         const versionFound = await VersionModel.findOne({
@@ -461,39 +449,6 @@ class Microservice {
             await Microservice.checkLiveMicro(microservices[i]);
         }
         logger.info('Finished checking');
-    }
-
-    static async registerPackMicroservices(microservices) {
-        logger.info('Refreshing all microservices');
-        logger.debug('Obtaining new version');
-        const versionFound = await VersionModel.findOne({
-            name: appConstants.ENDPOINT_VERSION,
-        });
-        logger.debug('Found', versionFound);
-        const newVersion = versionFound.version + 1;
-        logger.debug('New version is ', newVersion);
-
-        if (microservices) {
-            for (let i = 0, { length } = microservices; i < length; i++) {
-                try {
-                    if (microservices[i].name !== null && microservices[i].url !== null) {
-                        logger.debug(`Registering microservice with name ${microservices[i].name}`);
-                        await Microservice.register(microservices[i], newVersion);
-                    }
-                } catch (err) {
-                    logger.error('Error registering microservice', err);
-                }
-            }
-        }
-        logger.info('Updating version of ENDPOINT_VERSION');
-        await VersionModel.updateOne({
-            name: appConstants.ENDPOINT_VERSION,
-        }, {
-            $set: {
-                version: newVersion,
-            },
-        });
-        logger.info('Registered successfully');
     }
 
 }
