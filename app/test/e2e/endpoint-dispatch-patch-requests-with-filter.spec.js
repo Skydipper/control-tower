@@ -33,6 +33,7 @@ describe('Dispatch PATCH requests with filters', () => {
             path: '/api/v1/test1/test',
             redirect: [
                 {
+                    microservice: 'test1',
                     filters: null,
                     method: 'GET',
                     path: '/api/v1/test1/test',
@@ -114,6 +115,7 @@ describe('Dispatch PATCH requests with filters', () => {
             path: '/api/v1/test1/test',
             redirect: [
                 {
+                    microservice: 'test1',
                     filters: null,
                     method: 'GET',
                     path: '/api/v1/test1/test',
@@ -153,6 +155,7 @@ describe('Dispatch PATCH requests with filters', () => {
             path: '/api/v1/test1/test',
             redirect: [
                 {
+                    microservice: 'test1',
                     filters: null,
                     method: 'PATCH',
                     path: '/api/v1/test1/test',
@@ -195,6 +198,7 @@ describe('Dispatch PATCH requests with filters', () => {
             path: '/api/v1/test1/test',
             redirect: [
                 {
+                    microservice: 'test1',
                     filters: null,
                     method: 'PATCH',
                     path: '/api/v1/test1/test',
@@ -237,6 +241,7 @@ describe('Dispatch PATCH requests with filters', () => {
             path: '/api/v1/test1/test',
             redirect: [
                 {
+                    microservice: 'test1',
                     filters: null,
                     method: 'PATCH',
                     path: '/api/v1/test1/test',
@@ -273,6 +278,7 @@ describe('Dispatch PATCH requests with filters', () => {
             path: '/api/v1/test1/test',
             redirect: [
                 {
+                    microservice: 'test1',
                     filters: null,
                     method: 'PATCH',
                     path: '/api/v1/test1/test',
@@ -303,6 +309,7 @@ describe('Dispatch PATCH requests with filters', () => {
             path: '/api/v1/test1/test',
             redirect: [
                 {
+                    microservice: 'test1',
                     filters: null,
                     method: 'PATCH',
                     path: '/api/v1/test1/test',
@@ -345,6 +352,7 @@ describe('Dispatch PATCH requests with filters', () => {
             path: '/api/v1/test1/test',
             redirect: [
                 {
+                    microservice: 'test1',
                     filters: null,
                     method: 'PATCH',
                     path: '/api/v1/test1/test',
@@ -357,6 +365,7 @@ describe('Dispatch PATCH requests with filters', () => {
             path: '/api/v1/test2/test',
             redirect: [
                 {
+                    microservice: 'test1',
                     filters: null,
                     method: 'GET',
                     path: '/api/v1/test2/test',

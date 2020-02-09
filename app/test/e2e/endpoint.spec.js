@@ -64,6 +64,7 @@ describe('GET Endpoints', () => {
                 pathRegex: {},
                 redirect: [
                     {
+                        microservice: 'dataset',
                         filters: null,
                         method: 'POST',
                         path: '/api/v1/dataset',

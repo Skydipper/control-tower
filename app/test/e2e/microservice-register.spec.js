@@ -6,7 +6,7 @@ const MicroserviceModel = require('models/microservice.model');
 const EndpointModel = require('models/endpoint.model');
 const UserModel = require('plugins/sd-ct-oauth-plugin/models/user.model');
 
-const { createUserAndToken, createMicroservice, createEndpoint } = require('./utils/helpers');
+const { createMicroservice, createEndpoint } = require('./utils/helpers');
 const { getTestAgent, closeTestAgent } = require('./test-server');
 
 chai.should();
@@ -31,7 +31,7 @@ describe('Microservices endpoints', () => {
     });
 
     /* Register a microservice */
-    it('Registering a microservice should be successful', async () => {
+    it('Registering a microservice that doesn\'t should be successful (happy case)', async () => {
         const testMicroserviceOne = {
             name: `test-microservice-one`,
             url: 'http://test-microservice-one:8000',
@@ -72,13 +72,219 @@ describe('Microservices endpoints', () => {
         deletedEndpoints.should.have.lengthOf(0);
     });
 
-    it('Updating info for an existing microservice should be successful', async () => {
+    it('Re-registering a microservice that already exists should be successful', async () => {
+        const testMicroserviceOne = {
+            name: `test-microservice-one`,
+            url: 'http://test-microservice-one:8000',
+            active: true
+        };
+
+        await createMicroservice(testMicroserviceOne);
+        await createEndpoint({
+            pathKeys: [],
+            authenticated: false,
+            applicationRequired: false,
+            binary: false,
+            cache: [],
+            uncache: [],
+            toDelete: false,
+            path: '/v1/test',
+            method: 'GET',
+            pathRegex: /^\/v1\/test(?:\/(?=$))?$/i,
+            redirect: [
+                {
+                    microservice: 'test-microservice-one',
+                    method: 'GET',
+                    path: '/api/v1/test',
+                    url: testMicroserviceOne.url
+                }
+            ],
+            version: 1
+        });
+
+        nock('http://test-microservice-one:8000')
+            .get((uri) => {
+                logger.info('Uri', uri);
+                return uri.startsWith('/info');
+            })
+            .reply(200, {
+                swagger: {},
+                name: 'test-microservice-one',
+                tags: ['test'],
+                endpoints: [{
+                    path: '/v1/test',
+                    method: 'GET',
+                    redirect: {
+                        method: 'GET',
+                        path: '/api/v1/test'
+                    }
+                }]
+            });
+
+        const response = await requester.post(`/api/v1/microservice`).send(testMicroserviceOne);
+
+        response.status.should.equal(200);
+        response.body.status.should.equal('active');
+
+        const microservice = await MicroserviceModel.find();
+        microservice.should.have.lengthOf(1);
+
+        const endpoints = await EndpointModel.find({ toDelete: false });
+        endpoints.should.have.lengthOf(1);
+
+        const deletedEndpoints = await EndpointModel.find({ toDelete: true });
+        deletedEndpoints.should.have.lengthOf(0);
+    });
+
+    it('Re-registering a microservice that already exists with a new endpoint should be successful', async () => {
+        const testMicroserviceOne = {
+            name: `test-microservice-one`,
+            url: 'http://test-microservice-one:8000',
+            active: true
+        };
+
+        await createMicroservice(testMicroserviceOne);
+        await createEndpoint({
+            pathKeys: [],
+            authenticated: false,
+            applicationRequired: false,
+            binary: false,
+            cache: [],
+            uncache: [],
+            toDelete: false,
+            path: '/v1/test',
+            method: 'GET',
+            pathRegex: /^\/v1\/test(?:\/(?=$))?$/i,
+            redirect: [
+                {
+                    microservice: 'test-microservice-one',
+                    method: 'GET',
+                    path: '/api/v1/test',
+                    url: testMicroserviceOne.url
+                }
+            ],
+            version: 1
+        });
+
+        nock('http://test-microservice-one:8000')
+            .get((uri) => {
+                logger.info('Uri', uri);
+                return uri.startsWith('/info');
+            })
+            .reply(200, {
+                swagger: {},
+                name: 'test-microservice-one',
+                tags: ['test'],
+                endpoints: [{
+                    path: '/v1/test',
+                    method: 'GET',
+                    redirect: {
+                        method: 'GET',
+                        path: '/api/v1/test'
+                    }
+                }, {
+                    path: '/v1/test',
+                    method: 'POST',
+                    redirect: {
+                        method: 'POST',
+                        path: '/api/v1/test'
+                    }
+                }]
+            });
+
+        const response = await requester.post(`/api/v1/microservice`).send(testMicroserviceOne);
+
+        response.status.should.equal(200);
+        response.body.status.should.equal('active');
+
+        const microservice = await MicroserviceModel.find();
+        microservice.should.have.lengthOf(1);
+
+        const endpoints = await EndpointModel.find({ toDelete: false });
+        endpoints.should.have.lengthOf(2);
+
+        const deletedEndpoints = await EndpointModel.find({ toDelete: true });
+        deletedEndpoints.should.have.lengthOf(0);
+    });
+
+    it('Registering a microservice that adds a new redirect to an existing endpoint should be successful (happy case)', async () => {
+        const testMicroserviceOne = {
+            name: `test-microservice-one`,
+            url: 'http://test-microservice-one:8000',
+            active: true
+        };
+        const testMicroserviceTwo = {
+            name: `test-microservice-two`,
+            url: 'http://test-microservice-two:8000',
+            active: true
+        };
+
+        await createMicroservice(testMicroserviceOne);
+        await createEndpoint({
+            pathKeys: [],
+            authenticated: false,
+            applicationRequired: false,
+            binary: false,
+            cache: [],
+            uncache: [],
+            toDelete: false,
+            path: '/v1/test',
+            method: 'GET',
+            pathRegex: /^\/v1\/test(?:\/(?=$))?$/i,
+            redirect: [
+                {
+                    microservice: 'test-microservice-one',
+                    method: 'GET',
+                    path: '/api/v1/test',
+                    url: testMicroserviceOne.url
+                }
+            ],
+            version: 1
+        });
+
+        nock('http://test-microservice-two:8000')
+            .get((uri) => {
+                logger.info('Uri', uri);
+                return uri.startsWith('/info');
+            })
+            .reply(200, {
+                swagger: {},
+                name: 'test-microservice-two',
+                tags: ['test'],
+                endpoints: [{
+                    path: '/v1/test',
+                    method: 'GET',
+                    redirect: {
+                        method: 'GET',
+                        path: '/api/v1/test'
+                    }
+                }]
+            });
+
+        const response = await requester.post(`/api/v1/microservice`).send(testMicroserviceTwo);
+
+        response.status.should.equal(200);
+        response.body.status.should.equal('active');
+
+        const microservice = await MicroserviceModel.find();
+        microservice.should.have.lengthOf(2);
+
+        const endpoints = await EndpointModel.find({ toDelete: false });
+        endpoints.should.have.lengthOf(1);
+        endpoints[0].redirect.should.have.lengthOf(2);
+
+        const deletedEndpoints = await EndpointModel.find({ toDelete: true });
+        deletedEndpoints.should.have.lengthOf(0);
+    });
+
+    it('Re-registering an existing microservice should be successful - new endpoints are added, missing ones are flagged as toDelete', async () => {
         const testMicroserviceOne = {
             name: `test-microservice-one`,
             url: 'http://test-microservice-one:8000',
             active: true,
             endpoints: [
                 {
+                    microservice: 'test-microservice-one',
                     path: '/v1/test',
                     method: 'GET',
                     redirect: {
@@ -103,6 +309,7 @@ describe('Microservices endpoints', () => {
             pathRegex: /^\/v1\/test(?:\/(?=$))?$/i,
             redirect: [
                 {
+                    microservice: 'test-microservice-one',
                     method: 'GET',
                     path: '/api/v1/test',
                     url: testMicroserviceOne.url
@@ -152,237 +359,8 @@ describe('Microservices endpoints', () => {
         deletedEndpoints.should.have.lengthOf(1);
     });
 
-    it('Authorized status check and registered microservice (happy case)', async () => {
-        const { token } = await createUserAndToken({ role: 'ADMIN' });
-
-        const response = await requester.get(`/api/v1/microservice`)
-            .send()
-            .set('Authorization', `Bearer ${token}`);
-
-        response.status.should.equal(200);
-    });
-
-    it('Deleting a microservice should delete endpoints but keep microservice document in the database (happy case)', async () => {
-        const { token } = await createUserAndToken({ role: 'ADMIN' });
-
-        const testMicroserviceOne = {
-            name: `test-microservice-one`,
-            url: 'http://test-microservice-one:8000',
-            active: true,
-            endpoints: [
-                {
-                    path: '/v1/testOne',
-                    method: 'GET',
-                    redirect: {
-                        method: 'GET',
-                        path: '/api/v1/testOne'
-                    }
-                },
-                {
-                    path: '/v1/testTwo',
-                    method: 'GET',
-                    redirect: {
-                        method: 'GET',
-                        path: '/api/v1/testTwo'
-                    }
-                }
-            ],
-        };
-
-        const microservice = await createMicroservice(testMicroserviceOne);
-        await createEndpoint(
-            {
-                pathKeys: [],
-                authenticated: false,
-                applicationRequired: false,
-                binary: false,
-                cache: [],
-                uncache: [],
-                toDelete: true,
-                path: '/v1/test',
-                method: 'GET',
-                pathRegex: /^\/v1\/test(?:\/(?=$))?$/i,
-                redirect: [
-                    {
-                        method: 'GET',
-                        path: '/api/v1/test',
-                        url: 'http://test-microservice-one:8000',
-                        filters: []
-                    }
-                ],
-                version: 1,
-            }
-        );
-        await createEndpoint(
-            {
-                pathKeys: [],
-                authenticated: false,
-                applicationRequired: false,
-                binary: false,
-                cache: [],
-                uncache: [],
-                toDelete: false,
-                path: '/v1/testOne',
-                method: 'GET',
-                pathRegex: /^\/v1\/testOne(?:\/(?=$))?$/i,
-                redirect: [
-                    {
-                        method: 'GET',
-                        path: '/api/v1/testOne',
-                        url: 'http://test-microservice-one:8000',
-                        filters: null
-                    }
-                ],
-                version: 1,
-            }
-        );
-        await createEndpoint(
-            {
-                pathKeys: [],
-                authenticated: false,
-                applicationRequired: false,
-                binary: false,
-                cache: [],
-                uncache: [],
-                toDelete: false,
-                path: '/v1/testTwo',
-                method: 'GET',
-                pathRegex: /^\/v1\/testTwo(?:\/(?=$))?$/i,
-                redirect: [
-                    {
-                        method: 'GET',
-                        path: '/api/v1/testTwo',
-                        url: 'http://test-microservice-one:8000',
-                        filters: null
-                    }
-                ],
-                version: 1,
-            }
-        );
-
-        (await MicroserviceModel.find()).should.have.lengthOf(1);
-        (await EndpointModel.find({ toDelete: true })).should.have.lengthOf(1);
-
-        const response = await requester.delete(`/api/v1/microservice/${microservice.id.toString()}`)
-            .send()
-            .set('Authorization', `Bearer ${token}`);
-
-        response.status.should.equal(200);
-
-        (await MicroserviceModel.find()).should.have.lengthOf(1);
-        (await EndpointModel.find({ toDelete: true })).should.have.lengthOf(3);
-        (await EndpointModel.find({ toDelete: false })).should.have.lengthOf(0);
-
-    });
-
-    it('Getting endpoints for registered microservices should return a list of available endpoints (happy case)', async () => {
-        const { token } = await createUserAndToken({ role: 'ADMIN' });
-
-        const testMicroserviceOne = {
-            name: `test-microservice-one`,
-            url: 'http://test-microservice-one:8000',
-            active: true,
-            endpoints: [
-                {
-                    path: '/v1/testOne',
-                    method: 'GET',
-                    redirect: {
-                        method: 'GET',
-                        path: '/api/v1/testOne'
-                    }
-                },
-                {
-                    path: '/v1/testTwo',
-                    method: 'GET',
-                    redirect: {
-                        method: 'GET',
-                        path: '/api/v1/testTwo'
-                    }
-                }
-            ],
-        };
-
-        await createMicroservice(testMicroserviceOne);
-        await createEndpoint(
-            {
-                pathKeys: [],
-                authenticated: false,
-                applicationRequired: false,
-                binary: false,
-                cache: [],
-                uncache: [],
-                toDelete: true,
-                path: '/v1/test',
-                method: 'GET',
-                pathRegex: /^\/v1\/test(?:\/(?=$))?$/i,
-                redirect: [
-                    {
-                        method: 'GET',
-                        path: '/api/v1/test',
-                        url: 'http://test-microservice-one:8000',
-                        filters: []
-                    }
-                ],
-                version: 1,
-            }
-        );
-        await createEndpoint(
-            {
-                pathKeys: [],
-                authenticated: false,
-                applicationRequired: false,
-                binary: false,
-                cache: [],
-                uncache: [],
-                toDelete: false,
-                path: '/v1/testOne',
-                method: 'GET',
-                pathRegex: /^\/v1\/testOne(?:\/(?=$))?$/i,
-                redirect: [
-                    {
-                        method: 'GET',
-                        path: '/api/v1/testOne',
-                        url: 'http://test-microservice-one:8000',
-                        filters: null
-                    }
-                ],
-                version: 1,
-            }
-        );
-        await createEndpoint(
-            {
-                pathKeys: [],
-                authenticated: false,
-                applicationRequired: false,
-                binary: false,
-                cache: [],
-                uncache: [],
-                toDelete: false,
-                path: '/v1/testTwo',
-                method: 'GET',
-                pathRegex: /^\/v1\/testTwo(?:\/(?=$))?$/i,
-                redirect: [
-                    {
-                        method: 'GET',
-                        path: '/api/v1/testTwo',
-                        url: 'http://test-microservice-one:8000',
-                        filters: null
-                    }
-                ],
-                version: 1,
-            }
-        );
-
-        const response = await requester.get(`/api/v1/endpoint`)
-            .send()
-            .set('Authorization', `Bearer ${token}`);
-
-        response.status.should.equal(200);
-        response.body.should.be.an('array').and.have.lengthOf(3);
-    });
-
     /* Testing redirects and filters */
-    it('Redirects and filters', async () => {
+    it('Registering multiple microservices and querying them is successful (redirects and filters)', async () => {
         const testDatasetMicroservice = {
             name: `dataset`,
             url: 'http://test-dataset-microservice:3000',

@@ -36,6 +36,7 @@ describe('Dispatch internal requests', () => {
             method: 'GET',
             redirect: [
                 {
+                    microservice: 'test1',
                     filters: null,
                     method: 'GET',
                     path: '/api/v1/test1/test',

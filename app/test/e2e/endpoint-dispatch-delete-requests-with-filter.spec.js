@@ -78,6 +78,7 @@ describe('Dispatch DELETE requests with filters', () => {
             path: '/api/v1/test1/test',
             redirect: [
                 {
+                    microservice: 'test1',
                     filters: null,
                     method: 'DELETE',
                     path: '/api/v1/test1/test',
@@ -119,6 +120,7 @@ describe('Dispatch DELETE requests with filters', () => {
             method: 'DELETE',
             redirect: [
                 {
+                    microservice: 'test1',
                     filters: null,
                     method: 'DELETE',
                     path: '/api/v1/test1/test',
@@ -155,6 +157,7 @@ describe('Dispatch DELETE requests with filters', () => {
             path: '/api/v1/test1/test',
             redirect: [
                 {
+                    microservice: 'test1',
                     filters: null,
                     method: 'POST',
                     path: '/api/v1/test1/test',
@@ -192,6 +195,7 @@ describe('Dispatch DELETE requests with filters', () => {
             path: '/api/v1/test1/test',
             redirect: [
                 {
+                    microservice: 'test1',
                     filters: null,
                     method: 'POST',
                     path: '/api/v1/test1/test',
@@ -231,6 +235,7 @@ describe('Dispatch DELETE requests with filters', () => {
             path: '/api/v1/test1/test',
             redirect: [
                 {
+                    microservice: 'test1',
                     filters: null,
                     method: 'POST',
                     path: '/api/v1/test1/test',
@@ -270,6 +275,7 @@ describe('Dispatch DELETE requests with filters', () => {
             path: '/api/v1/test1/test',
             redirect: [
                 {
+                    microservice: 'test1',
                     filters: null,
                     method: 'POST',
                     path: '/api/v1/test1/test',
@@ -305,6 +311,7 @@ describe('Dispatch DELETE requests with filters', () => {
             path: '/api/v1/test1/test',
             redirect: [
                 {
+                    microservice: 'test1',
                     filters: null,
                     method: 'POST',
                     path: '/api/v1/test1/test',
@@ -356,6 +363,7 @@ describe('Dispatch DELETE requests with filters', () => {
             path: '/api/v1/test1/test',
             redirect: [
                 {
+                    microservice: 'test1',
                     filters: null,
                     method: 'POST',
                     path: '/api/v1/test1/test',
@@ -368,6 +376,7 @@ describe('Dispatch DELETE requests with filters', () => {
             path: '/api/v1/test2/test',
             redirect: [
                 {
+                    microservice: 'test1',
                     filters: null,
                     method: 'DELETE',
                     path: '/api/v1/test2/test',

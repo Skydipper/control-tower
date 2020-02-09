@@ -70,6 +70,7 @@ class Microservice {
             if (!oldRedirect) {
                 logger.debug(`Redirect doesn't exist`);
                 endpoint.redirect.filters = Microservice.getFilters(endpoint);
+                endpoint.redirect.microservice = micro.name;
                 oldEndpoint.redirect.push(endpoint.redirect);
                 oldEndpoint.uncache = micro.uncache;
                 oldEndpoint.cache = micro.cache;
@@ -78,6 +79,7 @@ class Microservice {
                 logger.debug('Redirect exists. Updating', oldRedirect);
                 for (let i = 0, { length } = oldRedirect.redirect; i < length; i++) {
                     if (oldRedirect.redirect[i].url === endpoint.redirect.url) {
+                        oldRedirect.microservice = micro.name;
                         oldRedirect.uncache = micro.uncache;
                         oldRedirect.cache = micro.cache;
                         oldRedirect.redirect[i].method = endpoint.redirect.method;
@@ -99,6 +101,7 @@ class Microservice {
             endpoint.redirect.filters = Microservice.getFilters(endpoint);
             logger.debug('filters', endpoint.redirect.filters);
             logger.debug('regesx', pathRegex);
+            endpoint.redirect.microservice = micro.name;
             await new EndpointModel({
                 path: endpoint.path,
                 method: endpoint.method,
@@ -347,13 +350,16 @@ class Microservice {
             }).exec();
 
             if (endpoint) {
-                const redirects = endpoint.redirect.filter((red) => red.url !== micro.url);
+                let redirects = endpoint.redirect.filter((red) => red.url !== micro.url);
                 if (redirects && redirects.length > 0) {
+                    redirects = redirects.toObject().map((redirect) => ({ ...redirect, microservice: micro.name }));
                     logger.debug('Updating endpoint');
                     endpoint.redirect = redirects;
                     await endpoint.save();
                 } else {
                     logger.debug('Endpoint empty. Removing endpoint');
+                    redirects = redirects.toObject().map((redirect) => ({ ...redirect, microservice: micro.name }));
+                    endpoint.redirect = redirects;
                     endpoint.toDelete = true;
                     await endpoint.save();
                 }
