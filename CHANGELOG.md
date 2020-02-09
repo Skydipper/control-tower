@@ -1,5 +1,6 @@
 # 09/02/2020
 - Save microservice name in endpoint redirect.
+- Prevent duplicated tags when saving microservice data to the database.
 
 # 05/02/2020
 - Prevent statistics logging for `/healthcheck` endpoint.

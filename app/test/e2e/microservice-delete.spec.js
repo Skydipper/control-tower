@@ -1,0 +1,161 @@
+const nock = require('nock');
+const chai = require('chai');
+
+const MicroserviceModel = require('models/microservice.model');
+const EndpointModel = require('models/endpoint.model');
+const UserModel = require('plugins/sd-ct-oauth-plugin/models/user.model');
+
+const { createUserAndToken, createMicroservice, createEndpoint } = require('./utils/helpers');
+const { getTestAgent, closeTestAgent } = require('./test-server');
+
+chai.should();
+
+let requester;
+
+
+describe('Delete a microservice', () => {
+
+    before(async () => {
+        if (process.env.NODE_ENV !== 'test') {
+            throw Error(`Running the test suite with NODE_ENV ${process.env.NODE_ENV} may result in permanent data loss. Please use NODE_ENV=test.`);
+        }
+
+        requester = await getTestAgent();
+    });
+
+    beforeEach(async () => {
+        await UserModel.deleteMany({}).exec();
+        await MicroserviceModel.deleteMany({}).exec();
+        await EndpointModel.deleteMany({}).exec();
+    });
+
+    it('Deleting a microservice should delete endpoints but keep microservice document in the database (happy case)', async () => {
+        const { token } = await createUserAndToken({ role: 'ADMIN' });
+
+        const testMicroserviceOne = {
+            name: `test-microservice-one`,
+            url: 'http://test-microservice-one:8000',
+            active: true,
+            endpoints: [
+                {
+                    microservice: 'test1',
+                    path: '/v1/testOne',
+                    method: 'GET',
+                    redirect: {
+                        method: 'GET',
+                        path: '/api/v1/testOne'
+                    }
+                },
+                {
+                    microservice: 'test2',
+                    path: '/v1/testTwo',
+                    method: 'GET',
+                    redirect: {
+                        method: 'GET',
+                        path: '/api/v1/testTwo'
+                    }
+                }
+            ],
+        };
+
+        const microservice = await createMicroservice(testMicroserviceOne);
+        await createEndpoint(
+            {
+                pathKeys: [],
+                authenticated: false,
+                applicationRequired: false,
+                binary: false,
+                cache: [],
+                uncache: [],
+                toDelete: true,
+                path: '/v1/test',
+                method: 'GET',
+                pathRegex: /^\/v1\/test(?:\/(?=$))?$/i,
+                redirect: [
+                    {
+                        microservice: 'test1',
+                        method: 'GET',
+                        path: '/api/v1/test',
+                        url: 'http://test-microservice-one:8000',
+                        filters: []
+                    }
+                ],
+                version: 1,
+            }
+        );
+        await createEndpoint(
+            {
+                pathKeys: [],
+                authenticated: false,
+                applicationRequired: false,
+                binary: false,
+                cache: [],
+                uncache: [],
+                toDelete: false,
+                path: '/v1/testOne',
+                method: 'GET',
+                pathRegex: /^\/v1\/testOne(?:\/(?=$))?$/i,
+                redirect: [
+                    {
+                        microservice: 'test1',
+                        method: 'GET',
+                        path: '/api/v1/testOne',
+                        url: 'http://test-microservice-one:8000',
+                        filters: null
+                    }
+                ],
+                version: 1,
+            }
+        );
+        await createEndpoint(
+            {
+                pathKeys: [],
+                authenticated: false,
+                applicationRequired: false,
+                binary: false,
+                cache: [],
+                uncache: [],
+                toDelete: false,
+                path: '/v1/testTwo',
+                method: 'GET',
+                pathRegex: /^\/v1\/testTwo(?:\/(?=$))?$/i,
+                redirect: [
+                    {
+                        microservice: 'test2',
+                        method: 'GET',
+                        path: '/api/v1/testTwo',
+                        url: 'http://test-microservice-one:8000',
+                        filters: null
+                    }
+                ],
+                version: 1,
+            }
+        );
+
+        (await MicroserviceModel.find()).should.have.lengthOf(1);
+        (await EndpointModel.find({ toDelete: true })).should.have.lengthOf(1);
+
+        const response = await requester.delete(`/api/v1/microservice/${microservice.id.toString()}`)
+            .send()
+            .set('Authorization', `Bearer ${token}`);
+
+        response.status.should.equal(200);
+
+        (await MicroserviceModel.find()).should.have.lengthOf(1);
+        (await EndpointModel.find({ toDelete: true })).should.have.lengthOf(3);
+        (await EndpointModel.find({ toDelete: false })).should.have.lengthOf(0);
+
+    });
+
+    afterEach(async () => {
+        await UserModel.deleteMany({}).exec();
+        await MicroserviceModel.deleteMany({}).exec();
+        await EndpointModel.deleteMany({}).exec();
+
+        if (!nock.isDone()) {
+            throw new Error(`Not all nock interceptors were used: ${nock.pendingMocks()}`);
+        }
+    });
+
+    after(closeTestAgent);
+});

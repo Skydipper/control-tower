@@ -12,6 +12,7 @@ const pathToRegexp = require('path-to-regexp');
 const NotificationService = require('services/notification.service.js');
 const JWT = require('jsonwebtoken');
 const { promisify } = require('util');
+const { uniq } = require('lodash');
 
 const MICRO_STATUS_PENDING = 'pending';
 const MICRO_STATUS_ACTIVE = 'active';
@@ -206,7 +207,7 @@ class Microservice {
                 if (!micro.tags) {
                     micro.tags = [];
                 }
-                micro.tags = micro.tags.concat(result.tags);
+                micro.tags = uniq(micro.tags.concat(result.tags));
             }
             await micro.save();
             await Microservice.saveEndpoints(micro, result, version);
@@ -262,7 +263,7 @@ class Microservice {
                         pathInfo: info.pathInfo,
                         swagger: info.swagger,
                         token: crypto.randomBytes(20).toString('hex'),
-                        tags: info.tags,
+                        tags: uniq(info.tags),
                         version,
                     }).save();
 
