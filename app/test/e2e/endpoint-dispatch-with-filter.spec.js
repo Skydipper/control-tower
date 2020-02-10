@@ -9,7 +9,7 @@ const { createMockEndpointWithBody } = require('./mock');
 chai.should();
 let microservice;
 
-describe('Endpoint dispatch tests', () => {
+describe('Endpoint dispatch with filter tests', () => {
     before(async () => {
         microservice = await getTestAgent();
     });

@@ -14,7 +14,7 @@ let requester;
 nock.disableNetConnect();
 nock.enableNetConnect(process.env.HOST_IP);
 
-describe('Auth endpoints tests', () => {
+describe('Auth endpoints tests - JSON', () => {
 
     before(async () => {
         if (process.env.NODE_ENV !== 'test') {

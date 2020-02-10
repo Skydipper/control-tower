@@ -18,7 +18,7 @@ const Endpoint = new Schema({
         path: { type: String, required: true, trim: true },
         url: { type: String, required: true, trim: true },
         method: { type: String, required: true, trim: true },
-        microservice: { type: String, required: true, trim: true },
+        microservice: { type: String, required: false, trim: true },
         filters: [{
             name: { type: String, required: true, trim: true },
             path: { type: String, required: true, trim: true },

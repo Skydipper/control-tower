@@ -49,9 +49,9 @@ class MicroserviceRouter {
     }
 
     static async delete(ctx) {
-        logger.info(`Removing microservice with id ${ctx.params.id}`);
+        logger.info(`[MicroserviceRouter] Removing microservice with id ${ctx.params.id}`);
         try {
-            const result = await MicroserviceService.remove(ctx.params.id);
+            const result = await MicroserviceService.removeMicroservice(ctx.params.id);
             ctx.body = result;
         } catch (err) {
             if (err instanceof MicroserviceNotExist) {

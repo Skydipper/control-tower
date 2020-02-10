@@ -49,10 +49,19 @@ class Microservice {
         return filters;
     }
 
-    static async saveEndpoint(endpoint, micro, version) {
-        logger.info(`Saving endpoint ${endpoint.path} with version ${version}`);
-        logger.debug(`Searching if path ${endpoint.path} exists in endpoints`);
-        endpoint.redirect.url = micro.url;
+    /**
+     * Creates an Endpoint model instance based on the array format data provided by a microservice
+     * when confirming registration.
+     *
+     * @param endpoint
+     * @param microservice
+     * @param version
+     * @returns {Promise<void>}
+     */
+    static async saveEndpoint(endpoint, microservice, version) {
+        logger.info(`[MicroserviceService] Saving endpoint ${endpoint.path} with version ${version}`);
+        logger.debug(`[MicroserviceService] Searching if path ${endpoint.path} exists in endpoints`);
+        endpoint.redirect.url = microservice.url;
         // searching
         const oldEndpoint = await EndpointModel.findOne({
             path: endpoint.path,
@@ -61,7 +70,7 @@ class Microservice {
             toDelete: false
         }).exec();
         if (oldEndpoint) {
-            logger.debug(`Path ${endpoint.path} exists. Checking if redirect with url ${endpoint.redirect.url} exists.`);
+            logger.debug(`[MicroserviceService] Path ${endpoint.path} exists. Checking if redirect with url ${endpoint.redirect.url} exists.`);
             const oldRedirect = await EndpointModel.findOne({
                 path: endpoint.path,
                 method: endpoint.method,
@@ -69,20 +78,20 @@ class Microservice {
                 version,
             }).exec();
             if (!oldRedirect) {
-                logger.debug(`Redirect doesn't exist`);
+                logger.debug(`[MicroserviceService] Redirect doesn't exist`);
                 endpoint.redirect.filters = Microservice.getFilters(endpoint);
-                endpoint.redirect.microservice = micro.name;
+                endpoint.redirect.microservice = microservice.name;
                 oldEndpoint.redirect.push(endpoint.redirect);
-                oldEndpoint.uncache = micro.uncache;
-                oldEndpoint.cache = micro.cache;
+                oldEndpoint.uncache = microservice.uncache;
+                oldEndpoint.cache = microservice.cache;
                 await oldEndpoint.save();
             } else {
-                logger.debug('Redirect exists. Updating', oldRedirect);
+                logger.debug('[MicroserviceService] Redirect exists. Updating', oldRedirect);
                 for (let i = 0, { length } = oldRedirect.redirect; i < length; i++) {
                     if (oldRedirect.redirect[i].url === endpoint.redirect.url) {
-                        oldRedirect.microservice = micro.name;
-                        oldRedirect.uncache = micro.uncache;
-                        oldRedirect.cache = micro.cache;
+                        oldRedirect.microservice = microservice.name;
+                        oldRedirect.uncache = microservice.uncache;
+                        oldRedirect.cache = microservice.cache;
                         oldRedirect.redirect[i].method = endpoint.redirect.method;
                         oldRedirect.redirect[i].path = endpoint.redirect.path;
                         oldRedirect.redirect[i].filters = Microservice.getFilters(endpoint);
@@ -92,17 +101,17 @@ class Microservice {
             }
 
         } else {
-            logger.debug(`Path ${endpoint.path} doesn't exist. Registering new`);
+            logger.debug(`[MicroserviceService] Path ${endpoint.path} doesn't exist. Registering new`);
             let pathKeys = [];
             const pathRegex = pathToRegexp(endpoint.path, pathKeys);
             if (pathKeys && pathKeys.length > 0) {
                 pathKeys = pathKeys.map((key) => key.name);
             }
-            logger.debug('Saving new endpoint');
+            logger.debug('[MicroserviceService] Saving new endpoint');
             endpoint.redirect.filters = Microservice.getFilters(endpoint);
-            logger.debug('filters', endpoint.redirect.filters);
-            logger.debug('regesx', pathRegex);
-            endpoint.redirect.microservice = micro.name;
+            logger.debug('[MicroserviceService] filters', endpoint.redirect.filters);
+            logger.debug('[MicroserviceService] regesx', pathRegex);
+            endpoint.redirect.microservice = microservice.name;
             await new EndpointModel({
                 path: endpoint.path,
                 method: endpoint.method,
@@ -113,17 +122,26 @@ class Microservice {
                 binary: endpoint.binary,
                 redirect: [endpoint.redirect],
                 version,
-                uncache: micro.uncache,
-                cache: micro.cache
+                uncache: microservice.uncache,
+                cache: microservice.cache
             }).save();
         }
     }
 
-    static async saveEndpoints(micro, info, version) {
+    /**
+     * Given a microservice object, creates the individual Endpoint model instances corresponding to each endpoint.
+     * Used once CT has successfully contacted the MS requesting to register.
+     *
+     * @param microservice
+     * @param info
+     * @param version
+     * @returns {Promise<void>}
+     */
+    static async saveEndpointsForMicroservice(microservice, info, version) {
         logger.info('Saving endpoints');
         if (info.endpoints && info.endpoints.length > 0) {
             for (let i = 0, { length } = info.endpoints; i < length; i++) {
-                await Microservice.saveEndpoint(info.endpoints[i], micro, version);
+                await Microservice.saveEndpoint(info.endpoints[i], microservice, version);
             }
         }
     }
@@ -146,9 +164,17 @@ class Microservice {
         return filters;
     }
 
-    static transformToNewVersion(info) {
-        logger.info('Checking if is necessary transform to new version');
+    /**
+     * Transform URLs from microservice info to the new format
+     * This is a thin compatibility layer, I'm assuming, to support some sort of old MS spec format.
+     *
+     * @param info
+     * @returns {{urls}|*}
+     */
+    static transformUrlsToNewVersion(info) {
+        logger.info('[MicroserviceService] Checking if URLs are in old format, and transforming to the new format');
         if (info.urls) {
+            logger.info('[MicroserviceService] Found URLs in old format, transforming...');
             info.endpoints = info.urls.map((endpoint) => ({
                 path: endpoint.url,
                 method: endpoint.method,
@@ -167,45 +193,76 @@ class Microservice {
         return promisify(JWT.sign)(micro.toJSON(), config.get('jwt.token'), {});
     }
 
-    static async getInfoMicroservice(micro, version) {
-        try {
-            logger.info(`Obtaining info of the microservice with name ${micro.name} and version ${version}`);
-            const urlInfo = url.resolve(micro.url, micro.pathInfo);
-            logger.debug('Generating token');
-            const token = await Microservice.generateToken(micro);
-            logger.debug(`Doing request to ${urlInfo}`);
+    /**
+     * Loads details for a microservice.
+     *
+     * During the microservice registration process, the MS provides CT with an URL where it can reach the MS.
+     * This is used both to confirm that the MS is reachable and available, as well to allow the MS to announce to CT its endpoints.
+     *
+     * This method contacts the MS at its announced URL and path, and saves the announced endpoints to the database
+     *
+     * Returns a boolean describing whether or not it was able to successfully contact the microservice at the announces URL.
+     *
+     * @param microservice
+     * @param version
+     * @returns {Promise<boolean>}
+     */
+    static async getMicroserviceInfo(microservice, version) {
+        logger.info(`[MicroserviceService] Obtaining info of the microservice with name ${microservice.name} and version ${version}`);
+        const urlInfo = url.resolve(microservice.url, microservice.pathInfo);
+        logger.debug('[MicroserviceService] Generating token');
+        const token = await Microservice.generateToken(microservice);
+        logger.debug(`[MicroserviceService] Doing request to ${urlInfo}`);
+        let result;
 
-            let result = await request({
+        try {
+            result = await request({
                 url: urlInfo,
                 json: true,
                 method: 'GET',
                 timeout: 10000
             });
-            logger.debug('Updating microservice');
-            result = Microservice.transformToNewVersion(result);
-            micro.endpoints = result.endpoints;
-            micro.cache = result.cache;
-            micro.uncache = result.uncache;
-
-            logger.debug('Microservice info', result.endpoints[0]);
-            micro.swagger = JSON.stringify(result.swagger);
-            micro.updatedAt = Date.now();
-            micro.token = token;
-            if (result.tags) {
-                if (!micro.tags) {
-                    micro.tags = [];
-                }
-                micro.tags = uniq(micro.tags.concat(result.tags));
-            }
-            await micro.save();
-            await Microservice.saveEndpoints(micro, result, version);
-            return true;
         } catch (err) {
-            logger.error(err);
+            logger.warn(`[MicroserviceRouter] Microservice ${microservice.name} could not be reached on announced URL ${urlInfo}`);
+            logger.warn(err);
             return false;
         }
+
+        logger.debug('[MicroserviceService] Microservice information loaded successfully, applying transformations');
+        result = Microservice.transformUrlsToNewVersion(result);
+        microservice.endpoints = result.endpoints;
+        microservice.cache = result.cache;
+        microservice.uncache = result.uncache;
+        microservice.swagger = JSON.stringify(result.swagger);
+        microservice.updatedAt = Date.now();
+        microservice.token = token;
+        if (result.tags) {
+            if (!microservice.tags) {
+                microservice.tags = [];
+            }
+            microservice.tags = uniq(microservice.tags.concat(result.tags));
+        }
+
+        logger.debug('[MicroserviceService] Microservice info ready, saving...');
+        await microservice.save();
+        await Microservice.saveEndpointsForMicroservice(microservice, result, version);
+        return true;
     }
 
+    /**
+     * Registers a microservice
+     * Can be used for either a new microservice, or to re-register an already known one
+     * Triggered by a call to CT made by the MS itself, on bootup
+     *
+     * If a MS has never registered before, this adds a new Microservice instance to the DB.
+     * If it's known, its endpoints are flagged for delete, so we can have a clean slate
+     *
+     * It then tries to contact the MS on the URL it provided, and if successful, registers the announced endpoints.
+     *
+     * @param info
+     * @param ver
+     * @returns {Promise<null>}
+     */
     static async register(info, ver) {
         try {
             let version = ver;
@@ -217,32 +274,33 @@ class Microservice {
                 version = versionFound.version;
                 existingVersion = versionFound;
             }
-            logger.info(`Registering new microservice with name ${info.name} and url ${info.url}`);
-            logger.debug('Search if microservice already exist');
-            let existingMicroservice = await MicroserviceModel.findOne({
+            logger.info(`[MicroserviceRouter] Registering new microservice with name ${info.name} and url ${info.url}`);
+            logger.debug('[MicroserviceRouter] Search if microservice already exist');
+            const existingMicroservice = await MicroserviceModel.findOne({
                 url: info.url,
                 version,
             });
             let micro = null;
             if (existingMicroservice) {
-                existingMicroservice = await MicroserviceModel.findByIdAndUpdate(existingMicroservice._id, {
-                    $set: {
-                        status: MICRO_STATUS_PENDING
-                    }
-                });
-                micro = await MicroserviceModel.findById(existingMicroservice._id);
+                micro = await MicroserviceModel.findByIdAndUpdate(
+                    existingMicroservice._id,
+                    { status: MICRO_STATUS_PENDING },
+                    { new: true }
+                );
             }
 
             if (existingMicroservice && existingMicroservice.status === MICRO_STATUS_PENDING) {
-                logger.error('Mutex active in microservice ', info.url);
+                logger.error('[MicroserviceRouter] Mutex active in microservice ', info.url);
                 return null;
             }
 
             try {
                 if (existingMicroservice) {
-                    await Microservice.remove(existingMicroservice._id);
+                    logger.debug(`[MicroserviceRouter] Removing existing microservice endpoints prior to re-import.`);
+                    // If the microservice already exists, we delete the existing data first, so we can have a clean slate to re-import.
+                    await Microservice.removeEndpointsOfMicroservice(existingMicroservice);
                 } else {
-                    logger.debug(`Creating microservice with status ${MICRO_STATUS_PENDING}`);
+                    logger.debug(`[MicroserviceRouter] Creating new microservice`);
 
                     micro = await new MicroserviceModel({
                         name: info.name,
@@ -256,24 +314,24 @@ class Microservice {
                     }).save();
 
                 }
-                logger.debug(`Creating microservice with status ${MICRO_STATUS_PENDING}`);
+                logger.debug(`[MicroserviceRouter] Creating microservice with status ${MICRO_STATUS_PENDING}`);
 
-                const correct = await Microservice.getInfoMicroservice(micro, version);
+                const correct = await Microservice.getMicroserviceInfo(micro, version);
                 if (correct) {
-                    logger.info(`Updating state of microservice with name ${micro.name}`);
+                    logger.info(`[MicroserviceRouter] Microservice ${micro.name} was reached successfully, setting status to 'active'`);
                     micro.status = MICRO_STATUS_ACTIVE;
                     await micro.save();
                     if (existingMicroservice) {
-                        logger.info('Removing endpoints with toDelete to true');
-                        await Microservice.removeEndpointToDeleteOfMicroservice(existingMicroservice._id);
+                        logger.info(`[MicroserviceRouter] Removing endpoints with \`toDelete\` to true for microservice ${micro.name}.`);
+                        await Microservice.removeEndpointToDeleteOfMicroservice(existingMicroservice);
                     }
                     if (existingVersion) {
                         existingVersion.lastUpdated = new Date();
                         await existingVersion.save();
                     }
-                    logger.info('Updated successfully');
+                    logger.info(`[MicroserviceRouter] Microservice ${micro.name} activated successfully.`);
                 } else {
-                    logger.info(`Updated to error state microservice with name ${micro.name}`);
+                    logger.warn(`[MicroserviceRouter] Microservice ${micro.name} could not be reached on announced URL.`);
                     micro.status = MICRO_STATUS_ERROR;
                     await micro.save();
                 }
@@ -307,7 +365,7 @@ class Microservice {
                 const micro = errorMicroservices[i];
                 if (micro.status === MICRO_STATUS_ERROR
                     || (micro.status === MICRO_STATUS_PENDING && (Date.now() - micro.updatedAt.getTime()) > 10000)) {
-                    const correct = await Microservice.getInfoMicroservice(micro, version);
+                    const correct = await Microservice.getMicroserviceInfo(micro, version);
                     if (correct) {
                         logger.info(`Updating state of microservice with name ${micro.name}`);
                         micro.status = MICRO_STATUS_ACTIVE;
@@ -321,33 +379,40 @@ class Microservice {
                 }
             }
         } else {
-            logger.info('Not exist microservices in error state');
+            logger.info('No microservices in error state found.');
         }
     }
 
-    static async removeEndpointOfMicroservice(micro) {
-        logger.info(`Removing endpoints of microservice with url ${micro.url}`);
-        if (!micro || !micro.endpoints) {
+    /**
+     * Flags endpoints of a microservice for removal
+     * - If an endpoint has another redirect, simply removes this MS's url from the redirects list, and updates the endpoint
+     * - If an endpoint doesn't have any other redirect, sets `toDelete` to true, but does not actually remove the redirect or endpoint.
+     *
+     * @param microservice
+     * @returns {Promise<void>}
+     */
+    static async removeEndpointsOfMicroservice(microservice) {
+        logger.info(`Removing endpoints of microservice with url ${microservice.url}`);
+        if (!microservice || !microservice.endpoints) {
             return;
         }
 
-        for (let i = 0, { length } = micro.endpoints; i < length; i++) {
+        for (let i = 0, { length } = microservice.endpoints; i < length; i++) {
             const endpoint = await EndpointModel.findOne({
-                method: micro.endpoints[i].method,
-                path: micro.endpoints[i].path,
+                method: microservice.endpoints[i].method,
+                path: microservice.endpoints[i].path,
                 toDelete: false
             }).exec();
 
             if (endpoint) {
-                let redirects = endpoint.redirect.filter((red) => red.url !== micro.url);
+                let redirects = endpoint.redirect.filter((redirect) => redirect.url !== microservice.url);
                 if (redirects && redirects.length > 0) {
-                    redirects = redirects.toObject().map((redirect) => ({ ...redirect, microservice: micro.name }));
                     logger.debug('Updating endpoint');
                     endpoint.redirect = redirects;
                     await endpoint.save();
                 } else {
                     logger.debug('Endpoint empty. Removing endpoint');
-                    redirects = redirects.toObject().map((redirect) => ({ ...redirect, microservice: micro.name }));
+                    redirects = redirects.toObject().map((redirect) => ({ ...redirect, microservice: microservice.name }));
                     endpoint.redirect = redirects;
                     endpoint.toDelete = true;
                     await endpoint.save();
@@ -356,39 +421,42 @@ class Microservice {
         }
     }
 
-    static async removeEndpointToDeleteOfMicroservice(id) {
-
-        logger.info(`Removing endpoints with toDelete to true of microservice with id ${id}`);
-        const micro = await MicroserviceModel.findById(id, {
-            __v: 0,
-        });
-        if (!micro) {
-            throw new MicroserviceNotExist(`Microservice with id ${id} does not exist`);
-        }
-        if (!micro.endpoints) {
+    /**
+     * Deletes endpoints associated with a given microservice that are flagged to be deleted with `toDelete` = true
+     *
+     * @param microservice
+     * @returns {Promise<void>}
+     */
+    static async removeEndpointToDeleteOfMicroservice(microservice) {
+        logger.info(`[MicroserviceService] Removing endpoints with toDelete to true of microservice ${microservice.name}`);
+        if (!microservice.endpoints) {
             return;
         }
-        for (let i = 0, { length } = micro.endpoints; i < length; i++) {
+        for (let i = 0, { length } = microservice.endpoints; i < length; i++) {
             await EndpointModel.deleteMany({
-                method: micro.endpoints[i].method,
-                path: micro.endpoints[i].path,
+                method: microservice.endpoints[i].method,
+                path: microservice.endpoints[i].path,
                 toDelete: true
             }).exec();
         }
     }
 
-    static async remove(id) {
-        logger.info(`Removing microservice with id ${id}`);
-        const micro = await MicroserviceModel.findById(id, {
+    static async removeMicroservice(id) {
+        const microservice = await MicroserviceModel.findById(id, {
             __v: 0,
         });
-        if (!micro) {
+        if (!microservice) {
             throw new MicroserviceNotExist(`Microservice with id ${id} does not exist`);
         }
-        logger.debug('Removing endpoints');
-        await Microservice.removeEndpointOfMicroservice(micro);
-        // await micro.remove();
-        return micro;
+        logger.info(`[MicroserviceService] Removing microservice and associated endpoints for MS ${microservice.name}`);
+
+        logger.info(`[MicroserviceService] Removing endpoints for MS ${microservice.name}`);
+        await Microservice.removeEndpointsOfMicroservice(microservice);
+
+        // logger.info(`[MicroserviceService] Removing microservice ${microservice.name}`);
+        // await microservice.remove();
+
+        return microservice;
     }
 
     static async checkLiveMicro(micro) {
@@ -430,7 +498,7 @@ class Microservice {
     }
 
     static async checkLiveMicroservices() {
-        logger.info('Check live microservices');
+        logger.info('Checking live microservices');
 
         const versionFound = await VersionModel.findOne({
             name: appConstants.ENDPOINT_VERSION,
@@ -442,13 +510,13 @@ class Microservice {
             version: versionFound.version
         });
         if (!microservices || microservices.length === 0) {
-            logger.info('Not exist registered microservices');
+            logger.info('No registered microservices found.');
             return;
         }
         for (let i = 0, { length } = microservices; i < length; i++) {
             await Microservice.checkLiveMicro(microservices[i]);
         }
-        logger.info('Finished checking');
+        logger.info('Finished checking live microservices');
     }
 
 }

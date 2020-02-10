@@ -277,7 +277,7 @@ describe('Microservices endpoints', () => {
         deletedEndpoints.should.have.lengthOf(0);
     });
 
-    it('Re-registering an existing microservice should be successful - new endpoints are added, missing ones are flagged as toDelete', async () => {
+    it('Re-registering an existing microservice should be successful - new endpoints are added, missing ones are deleted', async () => {
         const testMicroserviceOne = {
             name: `test-microservice-one`,
             url: 'http://test-microservice-one:8000',
@@ -344,6 +344,8 @@ describe('Microservices endpoints', () => {
                 }]
             });
 
+        delete testMicroserviceOne.endpoints[0].microservice;
+
         const response = await requester.post(`/api/v1/microservice`).send(testMicroserviceOne);
 
         response.status.should.equal(200);
@@ -356,7 +358,205 @@ describe('Microservices endpoints', () => {
         endpoints.should.have.lengthOf(2);
 
         const deletedEndpoints = await EndpointModel.find({ toDelete: true });
-        deletedEndpoints.should.have.lengthOf(1);
+        deletedEndpoints.should.have.lengthOf(0);
+    });
+
+    it('Adding a new redirect to an existing endpoint should update an existing endpoint and add a redirect to the new microservice.', async () => {
+        const testMicroserviceOne = {
+            name: `test-microservice-one`,
+            url: 'http://test-microservice-one:8000',
+            active: true,
+            endpoints: [
+                {
+                    microservice: 'test-microservice-one',
+                    path: '/v1/test',
+                    method: 'GET',
+                    redirect: {
+                        method: 'GET',
+                        path: '/api/v1/test'
+                    }
+                }
+            ],
+        };
+
+        const testMicroserviceTwo = {
+            name: `test-microservice-two`,
+            url: 'http://test-microservice-two:8000',
+            active: true,
+            endpoints: [
+                {
+                    microservice: 'test-microservice-two',
+                    path: '/v1/test',
+                    method: 'GET',
+                    redirect: {
+                        method: 'GET',
+                        path: '/api/v1/test'
+                    }
+                }
+            ],
+        };
+
+        await createMicroservice(testMicroserviceOne);
+        await createEndpoint({
+            pathKeys: [],
+            authenticated: false,
+            applicationRequired: false,
+            binary: false,
+            cache: [],
+            uncache: [],
+            toDelete: false,
+            path: '/v1/test',
+            method: 'GET',
+            pathRegex: /^\/v1\/test(?:\/(?=$))?$/i,
+            redirect: [
+                {
+                    microservice: 'test-microservice-one',
+                    method: 'GET',
+                    path: '/api/v1/test',
+                    url: testMicroserviceOne.url
+                }
+            ],
+            version: 1
+        });
+
+        nock('http://test-microservice-two:8000')
+            .get((uri) => {
+                logger.info('Uri', uri);
+                return uri.startsWith('/info');
+            })
+            .reply(200, {
+                swagger: {},
+                name: 'test-microservice-one',
+                tags: ['test'],
+                endpoints: [{
+                    path: '/v1/test',
+                    method: 'GET',
+                    redirect: {
+                        method: 'GET',
+                        path: '/api/v1/test'
+                    }
+                }]
+            });
+
+        delete testMicroserviceTwo.endpoints[0].microservice;
+
+        const response = await requester.post(`/api/v1/microservice`).send(testMicroserviceTwo);
+
+        response.status.should.equal(200);
+        response.body.status.should.equal('active');
+
+        const microservice = await MicroserviceModel.find();
+        microservice.should.have.lengthOf(2);
+
+        const endpoints = await EndpointModel.find({ toDelete: false });
+        endpoints.should.have.lengthOf(1);
+        endpoints[0].redirect.should.have.length(2);
+        endpoints[0].redirect.toObject().map((redirect) => redirect.url).should.have.members([testMicroserviceTwo.url, testMicroserviceOne.url]);
+
+        const deletedEndpoints = await EndpointModel.find({ toDelete: true });
+        deletedEndpoints.should.have.lengthOf(0);
+    });
+
+    it('Re-registering an existing microservice with an endpoint shared with another microservice should should...', async () => {
+        const testMicroserviceOne = {
+            name: `test-microservice-one`,
+            url: 'http://test-microservice-one:8000',
+            active: true,
+            endpoints: [
+                {
+                    microservice: 'test-microservice-one',
+                    path: '/v1/test',
+                    method: 'GET',
+                    redirect: {
+                        method: 'GET',
+                        path: '/api/v1/test'
+                    }
+                }
+            ],
+        };
+
+        const testMicroserviceTwo = {
+            name: `test-microservice-two`,
+            url: 'http://test-microservice-two:8000',
+            active: true,
+            endpoints: [
+                {
+                    microservice: 'test-microservice-two',
+                    path: '/v1/test',
+                    method: 'GET',
+                    redirect: {
+                        method: 'GET',
+                        path: '/api/v1/test'
+                    }
+                }
+            ],
+        };
+
+        await createMicroservice(testMicroserviceOne);
+        await createMicroservice(testMicroserviceTwo);
+        await createEndpoint({
+            pathKeys: [],
+            authenticated: false,
+            applicationRequired: false,
+            binary: false,
+            cache: [],
+            uncache: [],
+            toDelete: false,
+            path: '/v1/test',
+            method: 'GET',
+            pathRegex: /^\/v1\/test(?:\/(?=$))?$/i,
+            redirect: [
+                {
+                    microservice: 'test-microservice-one',
+                    method: 'GET',
+                    path: '/api/v1/test',
+                    url: testMicroserviceOne.url
+                }, {
+                    microservice: 'test-microservice-two',
+                    method: 'GET',
+                    path: '/api/v1/test',
+                    url: testMicroserviceTwo.url
+                }
+            ],
+            version: 1
+        });
+
+        nock('http://test-microservice-two:8000')
+            .get((uri) => {
+                logger.info('Uri', uri);
+                return uri.startsWith('/info');
+            })
+            .reply(200, {
+                swagger: {},
+                name: 'test-microservice-one',
+                tags: ['test'],
+                endpoints: [{
+                    path: '/v1/test',
+                    method: 'GET',
+                    redirect: {
+                        method: 'GET',
+                        path: '/api/v1/test'
+                    }
+                }]
+            });
+
+        delete testMicroserviceTwo.endpoints[0].microservice;
+
+        const response = await requester.post(`/api/v1/microservice`).send(testMicroserviceTwo);
+
+        response.status.should.equal(200);
+        response.body.status.should.equal('active');
+
+        const microservice = await MicroserviceModel.find();
+        microservice.should.have.lengthOf(2);
+
+        const endpoints = await EndpointModel.find({ toDelete: false });
+        endpoints.should.have.lengthOf(1);
+        endpoints[0].redirect.should.have.length(2);
+        endpoints[0].redirect.toObject().map((redirect) => redirect.url).should.have.members([testMicroserviceTwo.url, testMicroserviceOne.url]);
+
+        const deletedEndpoints = await EndpointModel.find({ toDelete: true });
+        deletedEndpoints.should.have.lengthOf(0);
     });
 
     /* Testing redirects and filters */
