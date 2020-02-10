@@ -20,6 +20,7 @@ async function loadPlugins(app) {
     const plugins = await Plugin.find({
         active: true,
     });
+
     plugins.forEach((plugin) => {
         try {
             logger.info(`Loading ${plugin.name} plugin`);

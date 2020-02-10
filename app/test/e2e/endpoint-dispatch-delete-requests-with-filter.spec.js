@@ -67,42 +67,7 @@ describe('Dispatch DELETE requests with filters', () => {
     //     response.text.should.equal('ok');
     // });
 
-
-    it('Endpoint with DELETE filter that can be verified and matches return a 200 HTTP code (no filter value) - Null user is passed as query argument', async () => {
-        await updateVersion();
-        // eslint-disable-next-line no-useless-escape
-        await createEndpoint({
-            method: 'DELETE',
-            pathRegex: new RegExp('^/api/v1/dataset$'),
-            redirect: [{ ...endpointTest.redirect[0], method: 'DELETE', filters: testFilter({ foo: 'bar' }) }]
-        });
-        await createEndpoint({
-            path: '/api/v1/test1/test',
-            redirect: [
-                {
-                    filters: null,
-                    method: 'DELETE',
-                    path: '/api/v1/test1/test',
-                    url: 'http://mymachine:6001'
-                }
-            ],
-        });
-        createMockEndpointWithBody('/api/v1/test1/test?loggedUser=null', {
-            response: { body: { data: { foo: 'bar' } } },
-            method: 'delete'
-        });
-        createMockEndpointWithBody(`/api/v1/dataset?foo=bar&dataset=${JSON.stringify({ body: { data: { foo: 'bar' } } })}&loggedUser=null`, {
-            method: 'delete'
-        });
-        const response = await requester
-            .delete('/api/v1/dataset')
-            .query({ foo: 'bar' });
-
-        response.status.should.equal(200);
-        response.text.should.equal('ok');
-    });
-
-    it('Endpoint with DELETE filter that can be verified and matches return a 200 HTTP code (no filter value) - USER null is passed as query argument', async () => {
+    it('Endpoint with DELETE filter that can be verified and matches return a 200 HTTP code (no filter value) - USER user is passed as query argument', async () => {
         const { token } = await createUserAndToken({ role: 'USER' });
 
         await updateVersion();
@@ -128,7 +93,8 @@ describe('Dispatch DELETE requests with filters', () => {
                 }
             ],
         });
-        createMockEndpointWithBody(`/api/v1/test1/test?loggedUser=null`, {
+        createMockEndpointWithBody(`/api/v1/test1/test?loggedUser=${await getUserFromToken(token)}`, {
+            body: { },
             response: { body: { data: { foo: 'bar' } } },
             method: 'delete'
         });
@@ -139,41 +105,6 @@ describe('Dispatch DELETE requests with filters', () => {
         const response = await requester
             .delete('/api/v1/dataset')
             .set('Authorization', `Bearer ${token}`)
-            .query({ foo: 'bar' });
-
-        response.status.should.equal(200);
-        response.text.should.equal('ok');
-    });
-
-    it('Endpoint with POST filter that can be verified and matches return a 200 HTTP code (happy case) - Null user is passed as body content', async () => {
-        await updateVersion();
-        // eslint-disable-next-line no-useless-escape
-        await createEndpoint({
-            method: 'DELETE',
-            pathRegex: new RegExp('^/api/v1/dataset$'),
-            redirect: [{ ...endpointTest.redirect[0], method: 'DELETE', filters: testFilter({ foo: 'bar' }) }]
-        });
-        await createEndpoint({
-            path: '/api/v1/test1/test',
-            redirect: [
-                {
-                    filters: null,
-                    method: 'POST',
-                    path: '/api/v1/test1/test',
-                    url: 'http://mymachine:6001'
-                }
-            ],
-        });
-
-        createMockEndpointWithBody('/api/v1/test1/test', {
-            body: { loggedUser: null },
-            response: { body: { data: { foo: 'bar' } } }
-        });
-        createMockEndpointWithBody(`/api/v1/dataset?foo=bar&dataset=${JSON.stringify({ body: { data: { foo: 'bar' } } })}&loggedUser=null`, {
-            method: 'delete'
-        });
-        const response = await requester
-            .delete('/api/v1/dataset')
             .query({ foo: 'bar' });
 
         response.status.should.equal(200);
@@ -202,9 +133,8 @@ describe('Dispatch DELETE requests with filters', () => {
             ],
         });
 
-        // TODO: token should probably be passed to the filter request too
         createMockEndpointWithBody('/api/v1/test1/test', {
-            body: { loggedUser: null },
+            body: { loggedUser: await getUserFromToken(token, false) },
             response: { body: { data: { foo: 'bar' } } }
         });
         createMockEndpointWithBody(`/api/v1/dataset?foo=bar&dataset=${JSON.stringify({ body: { data: { foo: 'bar' } } })}&loggedUser=${await getUserFromToken(token)}`, {
@@ -242,7 +172,7 @@ describe('Dispatch DELETE requests with filters', () => {
         });
 
         createMockEndpointWithBody('/api/v1/test1/test', {
-            body: { loggedUser: null },
+            body: { loggedUser: await getUserFromToken(token, false) },
             response: { body: { data: { foo: 'bar' } } }
         });
         createMockEndpointWithBody(`/api/v1/dataset?foo=bar&dataset=${JSON.stringify({ body: { data: { foo: 'bar' } } })}&loggedUser=${await getUserFromToken(token)}`, {
@@ -281,7 +211,7 @@ describe('Dispatch DELETE requests with filters', () => {
         });
 
         createMockEndpointWithBody('/api/v1/test1/test', {
-            body: { loggedUser: null },
+            body: { loggedUser: await getUserFromToken(token, false) },
             response: { data: { test: 'bar' } }
         });
 
@@ -315,9 +245,8 @@ describe('Dispatch DELETE requests with filters', () => {
             ],
         });
 
-        // TODO: token should probably be passed to the filter request too
         createMockEndpointWithBody('/api/v1/test1/test', {
-            body: { loggedUser: null },
+            body: { loggedUser: await getUserFromToken(token, false) },
             replyStatus: 404
         });
 
@@ -378,10 +307,10 @@ describe('Dispatch DELETE requests with filters', () => {
             ],
         });
         createMockEndpointWithBody('/api/v1/test1/test', {
-            body: { loggedUser: null },
+            body: { loggedUser: await getUserFromToken(token, false) },
             response: { body: { data: { foo: 'bar' } } }
         });
-        createMockEndpointWithBody('/api/v1/test2/test?loggedUser=null', {
+        createMockEndpointWithBody(`/api/v1/test2/test?loggedUser=${await getUserFromToken(token)}`, {
             method: 'delete',
             response: { body: { data: { boo: 'tar' } } }
         });

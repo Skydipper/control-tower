@@ -36,20 +36,25 @@ const createUser = (userData) => ({
 
 const createTokenForUser = (tokenData) => promisify(JWT.sign)(tokenData, process.env.JWT_SECRET);
 
+// eslint-disable-next-line consistent-return
 const createUserInDB = async (userData) => {
-    // eslint-disable-next-line no-undef
-    const user = await new UserModel(createUser(userData)).save();
+    try {
+        const user = await new UserModel(createUser(userData)).save();
 
-    return {
-        id: user._id,
-        role: user.role,
-        provider: user.provider,
-        email: user.email,
-        extraUserData: user.extraUserData,
-        createdAt: Date.now(),
-        photo: user.photo,
-        name: user.name
-    };
+        return {
+            id: user._id,
+            role: user.role,
+            provider: user.provider,
+            email: user.email,
+            extraUserData: user.extraUserData,
+            createdAt: Date.now(),
+            photo: user.photo,
+            name: user.name
+        };
+    } catch (err) {
+        console.error(`error creating test user: ${err}`);
+        process.exit(1);
+    }
 };
 
 const createUserAndToken = async (userData) => {

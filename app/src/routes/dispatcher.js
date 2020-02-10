@@ -27,6 +27,7 @@ const ALLOWED_HEADERS = [
     'access-control-allow-origin',
     'access-control-allow-headers',
     'cache-control',
+    'authorization',
     'charset',
     'location',
     'content-disposition',
@@ -61,6 +62,10 @@ class DispatcherRouter {
                 return ctx.state.microservice;
             }
         }
+        if (ctx.request.query && ctx.request.query.loggedUser) {
+            return ctx.request.query.loggedUser;
+        }
+
         if (ctx.req && ctx.req.user) {
             return ctx.req.user;
         }

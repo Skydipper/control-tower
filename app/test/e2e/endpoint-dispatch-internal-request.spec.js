@@ -45,7 +45,7 @@ describe('Dispatch internal requests', () => {
                 }
             ],
         });
-        createMockEndpointWithBody(`/api/v1/test1/test?loggedUser=null`, {
+        createMockEndpointWithBody(`/api/v1/test1/test?loggedUser=${await getUserFromToken(token)}`, {
             response: { body: { data: { foo: 'bar' } } },
             method: 'get'
         });

@@ -29,14 +29,12 @@ describe('Authorization tests', () => {
         requester = await getTestAgent();
     });
 
-    it('Sending request without token to not authenticated request should be successful', async () => {
+    it('Sending request without token to not authenticated request should not be successful', async () => {
         await updateVersion();
         await createEndpoint();
-        createMockEndpoint('/api/v1/dataset');
 
         const result = await requester.post('/api/v1/dataset');
-        result.status.should.equal(200);
-        result.text.should.equal('ok');
+        ensureCorrectError(result, 'Unauthorized', 401);
     });
 
     it('Sending request without token to authenticated request should be unsuccessful with unauthorized error ', async () => {

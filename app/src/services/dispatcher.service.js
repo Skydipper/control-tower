@@ -1,3 +1,4 @@
+const _ = require('lodash');
 const logger = require('logger');
 const appConstants = require('app.constants');
 const EndpointModel = require('models/endpoint.model');
@@ -15,6 +16,7 @@ const ALLOWED_HEADERS = [
     'cache-control',
     'charset',
     'location',
+    'authorization',
     'host',
 ];
 
@@ -35,6 +37,15 @@ class Dispatcher {
                 return ctx.state.microservice;
             }
         }
+
+        if (ctx.request.query && ctx.request.query.loggedUser) {
+            return ctx.request.query.loggedUser;
+        }
+
+        if (ctx.request.body && ctx.request.body.loggedUser) {
+            return ctx.request.body.loggedUser;
+        }
+
         if (ctx.req && ctx.req.user) {
             return ctx.req.user;
         }
@@ -161,7 +172,7 @@ class Dispatcher {
         return newObject;
     }
 
-    static async checkFilters(sourcePath, endpoint) {
+    static async checkFilters(sourcePath, endpoint, ctx) {
         logger.debug('Checking filters in endpoint', endpoint);
         const newEndpoint = Dispatcher.cloneEndpoint(endpoint);
         let filters = [];
@@ -185,7 +196,8 @@ class Dispatcher {
                 request: {
                     url: path,
                     method: filter.method,
-                    body: {},
+                    query: {},
+                    body: { loggedUser: Dispatcher.getLoggedUser(ctx) },
                 },
             });
             logger.debug('Config request', request);
@@ -197,7 +209,7 @@ class Dispatcher {
             return newEndpoint;
         }
         try {
-            logger.debug('Doing requests');
+            logger.debug('Doing requests 12321312');
             const results = await Promise.all(promisesRequest);
             // TODO: Add support for several filter in each newEndpoint
             for (let i = 0, { length } = results; i < length; i++) {
@@ -283,21 +295,22 @@ class Dispatcher {
         }
 
         logger.debug('Endpoint found');
-        logger.debug('Checking if authentication is necessary');
-        if (endpoint.authenticated && !Dispatcher.getLoggedUser(ctx)) {
-            logger.info('Authentication is needed but no user data was found in the request');
-            throw new NotAuthenticated();
-        }
 
         if (endpoint.applicationRequired && !ctx.state.appKey) {
             logger.info('Application key is needed but none was found in the request');
             throw new NotApplicationKey('Required app_key');
         }
         let redirectEndpoint = null;
-        endpoint = await Dispatcher.checkFilters(parsedUrl.pathname, endpoint);
+        endpoint = await Dispatcher.checkFilters(parsedUrl.pathname, endpoint, ctx);
         if (endpoint && endpoint.redirect.length === 0) {
             logger.error('No redirects exist');
             throw new EndpointNotFound(`${parsedUrl.pathname} not found`);
+        }
+
+        logger.debug('Checking if authentication is necessary');
+        if (!ctx.request.url.startsWith('/auth') && !Dispatcher.getLoggedUser(ctx)) {
+            logger.info('Authentication is needed but no user data was found in the request');
+            throw new NotAuthenticated();
         }
 
         if (endpoint.redirect && endpoint.redirect.length > 1) {
@@ -357,6 +370,7 @@ class Dispatcher {
                 configRequest.body = { ...configRequest.body, ...redirectEndpoint.data };
             }
         }
+
         if (ctx.request.body.files) {
             logger.debug('Adding files', ctx.request.body.files);
             const { files } = ctx.request.body;
@@ -405,12 +419,10 @@ class Dispatcher {
         }
         if (ctx.request.headers) {
             logger.debug('Adding headers');
-            configRequest.headers = Dispatcher.getHeadersFromRequest(ctx.request.headers);
         }
         if (ctx.state && ctx.state.appKey) {
             configRequest.headers.app_key = JSON.stringify(ctx.state.appKey);
         }
-        configRequest.headers.user_key = JSON.stringify(Dispatcher.getLoggedUser(ctx));
 
         logger.debug('Checking if is json or formdata request');
         if (configRequest.multipart) {
@@ -424,7 +436,6 @@ class Dispatcher {
             delete configRequest.multipart;
         }
         configRequest.encoding = null; // all request have encoding null
-
         logger.debug('Returning config', configRequest);
         return {
             configRequest,

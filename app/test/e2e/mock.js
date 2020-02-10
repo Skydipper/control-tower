@@ -9,9 +9,11 @@ const createMockEndpoint = (path, params = {}) => {
 
 // eslint-disable-next-line arrow-body-style
 const createMockEndpointWithHeaders = (path, params = {}) => {
-    const { method = 'post', host = 'http://mymachine:6001', headers = {} } = params;
+    const {
+        method = 'post', host = 'http://mymachine:6001', headers = {}, body = {}
+    } = params;
 
-    return nock(host, { reqheaders: headers })[method](path).reply(200, 'ok');
+    return nock(host, { reqheaders: headers })[method](path, body).reply(200, 'ok');
 };
 
 // eslint-disable-next-line arrow-body-style

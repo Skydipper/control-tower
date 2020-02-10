@@ -375,11 +375,10 @@ function authService(plugin, connection) {
             if (payload.id !== 'microservice') {
                 const checkList = ['id', 'role', 'extraUserData', 'email'];
 
-                const user = await UserModel.findById(payload.id);
-
-                logger.info('[AuthService] User ID in token does not match an existing user');
+                const user = await UserModel.findById(ObjectId(payload.id));
 
                 if (!user) {
+                    logger.info('[AuthService] User ID in token does not match an existing user');
                     return true;
                 }
 
@@ -392,7 +391,6 @@ function authService(plugin, connection) {
                     }
                 });
             }
-
             return isRevoked;
         }
 

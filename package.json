@@ -4,7 +4,7 @@
   "description": "Control Tower API gateway - Skydipper edition",
   "main": "index.js",
   "scripts": {
-    "dev": "export $(cat ./dev.env | xargs) && NODE_PATH=app/src DEBUG=oauth-plugin,statistics-plugin,redis-cache-plugin grunt --gruntfile app/Gruntfile.js | bunyan",
+    "dev": "export $(cat ./dev.env.sample | xargs) && NODE_PATH=app/src DEBUG=oauth-plugin,statistics-plugin,redis-cache-plugin grunt --gruntfile app/Gruntfile.js | bunyan",
     "run": "NODE_PATH=app/src DEBUG=oauth-plugin,statistics-plugin,redis-cache-plugin node app/index.js | bunyan",
     "cron": "NODE_PATH=app/src DEBUG=oauth-plugin,statistics-plugin,redis-cache-plugin node app/index-crons.js | bunyan",
     "test": "NODE_PATH=app/src node $NODE_DEBUG_OPTION ./node_modules/.bin/grunt --gruntfile app/Gruntfile.js e2eTest",
