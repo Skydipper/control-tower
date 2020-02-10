@@ -452,9 +452,10 @@ class Microservice {
 
         logger.info(`[MicroserviceService] Removing endpoints for MS ${microservice.name}`);
         await Microservice.removeEndpointsOfMicroservice(microservice);
+        await Microservice.removeEndpointToDeleteOfMicroservice(microservice);
 
-        // logger.info(`[MicroserviceService] Removing microservice ${microservice.name}`);
-        // await microservice.remove();
+        logger.info(`[MicroserviceService] Removing microservice ${microservice.name}`);
+        await microservice.remove();
 
         return microservice;
     }
