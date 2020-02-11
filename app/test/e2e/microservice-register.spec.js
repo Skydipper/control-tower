@@ -281,7 +281,7 @@ describe('Microservices endpoints', () => {
         const testMicroserviceOne = {
             name: `test-microservice-one`,
             url: 'http://test-microservice-one:8000',
-            active: true,
+            status: 'active',
             endpoints: [
                 {
                     microservice: 'test-microservice-one',
@@ -365,7 +365,7 @@ describe('Microservices endpoints', () => {
         const testMicroserviceOne = {
             name: `test-microservice-one`,
             url: 'http://test-microservice-one:8000',
-            active: true,
+            status: 'active',
             endpoints: [
                 {
                     microservice: 'test-microservice-one',
@@ -382,7 +382,7 @@ describe('Microservices endpoints', () => {
         const testMicroserviceTwo = {
             name: `test-microservice-two`,
             url: 'http://test-microservice-two:8000',
-            active: true,
+            status: 'active',
             endpoints: [
                 {
                     microservice: 'test-microservice-two',
@@ -461,7 +461,7 @@ describe('Microservices endpoints', () => {
         const testMicroserviceOne = {
             name: `test-microservice-one`,
             url: 'http://test-microservice-one:8000',
-            active: true,
+            status: 'active',
             endpoints: [
                 {
                     microservice: 'test-microservice-one',
@@ -478,7 +478,7 @@ describe('Microservices endpoints', () => {
         const testMicroserviceTwo = {
             name: `test-microservice-two`,
             url: 'http://test-microservice-two:8000',
-            active: true,
+            status: 'active',
             endpoints: [
                 {
                     microservice: 'test-microservice-two',

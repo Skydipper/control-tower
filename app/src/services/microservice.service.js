@@ -441,7 +441,18 @@ class Microservice {
         }
     }
 
-    static async removeMicroservice(id) {
+    /**
+     * Deletes a microservice and its endpoints
+     *
+     * It works in 3 steps
+     * - Iterates over its endpoints. If they only have 1 redirect, sets their `toDelete` value to true, else removes this MS from the redirects list.
+     * - Iterates over its endpoints with `toDelete` value set to true, and deletes them.
+     * - Deletes the actual Microservice object from the database.
+     *
+     * @param id
+     * @returns {Promise<any>}
+     */
+    static async deleteMicroservice(id) {
         const microservice = await MicroserviceModel.findById(id, {
             __v: 0,
         });

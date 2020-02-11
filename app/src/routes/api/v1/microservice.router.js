@@ -15,27 +15,27 @@ const router = new Router({
 class MicroserviceRouter {
 
     static async get(ctx) {
-        logger.info('Obtaining microservices registered');
+        logger.info('[MicroserviceRouter] Obtaining registered microservices list');
         const versionFound = await VersionModel.findOne({
             name: appConstants.ENDPOINT_VERSION,
         });
-        logger.debug('Found', versionFound);
+        logger.debug('[MicroserviceRouter] Found', versionFound);
         ctx.body = await MicroserviceModel.find({ version: versionFound.version }, { __v: 0 });
     }
 
     static async getStatus(ctx) {
-        logger.info('Obtaining microservices status');
+        logger.info('[MicroserviceRouter] Obtaining microservices status');
         const versionFound = await VersionModel.findOne({
             name: appConstants.ENDPOINT_VERSION,
         });
-        logger.debug('Found', versionFound);
+        logger.debug('[MicroserviceRouter] Found', versionFound);
         ctx.body = await MicroserviceModel.find({ version: versionFound.version }, {
             name: 1, infoStatus: 1, status: 1, _id: 0
         });
     }
 
     static async register(ctx) {
-        logger.info(`Registering microservice`);
+        logger.info(`[MicroserviceRouter] Registering microservice`);
         try {
             const result = await MicroserviceService.register(ctx.request.body);
             ctx.body = result;
@@ -51,7 +51,7 @@ class MicroserviceRouter {
     static async delete(ctx) {
         logger.info(`[MicroserviceRouter] Removing microservice with id ${ctx.params.id}`);
         try {
-            const result = await MicroserviceService.removeMicroservice(ctx.params.id);
+            const result = await MicroserviceService.deleteMicroservice(ctx.params.id);
             ctx.body = result;
         } catch (err) {
             if (err instanceof MicroserviceNotExist) {
