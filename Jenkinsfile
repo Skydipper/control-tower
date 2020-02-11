@@ -64,6 +64,7 @@ node {
             sh("kubectl apply -f k8s/staging/")
           }
           sh("kubectl set image deployment ${appName} ${appName}=${imageTag} --record")
+          sh("kubectl set image deployment ${appName}-cron ${appName}-cron=${imageTag} --record")
           break
 
         // Roll out to production
@@ -97,6 +98,7 @@ node {
               sh("kubectl apply -f k8s/production/")
             }
             sh("kubectl set image deployment ${appName} ${appName}=${imageTag} --record")
+            sh("kubectl set image deployment ${appName}-cron ${appName}-cron=${imageTag} --record")
           } else {
             sh("echo NOT DEPLOYED")
             currentBuild.result = 'SUCCESS'

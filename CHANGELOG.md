@@ -1,3 +1,6 @@
+# 11/02/2020
+- Merge control tower cron deployment process
+
 # 09/02/2020
 - Modify microservice registration process so that it doesn't go to error by default.
 - Refactor cron logic so that long-failing microservices get deleted.
