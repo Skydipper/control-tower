@@ -471,10 +471,16 @@ class Microservice {
         return microservice;
     }
 
+    /**
+     *
+     *
+     * @param micro
+     * @returns {Promise<boolean>}
+     */
     static async checkLiveMicro(micro) {
-        logger.debug(`Checking live of microservice: ${micro.name} `);
+        logger.debug(`[MicroserviceService] Checking liveliness of microservice: ${micro.name} `);
         const urlLive = url.resolve(micro.url, micro.pathLive);
-        logger.debug(`Doing request to ${urlLive}`);
+        logger.debug(`[MicroserviceService] Doing request to ${urlLive}`);
         if (!micro.infoStatus) {
             micro.infoStatus = {};
         }
@@ -484,7 +490,7 @@ class Microservice {
                 timeout: 5000
             });
             if (micro.status === MICRO_STATUS_ERROR) {
-                logger.info('Sending event of restore microservice');
+                logger.info('[MicroserviceService] Sending event of restore microservice');
                 await NotificationService.sendAlertMicroserviceRestore(micro.name, micro.url);
             }
             micro.infoStatus.lastCheck = new Date();
@@ -492,9 +498,9 @@ class Microservice {
             micro.infoStatus.numRetries = 0;
             micro.status = MICRO_STATUS_ACTIVE;
             await micro.save();
-            logger.debug(`Microservice ${micro.name} is live`);
+            logger.debug(`[MicroserviceService] Microservice ${micro.name} is live`);
         } catch (err) {
-            logger.error(`Microservice ${micro.name} is DOWN`, err);
+            logger.error(`[MicroserviceService] Microservice ${micro.name} is DOWN`, err);
             micro.infoStatus.lastCheck = new Date();
             micro.infoStatus.numRetries++;
             micro.status = MICRO_STATUS_ERROR;
@@ -509,26 +515,31 @@ class Microservice {
         return true;
     }
 
+    /**
+     *
+     *
+     * @returns {Promise<void>}
+     */
     static async checkLiveMicroservices() {
-        logger.info('Checking live microservices');
+        logger.info('[MicroserviceService] Checking live microservices');
 
         const versionFound = await VersionModel.findOne({
             name: appConstants.ENDPOINT_VERSION,
         });
-        logger.debug('Found', versionFound);
+        logger.debug('[MicroserviceService] Found', versionFound);
 
-        logger.info('Obtaining microservices with version ', versionFound);
+        logger.info('[MicroserviceService] Obtaining microservices with version ', versionFound);
         const microservices = await MicroserviceModel.find({
             version: versionFound.version
         });
         if (!microservices || microservices.length === 0) {
-            logger.info('No registered microservices found.');
+            logger.info('[MicroserviceService] No registered microservices found.');
             return;
         }
         for (let i = 0, { length } = microservices; i < length; i++) {
             await Microservice.checkLiveMicro(microservices[i]);
         }
-        logger.info('Finished checking live microservices');
+        logger.info('[MicroserviceService] Finished checking live microservices');
     }
 
 }

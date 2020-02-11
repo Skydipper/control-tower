@@ -1,4 +1,3 @@
-const logger = require('logger');
 const nock = require('nock');
 const MicroserviceModel = require('models/microservice.model');
 const EndpointModel = require('models/endpoint.model');
@@ -55,10 +54,7 @@ describe('Microservice cron - Error checking', () => {
         });
 
         nock('http://test-microservice-one:8000')
-            .get((uri) => {
-                logger.info('Uri', uri);
-                return uri.startsWith('/info');
-            })
+            .get('/info')
             .reply(200, {
                 swagger: {},
                 name: 'test-microservice-one',
@@ -130,10 +126,7 @@ describe('Microservice cron - Error checking', () => {
         });
 
         nock('http://test-microservice-one:8000')
-            .get((uri) => {
-                logger.info('Uri', uri);
-                return uri.startsWith('/info');
-            })
+            .get('/info')
             .reply(404);
 
         (await MicroserviceModel.find({ status: 'error' })).should.have.lengthOf(1);
@@ -250,10 +243,7 @@ describe('Microservice cron - Error checking', () => {
         });
 
         nock('http://test-microservice-one:8000')
-            .get((uri) => {
-                logger.info('Uri', uri);
-                return uri.startsWith('/info');
-            })
+            .get('/info')
             .reply(200, {
                 swagger: {},
                 name: 'test-microservice-one',
@@ -327,10 +317,7 @@ describe('Microservice cron - Error checking', () => {
         });
 
         nock('http://test-microservice-one:8000')
-            .get((uri) => {
-                logger.info('Uri', uri);
-                return uri.startsWith('/info');
-            })
+            .get('/info')
             .reply(404);
 
 
