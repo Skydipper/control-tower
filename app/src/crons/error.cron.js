@@ -5,7 +5,7 @@ const MicroserviceService = require('services/microservice.service');
 
 async function checkErrorMicroservices() {
     try {
-        await MicroserviceService.tryRegisterErrorMicroservices();
+        await MicroserviceService.checkErrorMicroservices();
     } catch (err) {
         logger.error('Error in checkErrorMicroservices', err);
     }

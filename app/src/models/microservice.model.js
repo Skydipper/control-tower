@@ -22,6 +22,7 @@ const Microservice = new Schema({
             }
         ),
     updatedAt: { type: Date, default: Date.now, required: true },
+    createdAt: { type: Date, default: Date.now, required: true },
     endpoints: [
         new Schema(
             {

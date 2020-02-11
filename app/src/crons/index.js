@@ -12,8 +12,9 @@ async function onDbReady(err) {
         logger.error(err);
         throw new Error(err);
     }
-    require('crons/live.cron'); // eslint-disable-line global-require
+    require('crons/active.cron'); // eslint-disable-line global-require
     require('crons/error.cron'); // eslint-disable-line global-require
+    require('crons/pending.cron'); // eslint-disable-line global-require
 
     logger.info('Loading crons of the plugins');
     await loader.loadCronsPlugins();

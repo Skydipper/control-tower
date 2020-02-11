@@ -21,7 +21,8 @@
     "sessionKey": "control-tower-key"
   },
   "microservice": {
-    "overrideDuplicated": true
+    "pendingToErrorThreshold": 10,
+    "errorToDeleteThreshold": 360
   },
   "application": {
     "name": "RW API",

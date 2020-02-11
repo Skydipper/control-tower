@@ -40,7 +40,7 @@ describe('Microservice cron - Live checking', () => {
         (await MicroserviceModel.find({ status: 'pending' })).should.have.lengthOf(0);
         (await MicroserviceModel.find({ status: 'active' })).should.have.lengthOf(1);
 
-        await MicroserviceService.checkLiveMicroservices();
+        await MicroserviceService.checkActiveMicroservices();
 
         (await MicroserviceModel.find({ status: 'error' })).should.have.lengthOf(0);
         (await MicroserviceModel.find({ status: 'pending' })).should.have.lengthOf(0);
@@ -75,14 +75,14 @@ describe('Microservice cron - Live checking', () => {
         (await MicroserviceModel.find({ status: 'pending' })).should.have.lengthOf(0);
         (await MicroserviceModel.find({ status: 'active' })).should.have.lengthOf(1);
 
-        await MicroserviceService.checkLiveMicroservices();
+        await MicroserviceService.checkActiveMicroservices();
 
         (await MicroserviceModel.find({ status: 'error' })).should.have.lengthOf(1);
         (await MicroserviceModel.find({ status: 'pending' })).should.have.lengthOf(0);
         (await MicroserviceModel.find({ status: 'active' })).should.have.lengthOf(0);
     });
 
-    it('Running the "live" cron will check pending and errored microservice, and restore them if they are live.', async () => {
+    it('Running the "live" cron will not check pending nor errored microservice.', async () => {
         const testMicroserviceOne = {
             name: `test-microservice-one`,
             url: 'http://test-microservice-one:8000',
@@ -119,23 +119,15 @@ describe('Microservice cron - Live checking', () => {
         await createMicroservice(testMicroserviceOne);
         await createMicroservice(testMicroserviceTwo);
 
-        nock('http://test-microservice-one:8000')
-            .get('/ping')
-            .reply(200);
-
-        nock('http://test-microservice-two:8000')
-            .get('/ping')
-            .reply(200);
-
         (await MicroserviceModel.find({ status: 'error' })).should.have.lengthOf(1);
         (await MicroserviceModel.find({ status: 'pending' })).should.have.lengthOf(1);
         (await MicroserviceModel.find({ status: 'active' })).should.have.lengthOf(0);
 
-        await MicroserviceService.checkLiveMicroservices();
+        await MicroserviceService.checkActiveMicroservices();
 
-        (await MicroserviceModel.find({ status: 'error' })).should.have.lengthOf(0);
-        (await MicroserviceModel.find({ status: 'pending' })).should.have.lengthOf(0);
-        (await MicroserviceModel.find({ status: 'active' })).should.have.lengthOf(2);
+        (await MicroserviceModel.find({ status: 'error' })).should.have.lengthOf(1);
+        (await MicroserviceModel.find({ status: 'pending' })).should.have.lengthOf(1);
+        (await MicroserviceModel.find({ status: 'active' })).should.have.lengthOf(0);
     });
 
     afterEach(async () => {
