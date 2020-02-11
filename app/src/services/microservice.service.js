@@ -332,13 +332,9 @@ class Microservice {
                     logger.info(`[MicroserviceRouter] Microservice ${micro.name} activated successfully.`);
                 } else {
                     logger.warn(`[MicroserviceRouter] Microservice ${micro.name} could not be reached on announced URL.`);
-                    micro.status = MICRO_STATUS_ERROR;
-                    await micro.save();
                 }
             } catch (err) {
                 logger.error(err);
-                micro.status = MICRO_STATUS_ERROR;
-                await micro.save();
             }
             return micro;
         } catch (err) {

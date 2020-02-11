@@ -1,4 +1,5 @@
 # 09/02/2020
+- Modify microservice registration process so that it doesn't go to error by default.
 - Refactor cron logic so that long-failing microservices get deleted.
 - Save microservice name in endpoint redirect.
 - Prevent duplicated tags when saving microservice data to the database.
