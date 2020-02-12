@@ -9,6 +9,7 @@ const MicroserviceNotExist = require('errors/microserviceNotExist');
 const Utils = require('utils');
 const mongoose = require('mongoose');
 const MicroserviceSerializer = require('serializers/microservice.serializer');
+const pick = require('lodash/pick');
 
 const router = new Router({
     prefix: '/microservice',
@@ -17,12 +18,14 @@ const router = new Router({
 class MicroserviceRouter {
 
     static async getAll(ctx) {
+        const query = pick(ctx.query, ['status', 'url']);
+
         logger.info('[MicroserviceRouter] Obtaining registered microservices list');
         const versionFound = await VersionModel.findOne({
             name: appConstants.ENDPOINT_VERSION,
         });
         logger.debug('[MicroserviceRouter] Found', versionFound);
-        ctx.body = await MicroserviceModel.find({ version: versionFound.version }, { __v: 0 });
+        ctx.body = await MicroserviceModel.find({ ...query, version: versionFound.version }, { __v: 0 });
     }
 
     static async get(ctx) {
