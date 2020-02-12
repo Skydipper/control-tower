@@ -246,6 +246,7 @@ class Dispatcher {
     }
 
     static async getEndpoint(pathname, method) {
+        logger.info(`[DispatcherService] Searching for endpoint with path ${pathname} and method ${method}`);
         logger.debug('Obtaining version');
         const version = await VersionModel.findOne({
             name: appConstants.ENDPOINT_VERSION,
@@ -266,10 +267,12 @@ class Dispatcher {
             return endpointData.method === method && endpointData.pathRegex && endpointData.pathRegex.test(pathname);
         });
         if (endpoint) {
+            logger.info(`[DispatcherService] Found endpoint with id ${endpoint._id}`);
             return endpoint.toObject();
         }
-        return endpoint;
 
+        logger.info(`[DispatcherService] No endpoint found`);
+        return null;
     }
 
     static async getRequest(ctx) {
