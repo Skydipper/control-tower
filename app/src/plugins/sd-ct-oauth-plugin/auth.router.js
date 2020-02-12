@@ -775,6 +775,7 @@ module.exports = (plugin, connection, generalConfig) => {
             return;
         }
         if (user.role === 'ADMIN') {
+            logger.info('User is admin');
             await next();
         } else {
             logger.info('Not admin');

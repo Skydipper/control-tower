@@ -391,9 +391,9 @@ function authService(plugin, connection) {
 
                 const user = await UserModel.findById(payload.id);
 
-                logger.info('[AuthService] User ID in token does not match an existing user');
-
                 if (!user) {
+                    logger.info('[AuthService] User ID in token does not match an existing user');
+
                     return true;
                 }
 
