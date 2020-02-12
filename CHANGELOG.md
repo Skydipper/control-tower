@@ -1,4 +1,5 @@
 # 12/02/2020
+- Fix issue where pending microservice cron would not trigger a version update on the endpoints table
 - Add endpoint to get microservice details by id
 - Add status and url filters to get microservices endpoint
 

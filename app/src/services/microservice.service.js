@@ -585,6 +585,16 @@ class Microservice {
                 micro.status = MICRO_STATUS_ACTIVE;
                 micro.infoStatus.numRetries = 0;
                 await micro.save();
+
+                const existingVersion = await VersionModel.findOne({
+                    name: appConstants.ENDPOINT_VERSION,
+                });
+
+                if (existingVersion) {
+                    existingVersion.lastUpdated = new Date();
+                    await existingVersion.save();
+                }
+
                 logger.info('[MicroserviceService] Updated successfully');
             } else {
                 micro.infoStatus.numRetries++;
