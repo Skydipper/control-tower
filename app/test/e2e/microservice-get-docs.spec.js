@@ -14,7 +14,7 @@ chai.should();
 let requester;
 
 
-describe('Microservices endpoints - GET endpoints', () => {
+describe('Microservices endpoints - Get docs', () => {
 
     before(async () => {
         if (process.env.NODE_ENV !== 'test') {
@@ -28,22 +28,6 @@ describe('Microservices endpoints - GET endpoints', () => {
         await UserModel.deleteMany({}).exec();
         await MicroserviceModel.deleteMany({}).exec();
         await EndpointModel.deleteMany({}).exec();
-    });
-
-    it('Getting a list of microservices without being authenticated should fail', async () => {
-        const response = await requester.get(`/api/v1/microservice`);
-        response.status.should.equal(401);
-    });
-
-    it('Getting a list of microservices should return empty if no services are registered', async () => {
-        const { token } = await createUserAndToken({ role: 'ADMIN' });
-
-        const response = await requester
-            .get(`/api/v1/microservice`)
-            .set('Authorization', `Bearer ${token}`);
-
-        response.status.should.equal(200);
-        response.body.should.be.an('array').and.have.lengthOf(0);
     });
 
     it('Get documentation for existing endpoints should be successful (happy case)', async () => {

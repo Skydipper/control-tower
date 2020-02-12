@@ -1,3 +1,6 @@
+# 12/02/2020
+- Add endpoint to get microservice details by id
+
 # 11/02/2020
 - Merge control tower cron deployment process
 

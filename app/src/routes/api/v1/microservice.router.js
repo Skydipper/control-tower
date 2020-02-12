@@ -7,6 +7,8 @@ const MicroserviceService = require('services/microservice.service');
 const MicroserviceDuplicated = require('errors/microserviceDuplicated');
 const MicroserviceNotExist = require('errors/microserviceNotExist');
 const Utils = require('utils');
+const mongoose = require('mongoose');
+const MicroserviceSerializer = require('serializers/microservice.serializer');
 
 const router = new Router({
     prefix: '/microservice',
@@ -14,13 +16,31 @@ const router = new Router({
 
 class MicroserviceRouter {
 
-    static async get(ctx) {
+    static async getAll(ctx) {
         logger.info('[MicroserviceRouter] Obtaining registered microservices list');
         const versionFound = await VersionModel.findOne({
             name: appConstants.ENDPOINT_VERSION,
         });
         logger.debug('[MicroserviceRouter] Found', versionFound);
         ctx.body = await MicroserviceModel.find({ version: versionFound.version }, { __v: 0 });
+    }
+
+    static async get(ctx) {
+        const { id } = ctx.params;
+        logger.info(`[MicroserviceRouter] Obtaining microservice with id ${id}`);
+
+        if (!mongoose.Types.ObjectId.isValid(id)) {
+            ctx.throw(404, `Could not find a microservice with id ${id}`);
+            return;
+        }
+        const microservice = await MicroserviceModel.findById(id, { __v: 0 });
+
+        if (!microservice) {
+            ctx.throw(404, `Could not find a microservice with id ${id}`);
+            return;
+        }
+
+        ctx.body = MicroserviceSerializer.serialize(microservice);
     }
 
     static async getStatus(ctx) {
@@ -64,8 +84,9 @@ class MicroserviceRouter {
 
 }
 
-router.get('/', Utils.isLogged, Utils.isAdmin, MicroserviceRouter.get);
 router.get('/status', MicroserviceRouter.getStatus);
+router.get('/', Utils.isLogged, Utils.isAdmin, MicroserviceRouter.getAll);
+router.get('/:id', Utils.isLogged, Utils.isAdmin, MicroserviceRouter.get);
 router.post('/', MicroserviceRouter.register);
 router.delete('/:id', Utils.isLogged, Utils.isAdmin, MicroserviceRouter.delete);
 
