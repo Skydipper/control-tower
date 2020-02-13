@@ -247,21 +247,21 @@ class Dispatcher {
 
     static async getEndpoint(pathname, method) {
         logger.info(`[DispatcherService] Searching for endpoint with path ${pathname} and method ${method}`);
-        logger.debug('Obtaining version');
+        logger.debug('[DispatcherService] Obtaining version');
         const version = await VersionModel.findOne({
             name: appConstants.ENDPOINT_VERSION,
         });
-        logger.debug('Version found ', version);
-        logger.debug('Version last', version.lastUpdated);
+        logger.debug('[DispatcherService] Version found: ', version);
+        logger.debug('[DispatcherService] Version last', version.lastUpdated);
         if (!CACHE.version || !CACHE.version.lastUpdated || !version.lastUpdated || CACHE.version.lastUpdated.getTime() !== version.lastUpdated.getTime()) {
-            logger.debug('Reloading endpoints');
+            logger.debug('[DispatcherService] Reloading endpoints cache from database');
             await Dispatcher.reloadEndpoints(version);
         }
-        logger.debug('Searching endpoints');
         if (!CACHE.endpoints || CACHE.endpoints.length === 0) {
-            logger.fatal('Endpoints is empty');
+            logger.fatal('[DispatcherService] Endpoints cache is empty');
             return null;
         }
+        logger.debug('[DispatcherService] Searching endpoints cache');
         const endpoint = CACHE.endpoints.find((endpointData) => {
             endpointData.pathRegex.lastIndex = 0;
             return endpointData.method === method && endpointData.pathRegex && endpointData.pathRegex.test(pathname);
