@@ -138,7 +138,7 @@ class Microservice {
      * @returns {Promise<void>}
      */
     static async saveEndpointsForMicroservice(microservice, info, version) {
-        logger.info('Saving endpoints');
+        logger.info('[MicroserviceService - saveEndpointsForMicroservice] Saving endpoints');
         if (info.endpoints && info.endpoints.length > 0) {
             for (let i = 0, { length } = info.endpoints; i < length; i++) {
                 await Microservice.saveEndpoint(info.endpoints[i], microservice, version);
@@ -228,7 +228,7 @@ class Microservice {
             return false;
         }
 
-        logger.debug('[MicroserviceService] Microservice information loaded successfully, applying transformations');
+        logger.info('[MicroserviceService] Microservice information loaded successfully, applying transformations');
         result = Microservice.transformUrlsToNewVersion(result);
         microservice.endpoints = result.endpoints;
         microservice.cache = result.cache;
@@ -243,7 +243,7 @@ class Microservice {
             microservice.tags = uniq(microservice.tags.concat(result.tags));
         }
 
-        logger.debug('[MicroserviceService] Microservice info ready, saving...');
+        logger.info('[MicroserviceService] Microservice info ready, saving...');
         await microservice.save();
         await Microservice.saveEndpointsForMicroservice(microservice, result, version);
         return true;
@@ -449,14 +449,9 @@ class Microservice {
                 uri: urlLive,
                 timeout: 5000
             });
-            if (micro.status === MICRO_STATUS_ERROR) {
-                logger.info('[MicroserviceService] Sending event of restore microservice');
-                await NotificationService.sendAlertMicroserviceRestore(micro.name, micro.url);
-            }
             micro.infoStatus.lastCheck = new Date();
             micro.infoStatus.error = null;
             micro.infoStatus.numRetries = 0;
-            micro.status = MICRO_STATUS_ACTIVE;
             await micro.save();
             logger.debug(`[MicroserviceService] Microservice ${micro.name} is live`);
         } catch (err) {
