@@ -5,6 +5,10 @@ const chai = require('chai');
 const MicroserviceModel = require('models/microservice.model');
 const EndpointModel = require('models/endpoint.model');
 const UserModel = require('plugins/sd-ct-oauth-plugin/models/user.model');
+const VersionModel = require('models/version.model');
+const appConstants = require('app.constants');
+
+chai.use(require('chai-datetime'));
 
 const { createMicroservice, createEndpoint } = require('./utils/helpers');
 const { getTestAgent, closeTestAgent } = require('./test-server');
@@ -31,7 +35,9 @@ describe('Microservices endpoints', () => {
     });
 
     /* Register a microservice */
-    it('Registering a microservice that doesn\'t should be successful (happy case)', async () => {
+    it('Registering a microservice that is available should be successful and create the microservice and endpoints, and increase the version (happy case)', async () => {
+        const preVersion = await VersionModel.findOne({ name: appConstants.ENDPOINT_VERSION });
+
         const testMicroserviceOne = {
             name: `test-microservice-one`,
             url: 'http://test-microservice-one:8000',
@@ -65,18 +71,65 @@ describe('Microservices endpoints', () => {
         const microservice = await MicroserviceModel.find();
         microservice.should.have.lengthOf(1);
 
-        const endpoints = await EndpointModel.find({ toDelete: false });
-        endpoints.should.have.lengthOf(1);
+        (await EndpointModel.find({ 'redirect.microservice': testMicroserviceOne.name })).should.have.lengthOf(1);
 
-        const deletedEndpoints = await EndpointModel.find({ toDelete: true });
-        deletedEndpoints.should.have.lengthOf(0);
+        (await VersionModel.findOne({ name: appConstants.ENDPOINT_VERSION })).should.have.property('lastUpdated').and.afterTime(preVersion.lastUpdated);
     });
 
-    it('Re-registering a microservice that already exists should be successful', async () => {
+    it('Registering a microservice that is not yet available should be successful and set the microservice in "pending" state and not create any endpoints.', async () => {
+        const preVersion = await VersionModel.findOne({ name: appConstants.ENDPOINT_VERSION });
+
         const testMicroserviceOne = {
             name: `test-microservice-one`,
             url: 'http://test-microservice-one:8000',
-            active: true
+            status: 'error',
+            endpoints: [
+                {
+                    path: '/v1/testOne',
+                    method: 'GET',
+                    redirect: {
+                        method: 'GET',
+                        path: '/api/v1/testOne'
+                    }
+                }
+            ],
+        };
+
+        nock('http://test-microservice-one:8000')
+            .get('/info')
+            .reply(404);
+
+        const response = await requester.post(`/api/v1/microservice`).send(testMicroserviceOne);
+
+        response.status.should.equal(200);
+        response.body.status.should.equal('pending');
+
+        const microservice = await MicroserviceModel.find();
+        microservice.should.have.lengthOf(1);
+
+        const endpoints = await EndpointModel.find();
+        endpoints.should.have.lengthOf(0);
+
+        (await VersionModel.findOne({ name: appConstants.ENDPOINT_VERSION })).should.have.property('lastUpdated').and.equalTime(preVersion.lastUpdated);
+    });
+
+    it('Re-registering a microservice that already exists should be successful', async () => {
+        const preVersion = await VersionModel.findOne({ name: appConstants.ENDPOINT_VERSION });
+
+        const testMicroserviceOne = {
+            name: `test-microservice-one`,
+            url: 'http://test-microservice-one:8000',
+            status: 'error',
+            endpoints: [
+                {
+                    path: '/v1/testOne',
+                    method: 'GET',
+                    redirect: {
+                        method: 'GET',
+                        path: '/api/v1/testOne'
+                    }
+                }
+            ],
         };
 
         await createMicroservice(testMicroserviceOne);
@@ -134,9 +187,13 @@ describe('Microservices endpoints', () => {
 
         const deletedEndpoints = await EndpointModel.find({ toDelete: true });
         deletedEndpoints.should.have.lengthOf(0);
+
+        (await VersionModel.findOne({ name: appConstants.ENDPOINT_VERSION })).should.have.property('lastUpdated').and.afterTime(preVersion.lastUpdated);
     });
 
     it('Re-registering a microservice that already exists with a new endpoint should be successful', async () => {
+        const preVersion = await VersionModel.findOne({ name: appConstants.ENDPOINT_VERSION });
+
         const testMicroserviceOne = {
             name: `test-microservice-one`,
             url: 'http://test-microservice-one:8000',
@@ -205,9 +262,13 @@ describe('Microservices endpoints', () => {
 
         const deletedEndpoints = await EndpointModel.find({ toDelete: true });
         deletedEndpoints.should.have.lengthOf(0);
+
+        (await VersionModel.findOne({ name: appConstants.ENDPOINT_VERSION })).should.have.property('lastUpdated').and.afterTime(preVersion.lastUpdated);
     });
 
     it('Registering a microservice that adds a new redirect to an existing endpoint should be successful (happy case)', async () => {
+        const preVersion = await VersionModel.findOne({ name: appConstants.ENDPOINT_VERSION });
+
         const testMicroserviceOne = {
             name: `test-microservice-one`,
             url: 'http://test-microservice-one:8000',
@@ -275,9 +336,13 @@ describe('Microservices endpoints', () => {
 
         const deletedEndpoints = await EndpointModel.find({ toDelete: true });
         deletedEndpoints.should.have.lengthOf(0);
+
+        (await VersionModel.findOne({ name: appConstants.ENDPOINT_VERSION })).should.have.property('lastUpdated').and.afterTime(preVersion.lastUpdated);
     });
 
     it('Re-registering an existing microservice should be successful - new endpoints are added, missing ones are deleted', async () => {
+        const preVersion = await VersionModel.findOne({ name: appConstants.ENDPOINT_VERSION });
+
         const testMicroserviceOne = {
             name: `test-microservice-one`,
             url: 'http://test-microservice-one:8000',
@@ -359,9 +424,13 @@ describe('Microservices endpoints', () => {
 
         const deletedEndpoints = await EndpointModel.find({ toDelete: true });
         deletedEndpoints.should.have.lengthOf(0);
+
+        (await VersionModel.findOne({ name: appConstants.ENDPOINT_VERSION })).should.have.property('lastUpdated').and.afterTime(preVersion.lastUpdated);
     });
 
     it('Adding a new redirect to an existing endpoint should update an existing endpoint and add a redirect to the new microservice.', async () => {
+        const preVersion = await VersionModel.findOne({ name: appConstants.ENDPOINT_VERSION });
+
         const testMicroserviceOne = {
             name: `test-microservice-one`,
             url: 'http://test-microservice-one:8000',
@@ -455,9 +524,13 @@ describe('Microservices endpoints', () => {
 
         const deletedEndpoints = await EndpointModel.find({ toDelete: true });
         deletedEndpoints.should.have.lengthOf(0);
+
+        (await VersionModel.findOne({ name: appConstants.ENDPOINT_VERSION })).should.have.property('lastUpdated').and.afterTime(preVersion.lastUpdated);
     });
 
-    it('Re-registering an existing microservice with an endpoint shared with another microservice should should...', async () => {
+    it('Re-registering an existing microservice with an endpoint shared with another microservice should merge the configurations of existing and the updated MS.', async () => {
+        const preVersion = await VersionModel.findOne({ name: appConstants.ENDPOINT_VERSION });
+
         const testMicroserviceOne = {
             name: `test-microservice-one`,
             url: 'http://test-microservice-one:8000',
@@ -557,10 +630,14 @@ describe('Microservices endpoints', () => {
 
         const deletedEndpoints = await EndpointModel.find({ toDelete: true });
         deletedEndpoints.should.have.lengthOf(0);
+
+        (await VersionModel.findOne({ name: appConstants.ENDPOINT_VERSION })).should.have.property('lastUpdated').and.afterTime(preVersion.lastUpdated);
     });
 
     /* Testing redirects and filters */
     it('Registering multiple microservices and querying them is successful (redirects and filters)', async () => {
+        const preVersion = await VersionModel.findOne({ name: appConstants.ENDPOINT_VERSION });
+
         const testDatasetMicroservice = {
             name: `dataset`,
             url: 'http://test-dataset-microservice:3000',
@@ -740,6 +817,8 @@ describe('Microservices endpoints', () => {
         queryOne.body.query.should.equal(1000);
         queryTwo.status.should.equal(200);
         queryTwo.body.query.should.equal(2000);
+
+        (await VersionModel.findOne({ name: appConstants.ENDPOINT_VERSION })).should.have.property('lastUpdated').and.afterTime(preVersion.lastUpdated);
     });
 
     afterEach(async () => {

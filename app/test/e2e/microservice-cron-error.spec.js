@@ -1,9 +1,14 @@
 const nock = require('nock');
 const config = require('config');
+const chai = require('chai');
 const MicroserviceModel = require('models/microservice.model');
 const EndpointModel = require('models/endpoint.model');
+const VersionModel = require('models/version.model');
 const MicroserviceService = require('services/microservice.service');
-const { createEndpoint, createMicroservice } = require('./utils/helpers');
+const appConstants = require('app.constants');
+const { createMicroserviceWithEndpoints } = require('./utils/helpers');
+
+chai.use(require('chai-datetime'));
 
 describe('Microservice cron - Error checking', () => {
 
@@ -14,6 +19,8 @@ describe('Microservice cron - Error checking', () => {
     });
 
     it('Running the "error" cron will reactivate an errored microservice that is again reachable (happy case)', async () => {
+        const preVersion = await VersionModel.findOne({ name: appConstants.ENDPOINT_VERSION });
+
         const testMicroserviceOne = {
             name: `test-microservice-one`,
             url: 'http://test-microservice-one:8000',
@@ -31,28 +38,7 @@ describe('Microservice cron - Error checking', () => {
             ],
         };
 
-        await createMicroservice(testMicroserviceOne);
-        await createEndpoint({
-            pathKeys: [],
-            authenticated: false,
-            applicationRequired: false,
-            binary: false,
-            cache: [],
-            uncache: [],
-            toDelete: false,
-            path: '/v1/test',
-            method: 'GET',
-            pathRegex: /^\/v1\/test(?:\/(?=$))?$/i,
-            redirect: [
-                {
-                    microservice: 'test-microservice-one',
-                    method: 'GET',
-                    path: '/api/v1/test',
-                    url: testMicroserviceOne.url
-                }
-            ],
-            version: 1
-        });
+        await createMicroserviceWithEndpoints(testMicroserviceOne);
 
         nock('http://test-microservice-one:8000')
             .get('/info')
@@ -71,21 +57,25 @@ describe('Microservice cron - Error checking', () => {
             });
 
         (await MicroserviceModel.find({ status: 'error' })).should.have.lengthOf(1);
+        (await MicroserviceModel.find({ status: 'pending' })).should.have.lengthOf(0);
         (await MicroserviceModel.find({ status: 'active' })).should.have.lengthOf(0);
 
-        (await EndpointModel.find({ toDelete: false })).should.have.lengthOf(1);
-        (await EndpointModel.find({ toDelete: true })).should.have.lengthOf(0);
+        (await EndpointModel.find({ 'redirect.microservice': testMicroserviceOne.name })).should.have.lengthOf(1);
 
         await MicroserviceService.checkErrorMicroservices();
 
         (await MicroserviceModel.find({ status: 'error' })).should.have.lengthOf(0);
+        (await MicroserviceModel.find({ status: 'pending' })).should.have.lengthOf(0);
         (await MicroserviceModel.find({ status: 'active' })).should.have.lengthOf(1);
 
-        (await EndpointModel.find({ toDelete: false })).should.have.lengthOf(1);
-        (await EndpointModel.find({ toDelete: true })).should.have.lengthOf(0);
+        (await EndpointModel.find({ 'redirect.microservice': testMicroserviceOne.name })).should.have.lengthOf(1);
+
+        (await VersionModel.findOne({ name: appConstants.ENDPOINT_VERSION })).should.have.property('lastUpdated').and.equalTime(preVersion.lastUpdated);
     });
 
     it('Running the "error" cron will not reactivate an errored microservice that is not yet reachable, and it will increase its retries counter', async () => {
+        const preVersion = await VersionModel.findOne({ name: appConstants.ENDPOINT_VERSION });
+
         const testMicroserviceOne = {
             name: `test-microservice-one`,
             url: 'http://test-microservice-one:8000',
@@ -103,28 +93,7 @@ describe('Microservice cron - Error checking', () => {
             ],
         };
 
-        await createMicroservice(testMicroserviceOne);
-        await createEndpoint({
-            pathKeys: [],
-            authenticated: false,
-            applicationRequired: false,
-            binary: false,
-            cache: [],
-            uncache: [],
-            toDelete: false,
-            path: '/v1/test',
-            method: 'GET',
-            pathRegex: /^\/v1\/test(?:\/(?=$))?$/i,
-            redirect: [
-                {
-                    microservice: 'test-microservice-one',
-                    method: 'GET',
-                    path: '/api/v1/test',
-                    url: testMicroserviceOne.url
-                }
-            ],
-            version: 1
-        });
+        await createMicroserviceWithEndpoints(testMicroserviceOne);
 
         nock('http://test-microservice-one:8000')
             .get('/info')
@@ -134,6 +103,8 @@ describe('Microservice cron - Error checking', () => {
         (await MicroserviceModel.find({ status: 'active' })).should.have.lengthOf(0);
         (await MicroserviceModel.find({ status: 'pending' })).should.have.lengthOf(0);
 
+        (await EndpointModel.find({ 'redirect.microservice': testMicroserviceOne.name })).should.have.lengthOf(1);
+
         await MicroserviceService.checkErrorMicroservices();
 
         (await MicroserviceModel.find({ status: 'pending' })).should.have.lengthOf(0);
@@ -142,9 +113,15 @@ describe('Microservice cron - Error checking', () => {
         const postCronMicroservices = await MicroserviceModel.find({ status: 'error' });
         postCronMicroservices.should.have.lengthOf(1);
         postCronMicroservices[0].infoStatus.numRetries.should.equal(1);
+
+        (await EndpointModel.find({ 'redirect.microservice': testMicroserviceOne.name })).should.have.lengthOf(1);
+
+        (await VersionModel.findOne({ name: appConstants.ENDPOINT_VERSION })).should.have.property('lastUpdated').and.equalTime(preVersion.lastUpdated);
     });
 
     it('Running the "error" cron on an unreachable errored microservice that has been retried multiple times will cause the microservice and its endpoints to be deleted.', async () => {
+        const preVersion = await VersionModel.findOne({ name: appConstants.ENDPOINT_VERSION });
+
         const testMicroserviceOne = {
             name: `test-microservice-one`,
             url: 'http://test-microservice-one:8000',
@@ -165,28 +142,7 @@ describe('Microservice cron - Error checking', () => {
             }
         };
 
-        await createMicroservice(testMicroserviceOne);
-        await createEndpoint({
-            pathKeys: [],
-            authenticated: false,
-            applicationRequired: false,
-            binary: false,
-            cache: [],
-            uncache: [],
-            toDelete: false,
-            path: '/v1/test',
-            method: 'GET',
-            pathRegex: /^\/v1\/test(?:\/(?=$))?$/i,
-            redirect: [
-                {
-                    microservice: 'test-microservice-one',
-                    method: 'GET',
-                    path: '/api/v1/test',
-                    url: testMicroserviceOne.url
-                }
-            ],
-            version: 1
-        });
+        await createMicroserviceWithEndpoints(testMicroserviceOne);
 
         nock('http://test-microservice-one:8000')
             .get('/info')
@@ -195,15 +151,23 @@ describe('Microservice cron - Error checking', () => {
         (await MicroserviceModel.find({ status: 'error' })).should.have.lengthOf(1);
         (await MicroserviceModel.find({ status: 'active' })).should.have.lengthOf(0);
         (await MicroserviceModel.find({ status: 'pending' })).should.have.lengthOf(0);
-        (await EndpointModel.find()).should.have.lengthOf(1);
+
+        (await EndpointModel.find({ 'redirect.microservice': testMicroserviceOne.name })).should.have.lengthOf(1);
 
         await MicroserviceService.checkErrorMicroservices();
 
         (await MicroserviceModel.find()).should.have.lengthOf(0);
         (await EndpointModel.find()).should.have.lengthOf(0);
+
+        (await EndpointModel.find({ 'redirect.microservice': testMicroserviceOne.name })).should.have.lengthOf(0);
+
+        (await VersionModel.findOne({ name: appConstants.ENDPOINT_VERSION })).should.have.property('lastUpdated').and.equalTime(preVersion.lastUpdated);
+
     });
 
     it('Running the "error" cron will not act on a "pending" microservice', async () => {
+        const preVersion = await VersionModel.findOne({ name: appConstants.ENDPOINT_VERSION });
+
         const testMicroserviceOne = {
             name: `test-microservice-one`,
             url: 'http://test-microservice-one:8000',
@@ -222,38 +186,23 @@ describe('Microservice cron - Error checking', () => {
             updatedAt: Date.parse('2019-01-01')
         };
 
-        await createMicroservice(testMicroserviceOne);
-        await createEndpoint({
-            pathKeys: [],
-            authenticated: false,
-            applicationRequired: false,
-            binary: false,
-            cache: [],
-            uncache: [],
-            toDelete: false,
-            path: '/v1/test',
-            method: 'GET',
-            pathRegex: /^\/v1\/test(?:\/(?=$))?$/i,
-            redirect: [
-                {
-                    microservice: 'test-microservice-one',
-                    method: 'GET',
-                    path: '/api/v1/test',
-                    url: testMicroserviceOne.url
-                }
-            ],
-            version: 1
-        });
+        await createMicroserviceWithEndpoints(testMicroserviceOne);
 
         (await MicroserviceModel.find({ status: 'pending' })).should.have.lengthOf(1);
         (await MicroserviceModel.find({ status: 'error' })).should.have.lengthOf(0);
         (await MicroserviceModel.find({ status: 'active' })).should.have.lengthOf(0);
+
+        (await EndpointModel.find({ 'redirect.microservice': testMicroserviceOne.name })).should.have.lengthOf(1);
 
         await MicroserviceService.checkErrorMicroservices();
 
         (await MicroserviceModel.find({ status: 'pending' })).should.have.lengthOf(1);
         (await MicroserviceModel.find({ status: 'error' })).should.have.lengthOf(0);
         (await MicroserviceModel.find({ status: 'active' })).should.have.lengthOf(0);
+
+        (await EndpointModel.find({ 'redirect.microservice': testMicroserviceOne.name })).should.have.lengthOf(1);
+
+        (await VersionModel.findOne({ name: appConstants.ENDPOINT_VERSION })).should.have.property('lastUpdated').and.equalTime(preVersion.lastUpdated);
     });
 
     afterEach(async () => {

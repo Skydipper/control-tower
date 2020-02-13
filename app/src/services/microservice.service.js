@@ -352,7 +352,7 @@ class Microservice {
      * @returns {Promise<void>}
      */
     static async removeEndpointsOfMicroservice(microservice) {
-        logger.info(`Removing endpoints of microservice with url ${microservice.url}`);
+        logger.info(`[MicroserviceService - removeEndpointsOfMicroservice] Removing endpoints of microservice with url ${microservice.url}`);
         if (!microservice || !microservice.endpoints) {
             return;
         }
@@ -367,11 +367,11 @@ class Microservice {
             if (endpoint) {
                 let redirects = endpoint.redirect.filter((redirect) => redirect.url !== microservice.url);
                 if (redirects && redirects.length > 0) {
-                    logger.debug('Updating endpoint');
+                    logger.info(`[MicroserviceService - removeEndpointsOfMicroservice] Updating endpoint: Path ${endpoint.path} | Method ${endpoint.method}`);
                     endpoint.redirect = redirects;
                     await endpoint.save();
                 } else {
-                    logger.debug('Endpoint empty. Removing endpoint');
+                    logger.info(`[MicroserviceService - removeEndpointsOfMicroservice] Endpoint empty. Removing endpoint: Path ${endpoint.path} | Method ${endpoint.method}`);
                     redirects = redirects.toObject().map((redirect) => ({ ...redirect, microservice: microservice.name }));
                     endpoint.redirect = redirects;
                     endpoint.toDelete = true;
@@ -388,7 +388,7 @@ class Microservice {
      * @returns {Promise<void>}
      */
     static async removeEndpointToDeleteOfMicroservice(microservice) {
-        logger.info(`[MicroserviceService] Removing endpoints with toDelete to true of microservice ${microservice.name}`);
+        logger.info(`[MicroserviceService - removeEndpointToDeleteOfMicroservice] Removing endpoints with toDelete to true of microservice ${microservice.name}`);
         if (!microservice.endpoints) {
             return;
         }

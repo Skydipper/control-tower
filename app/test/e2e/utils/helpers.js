@@ -6,7 +6,6 @@ const MicroserviceModel = require('models/microservice.model');
 const EndpointModel = require('models/endpoint.model');
 const VersionModel = require('models/version.model');
 const appConstants = require('app.constants');
-// eslint-disable-next-line import/order
 const JWT = require('jsonwebtoken');
 const { promisify } = require('util');
 const UserModel = require('plugins/sd-ct-oauth-plugin/models/user.model');
@@ -106,6 +105,33 @@ const createMicroservice = async (microserviceData) => (MicroserviceModel({
     ...microserviceData
 }).save());
 
+const createEndpoint = (endpoint) => new EndpointModel({ ...endpointTest, ...endpoint }).save();
+
+const createMicroserviceWithEndpoints = async (microserviceData) => {
+    const microservice = await createMicroservice(microserviceData);
+
+    const endpoints = [];
+
+    microserviceData.endpoints.forEach((endpointData) => {
+
+        endpointData.redirect = [endpointData.redirect];
+
+        if (!endpointData.redirect[0].url) {
+            endpointData.redirect[0].url = microservice.url;
+            endpointData.redirect[0].microservice = microservice.name;
+        }
+
+        if (!endpointData.redirect[0].url) {
+            endpointData.redirect[0].url = microservice.url;
+        }
+        endpoints.push(createEndpoint(endpointData));
+    });
+
+    await Promise.all(endpoints);
+
+    return { microservice, endpoints };
+};
+
 const isAdminOnly = async (requester, method, url) => {
     const { token: managerToken } = await createUserAndToken({ role: 'MANAGER' });
     const { token: userToken } = await createUserAndToken({ role: 'USER' });
@@ -159,8 +185,6 @@ const updateVersion = () => VersionModel.updateOne({
     }
 });
 
-const createEndpoint = (endpoint) => new EndpointModel({ ...endpointTest, ...endpoint }).save();
-
 async function setPluginSetting(pluginName, settingKey, settingValue) {
     return new Promise((resolve, reject) => {
         async function onDbReady(err) {
@@ -196,6 +220,7 @@ module.exports = {
     createUserInDB,
     createPlugin,
     createMicroservice,
+    createMicroserviceWithEndpoints,
     createTempUser,
     getUserFromToken,
     isTokenRequired,
