@@ -162,7 +162,7 @@ class Dispatcher {
     }
 
     static async checkFilters(sourcePath, endpoint) {
-        logger.debug('Checking filters in endpoint', endpoint);
+        logger.debug('[DispatcherService - checkFilters] Checking filters in endpoint', endpoint);
         const newEndpoint = Dispatcher.cloneEndpoint(endpoint);
         let filters = [];
         for (let i = 0, { length } = newEndpoint.redirect; i < length; i++) {
@@ -171,10 +171,10 @@ class Dispatcher {
             }
         }
         if (!filters || filters.length === 0) {
-            logger.debug('Doesn\'t contain filters. All redirect are valid');
+            logger.debug('[DispatcherService - checkFilters] Doesn\'t contain filters. All redirect are valid');
             return newEndpoint;
         }
-        logger.debug('Obtaining data to check filters');
+        logger.debug('[DispatcherService - checkFilters] Obtaining data to check filters');
         const promisesRequest = [];
         let filter = null;
         let path = null;
@@ -188,7 +188,7 @@ class Dispatcher {
                     body: {},
                 },
             });
-            logger.debug('Config request', request);
+            logger.debug('[DispatcherService - checkFilters] Config request', request);
             request.configRequest.json = true;
             promisesRequest.push(requestPromise(request.configRequest));
 
@@ -197,7 +197,7 @@ class Dispatcher {
             return newEndpoint;
         }
         try {
-            logger.debug('Doing requests');
+            logger.debug('[DispatcherService - checkFilters] Doing requests');
             const results = await Promise.all(promisesRequest);
             // TODO: Add support for several filter in each newEndpoint
             for (let i = 0, { length } = results; i < length; i++) {
@@ -212,7 +212,7 @@ class Dispatcher {
                     };
                 }
             }
-            logger.debug('Checking valid filters');
+            logger.debug('[DispatcherService - checkFilters] Checking valid filters');
             const validRedirects = Dispatcher.checkValidRedirects(newEndpoint.redirect, filters);
             newEndpoint.redirect = validRedirects;
         } catch (err) {
@@ -246,37 +246,37 @@ class Dispatcher {
     }
 
     static async getEndpoint(pathname, method) {
-        logger.info(`[DispatcherService] Searching for endpoint with path ${pathname} and method ${method}`);
-        logger.debug('[DispatcherService] Obtaining version');
+        logger.info(`[DispatcherService - getEndpoint] Searching for endpoint with path ${pathname} and method ${method}`);
+        logger.debug('[DispatcherService - getEndpoint] Obtaining version');
         const version = await VersionModel.findOne({
             name: appConstants.ENDPOINT_VERSION,
         });
-        logger.debug('[DispatcherService] Version found: ', version);
-        logger.debug('[DispatcherService] Version last', version.lastUpdated);
+        logger.debug('[DispatcherService - getEndpoint] Version found: ', version);
+        logger.debug('[DispatcherService - getEndpoint] Version last', version.lastUpdated);
         if (!CACHE.version || !CACHE.version.lastUpdated || !version.lastUpdated || CACHE.version.lastUpdated.getTime() !== version.lastUpdated.getTime()) {
-            logger.debug('[DispatcherService] Reloading endpoints cache from database');
+            logger.debug('[DispatcherService - getEndpoint] Reloading endpoints cache from database');
             await Dispatcher.reloadEndpoints(version);
         }
         if (!CACHE.endpoints || CACHE.endpoints.length === 0) {
-            logger.fatal('[DispatcherService] Endpoints cache is empty');
+            logger.fatal('[DispatcherService - getEndpoint] Endpoints cache is empty');
             return null;
         }
-        logger.debug('[DispatcherService] Searching endpoints cache');
+        logger.debug('[DispatcherService - getEndpoint] Searching endpoints cache');
         const endpoint = CACHE.endpoints.find((endpointData) => {
             endpointData.pathRegex.lastIndex = 0;
             return endpointData.method === method && endpointData.pathRegex && endpointData.pathRegex.test(pathname);
         });
         if (endpoint) {
-            logger.info(`[DispatcherService] Found endpoint with id ${endpoint._id}`);
+            logger.info(`[DispatcherService - getEndpoint] Found endpoint with id ${endpoint._id}`);
             return endpoint.toObject();
         }
 
-        logger.info(`[DispatcherService] No endpoint found`);
+        logger.info(`[DispatcherService - getEndpoint] No endpoint found`);
         return null;
     }
 
     static async getRequest(ctx) {
-        logger.info(`Searching endpoint where redirect url ${ctx.request.url}
+        logger.info(`[DispatcherService - getRequest] Searching endpoint where redirect url ${ctx.request.url}
             and method ${ctx.request.method}`);
         const parsedUrl = url.parse(ctx.request.url);
         let endpoint = await Dispatcher.getEndpoint(parsedUrl.pathname, ctx.request.method);
@@ -285,37 +285,37 @@ class Dispatcher {
             throw new EndpointNotFound(`${parsedUrl.pathname} not found`);
         }
 
-        logger.debug('Endpoint found');
-        logger.debug('Checking if authentication is necessary');
+        logger.info(`[DispatcherService - getRequest] Endpoint found. Path: ${endpoint.path} | Method: ${endpoint.method}`);
+        logger.info('[DispatcherService - getRequest] Checking if authentication is necessary');
         if (endpoint.authenticated && !Dispatcher.getLoggedUser(ctx)) {
-            logger.info('Authentication is needed but no user data was found in the request');
+            logger.info('[DispatcherService - getRequest] Authentication is needed but no user data was found in the request');
             throw new NotAuthenticated();
         }
 
         if (endpoint.applicationRequired && !ctx.state.appKey) {
-            logger.info('Application key is needed but none was found in the request');
+            logger.info('[DispatcherService - getRequest] Application key is needed but none was found in the request');
             throw new NotApplicationKey('Required app_key');
         }
         let redirectEndpoint = null;
         endpoint = await Dispatcher.checkFilters(parsedUrl.pathname, endpoint);
         if (endpoint && endpoint.redirect.length === 0) {
-            logger.error('No redirects exist');
+            logger.error('[DispatcherService - getRequest] No redirects exist');
             throw new EndpointNotFound(`${parsedUrl.pathname} not found`);
         }
 
         if (endpoint.redirect && endpoint.redirect.length > 1) {
-            logger.debug(`Found several redirect endpoints (num: ${endpoint.redirect.length}).
+            logger.debug(`[DispatcherService - getRequest] Found several redirect endpoints (num: ${endpoint.redirect.length}).
             Obtaining final endpoint with random`);
             const pos = Math.floor(Math.random() * endpoint.redirect.length);
-            logger.debug(`Position choose ${pos}`);
+            logger.debug(`[DispatcherService - getRequest] Position choose ${pos}`);
             redirectEndpoint = endpoint.redirect[pos];
         } else {
-            logger.debug('Only one redirect found');
+            logger.debug('[DispatcherService - getRequest] Only one redirect found');
             [redirectEndpoint] = endpoint.redirect;
         }
-        logger.info('Dispatching request from %s to %s%s private endpoint.',
+        logger.info('[DispatcherService - getRequest] Dispatching request from %s to %s%s private endpoint.',
             parsedUrl.pathname, redirectEndpoint.url, redirectEndpoint.path);
-        logger.debug('endpoint', endpoint);
+        logger.debug('[DispatcherService - getRequest] endpoint', endpoint);
         const finalUrl = await Dispatcher.buildUrl(parsedUrl.pathname, redirectEndpoint, endpoint);
         let configRequest = { // eslint-disable-line prefer-const
             uri: finalUrl,
@@ -327,29 +327,29 @@ class Dispatcher {
             headers: {}
         };
         if (ctx.request.query) {
-            logger.debug('Adding query params');
+            logger.debug('[DispatcherService - getRequest] Adding query params');
             if (ctx.request.query.app_key) {
                 delete ctx.request.query.app_key;
             }
             configRequest.qs = ctx.request.query;
         }
 
-        logger.debug('Create request to %s', configRequest.uri);
+        logger.debug('[DispatcherService - getRequest] Create request to %s', configRequest.uri);
         if (configRequest.method === 'POST' || configRequest.method === 'PATCH'
             || configRequest.method === 'PUT') {
             logger.debug('Method is %s. Adding body', configRequest.method);
             if (ctx.request.body.fields) {
-                logger.debug('Is a form-data request');
+                logger.debug('[DispatcherService - getRequest] Is a form-data request');
                 configRequest.body = ctx.request.body.fields;
             } else {
                 configRequest.body = ctx.request.body;
             }
         }
-        logger.debug('Adding logged user if it is logged');
+        logger.debug('[DispatcherService - getRequest] Adding logged user if it is logged');
         redirectEndpoint.data = { ...redirectEndpoint.data, loggedUser: Dispatcher.getLoggedUser(ctx), };
 
         if (redirectEndpoint.data) {
-            logger.debug('Adding data');
+            logger.debug('[DispatcherService - getRequest] Adding data');
             if (configRequest.method === 'GET' || configRequest.method === 'DELETE') {
                 configRequest.qs = configRequest.qs || {};
                 const keys = Object.keys(redirectEndpoint.data);
@@ -361,7 +361,7 @@ class Dispatcher {
             }
         }
         if (ctx.request.body.files) {
-            logger.debug('Adding files', ctx.request.body.files);
+            logger.debug('[DispatcherService - getRequest] Adding files', ctx.request.body.files);
             const { files } = ctx.request.body;
             let formData = {}; // eslint-disable-line prefer-const
             for (const key in files) { // eslint-disable-line no-restricted-syntax
@@ -369,7 +369,7 @@ class Dispatcher {
 
                     if (files[key].size < 1000) {
                         const contents = fs.readFileSync(files[key].path, 'utf8');
-                        logger.debug('File content: ', contents);
+                        logger.debug('[DispatcherService - getRequest] File content: ', contents);
                     }
 
                     formData[key] = {
@@ -407,7 +407,7 @@ class Dispatcher {
 
         }
         if (ctx.request.headers) {
-            logger.debug('Adding headers');
+            logger.debug('[DispatcherService - getRequest] Adding headers');
             configRequest.headers = Dispatcher.getHeadersFromRequest(ctx.request.headers);
         }
         if (ctx.state && ctx.state.appKey) {
@@ -415,20 +415,20 @@ class Dispatcher {
         }
         configRequest.headers.user_key = JSON.stringify(Dispatcher.getLoggedUser(ctx));
 
-        logger.debug('Checking if is json or formdata request');
+        logger.debug('[DispatcherService - getRequest] Checking if is json or formdata request');
         if (configRequest.multipart) {
-            logger.debug('Is FormData request');
+            logger.debug('[DispatcherService - getRequest] Is FormData request');
             configRequest.formData = configRequest.body;
             delete configRequest.body;
             delete configRequest.multipart;
         } else {
-            logger.debug('Is JSON request');
+            logger.debug('[DispatcherService - getRequest] Is JSON request');
             configRequest.json = true;
             delete configRequest.multipart;
         }
         configRequest.encoding = null; // all request have encoding null
 
-        logger.debug('Returning config', configRequest);
+        logger.debug('[DispatcherService - getRequest] Returning config', configRequest);
         return {
             configRequest,
             endpoint,
