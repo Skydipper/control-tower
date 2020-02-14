@@ -5,6 +5,7 @@ const VersionModel = require('models/version.model');
 const logger = require('logger');
 const Utils = require('utils');
 const FastlyPurge = require('fastly-purge');
+const pick = require('lodash/pick');
 
 const router = new Router({
     prefix: '/endpoint',
@@ -12,16 +13,14 @@ const router = new Router({
 
 class EndpointRouter {
 
-    static async get(ctx) {
+    static async getAll(ctx) {
         logger.info('Obtaining endpoints');
+        const query = pick(ctx.query, ['authenticated', 'applicationRequired', 'binary', 'path', 'method']);
+
         const version = await VersionModel.findOne({
             name: appConstants.ENDPOINT_VERSION,
         });
-        ctx.body = await Endpoint.find({
-            version: version.version,
-        }, {
-            __v: 0,
-        });
+        ctx.body = await Endpoint.find({ ...query, version: version.version }, { __v: 0 });
     }
 
     static async purgeAll(ctx) {
@@ -44,7 +43,7 @@ class EndpointRouter {
 
 }
 
-router.get('/', Utils.isLogged, Utils.isAdmin, EndpointRouter.get);
+router.get('/', Utils.isLogged, Utils.isAdmin, EndpointRouter.getAll);
 router.delete('/purge-all', Utils.isLogged, Utils.isAdmin, EndpointRouter.purgeAll);
 
 module.exports = router;

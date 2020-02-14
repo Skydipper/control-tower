@@ -138,7 +138,7 @@ class Microservice {
      * @returns {Promise<void>}
      */
     static async saveEndpointsForMicroservice(microservice, info, version) {
-        logger.info('[MicroserviceService - saveEndpointsForMicroservice] Saving endpoints');
+        logger.info(`[MicroserviceService - saveEndpointsForMicroservice] Saving endpoints for microservice ${microservice.name}`);
         if (info.endpoints && info.endpoints.length > 0) {
             for (let i = 0, { length } = info.endpoints; i < length; i++) {
                 await Microservice.saveEndpoint(info.endpoints[i], microservice, version);
@@ -208,11 +208,11 @@ class Microservice {
      * @returns {Promise<boolean>}
      */
     static async getMicroserviceInfo(microservice, version) {
-        logger.info(`[MicroserviceService] Obtaining info of the microservice with name ${microservice.name} and version ${version}`);
+        logger.info(`[MicroserviceService - getMicroserviceInfo] Obtaining info of the microservice with name ${microservice.name} and version ${version}`);
         const urlInfo = url.resolve(microservice.url, microservice.pathInfo);
-        logger.debug('[MicroserviceService] Generating token');
+        logger.debug('[MicroserviceService - getMicroserviceInfo] Generating token');
         const token = await Microservice.generateToken(microservice);
-        logger.debug(`[MicroserviceService] Doing request to ${urlInfo}`);
+        logger.debug(`[MicroserviceService - getMicroserviceInfo] Doing request to ${urlInfo}`);
         let result;
 
         try {
@@ -223,12 +223,12 @@ class Microservice {
                 timeout: 10000
             });
         } catch (err) {
-            logger.warn(`[MicroserviceRouter] Microservice ${microservice.name} could not be reached on announced URL ${urlInfo}`);
+            logger.warn(`[MicroserviceService - getMicroserviceInfo] Microservice ${microservice.name} could not be reached on announced URL ${urlInfo}`);
             logger.warn(err);
             return false;
         }
 
-        logger.info('[MicroserviceService] Microservice information loaded successfully, applying transformations');
+        logger.info(`[MicroserviceService - getMicroserviceInfo] Microservice information loaded successfully for microservice ${microservice.name}, applying transformations`);
         result = Microservice.transformUrlsToNewVersion(result);
         microservice.endpoints = result.endpoints;
         microservice.cache = result.cache;
@@ -243,7 +243,7 @@ class Microservice {
             microservice.tags = uniq(microservice.tags.concat(result.tags));
         }
 
-        logger.info('[MicroserviceService] Microservice info ready, saving...');
+        logger.info(`[MicroserviceService - getMicroserviceInfo] Microservice info ready for microservice ${microservice.name}, saving...`);
         await microservice.save();
         await Microservice.saveEndpointsForMicroservice(microservice, result, version);
         return true;
