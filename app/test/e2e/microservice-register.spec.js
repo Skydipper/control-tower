@@ -140,7 +140,6 @@ describe('Microservices endpoints', () => {
             binary: false,
             cache: [],
             uncache: [],
-            toDelete: false,
             path: '/v1/test',
             method: 'GET',
             pathRegex: /^\/v1\/test(?:\/(?=$))?$/i,
@@ -182,11 +181,8 @@ describe('Microservices endpoints', () => {
         const microservice = await MicroserviceModel.find();
         microservice.should.have.lengthOf(1);
 
-        const endpoints = await EndpointModel.find({ toDelete: false });
+        const endpoints = await EndpointModel.find();
         endpoints.should.have.lengthOf(1);
-
-        const deletedEndpoints = await EndpointModel.find({ toDelete: true });
-        deletedEndpoints.should.have.lengthOf(0);
 
         (await VersionModel.findOne({ name: appConstants.ENDPOINT_VERSION })).should.have.property('lastUpdated').and.afterTime(preVersion.lastUpdated);
     });
@@ -208,7 +204,6 @@ describe('Microservices endpoints', () => {
             binary: false,
             cache: [],
             uncache: [],
-            toDelete: false,
             path: '/v1/test',
             method: 'GET',
             pathRegex: /^\/v1\/test(?:\/(?=$))?$/i,
@@ -257,11 +252,8 @@ describe('Microservices endpoints', () => {
         const microservice = await MicroserviceModel.find();
         microservice.should.have.lengthOf(1);
 
-        const endpoints = await EndpointModel.find({ toDelete: false });
+        const endpoints = await EndpointModel.find();
         endpoints.should.have.lengthOf(2);
-
-        const deletedEndpoints = await EndpointModel.find({ toDelete: true });
-        deletedEndpoints.should.have.lengthOf(0);
 
         (await VersionModel.findOne({ name: appConstants.ENDPOINT_VERSION })).should.have.property('lastUpdated').and.afterTime(preVersion.lastUpdated);
     });
@@ -288,7 +280,6 @@ describe('Microservices endpoints', () => {
             binary: false,
             cache: [],
             uncache: [],
-            toDelete: false,
             path: '/v1/test',
             method: 'GET',
             pathRegex: /^\/v1\/test(?:\/(?=$))?$/i,
@@ -330,12 +321,9 @@ describe('Microservices endpoints', () => {
         const microservice = await MicroserviceModel.find();
         microservice.should.have.lengthOf(2);
 
-        const endpoints = await EndpointModel.find({ toDelete: false });
+        const endpoints = await EndpointModel.find();
         endpoints.should.have.lengthOf(1);
         endpoints[0].redirect.should.have.lengthOf(2);
-
-        const deletedEndpoints = await EndpointModel.find({ toDelete: true });
-        deletedEndpoints.should.have.lengthOf(0);
 
         (await VersionModel.findOne({ name: appConstants.ENDPOINT_VERSION })).should.have.property('lastUpdated').and.afterTime(preVersion.lastUpdated);
     });
@@ -368,7 +356,6 @@ describe('Microservices endpoints', () => {
             binary: false,
             cache: [],
             uncache: [],
-            toDelete: false,
             path: '/v1/test',
             method: 'GET',
             pathRegex: /^\/v1\/test(?:\/(?=$))?$/i,
@@ -419,11 +406,8 @@ describe('Microservices endpoints', () => {
         const microservice = await MicroserviceModel.find();
         microservice.should.have.lengthOf(1);
 
-        const endpoints = await EndpointModel.find({ toDelete: false });
+        const endpoints = await EndpointModel.find();
         endpoints.should.have.lengthOf(2);
-
-        const deletedEndpoints = await EndpointModel.find({ toDelete: true });
-        deletedEndpoints.should.have.lengthOf(0);
 
         (await VersionModel.findOne({ name: appConstants.ENDPOINT_VERSION })).should.have.property('lastUpdated').and.afterTime(preVersion.lastUpdated);
     });
@@ -473,7 +457,6 @@ describe('Microservices endpoints', () => {
             binary: false,
             cache: [],
             uncache: [],
-            toDelete: false,
             path: '/v1/test',
             method: 'GET',
             pathRegex: /^\/v1\/test(?:\/(?=$))?$/i,
@@ -517,13 +500,10 @@ describe('Microservices endpoints', () => {
         const microservice = await MicroserviceModel.find();
         microservice.should.have.lengthOf(2);
 
-        const endpoints = await EndpointModel.find({ toDelete: false });
+        const endpoints = await EndpointModel.find();
         endpoints.should.have.lengthOf(1);
         endpoints[0].redirect.should.have.length(2);
         endpoints[0].redirect.toObject().map((redirect) => redirect.url).should.have.members([testMicroserviceTwo.url, testMicroserviceOne.url]);
-
-        const deletedEndpoints = await EndpointModel.find({ toDelete: true });
-        deletedEndpoints.should.have.lengthOf(0);
 
         (await VersionModel.findOne({ name: appConstants.ENDPOINT_VERSION })).should.have.property('lastUpdated').and.afterTime(preVersion.lastUpdated);
     });
@@ -574,7 +554,6 @@ describe('Microservices endpoints', () => {
             binary: false,
             cache: [],
             uncache: [],
-            toDelete: false,
             path: '/v1/test',
             method: 'GET',
             pathRegex: /^\/v1\/test(?:\/(?=$))?$/i,
@@ -623,13 +602,10 @@ describe('Microservices endpoints', () => {
         const microservice = await MicroserviceModel.find();
         microservice.should.have.lengthOf(2);
 
-        const endpoints = await EndpointModel.find({ toDelete: false });
+        const endpoints = await EndpointModel.find();
         endpoints.should.have.lengthOf(1);
         endpoints[0].redirect.should.have.length(2);
         endpoints[0].redirect.toObject().map((redirect) => redirect.url).should.have.members([testMicroserviceTwo.url, testMicroserviceOne.url]);
-
-        const deletedEndpoints = await EndpointModel.find({ toDelete: true });
-        deletedEndpoints.should.have.lengthOf(0);
 
         (await VersionModel.findOne({ name: appConstants.ENDPOINT_VERSION })).should.have.property('lastUpdated').and.afterTime(preVersion.lastUpdated);
     });

@@ -66,8 +66,7 @@ class Microservice {
         const oldEndpoint = await EndpointModel.findOne({
             path: endpoint.path,
             method: endpoint.method,
-            version,
-            toDelete: false
+            version
         }).exec();
         if (oldEndpoint) {
             logger.debug(`[MicroserviceService] Path ${endpoint.path} exists. Checking if redirect with url ${endpoint.redirect.url} exists.`);
@@ -323,10 +322,6 @@ class Microservice {
                     logger.info(`[MicroserviceRouter] Microservice ${micro.name} was reached successfully, setting status to 'active'`);
                     micro.status = MICRO_STATUS_ACTIVE;
                     await micro.save();
-                    if (existingMicroservice) {
-                        logger.info(`[MicroserviceRouter] Removing endpoints with \`toDelete\` to true for microservice ${micro.name}.`);
-                        await Microservice.removeEndpointToDeleteOfMicroservice(existingMicroservice);
-                    }
                     if (existingVersion) {
                         existingVersion.lastUpdated = new Date();
                         await existingVersion.save();
@@ -348,7 +343,7 @@ class Microservice {
     /**
      * Flags endpoints of a microservice for removal
      * - If an endpoint has another redirect, simply removes this MS's url from the redirects list, and updates the endpoint
-     * - If an endpoint doesn't have any other redirect, sets `toDelete` to true, but does not actually remove the redirect or endpoint.
+     * - If an endpoint doesn't have any other redirect, removes the redirect or endpoint.
      *
      * @param microservice
      * @returns {Promise<void>}
@@ -362,12 +357,11 @@ class Microservice {
         for (let i = 0, { length } = microservice.endpoints; i < length; i++) {
             const endpoint = await EndpointModel.findOne({
                 method: microservice.endpoints[i].method,
-                path: microservice.endpoints[i].path,
-                toDelete: false
+                path: microservice.endpoints[i].path
             }).exec();
 
             if (endpoint) {
-                let redirects = endpoint.redirect.filter((redirect) => redirect.url !== microservice.url);
+                const redirects = endpoint.redirect.filter((redirect) => redirect.url !== microservice.url);
                 if (redirects && redirects.length > 0) {
                     logger.info(`[MicroserviceService - removeEndpointsOfMicroservice] Updating endpoint: Path ${endpoint.path} | Method ${endpoint.method}`);
                     endpoint.redirect = redirects;
@@ -375,42 +369,17 @@ class Microservice {
                     await endpoint.save();
                 } else {
                     logger.info(`[MicroserviceService - removeEndpointsOfMicroservice] Endpoint empty. Removing endpoint: Path ${endpoint.path} | Method ${endpoint.method}`);
-                    redirects = redirects.toObject().map((redirect) => ({ ...redirect, microservice: microservice.name }));
-                    endpoint.redirect = redirects;
-                    endpoint.toDelete = true;
-                    endpoint.updatedAt = new Date();
-                    await endpoint.save();
+                    await EndpointModel.deleteOne({ _id: endpoint._id });
                 }
             }
         }
     }
 
     /**
-     * Deletes endpoints associated with a given microservice that are flagged to be deleted with `toDelete` = true
-     *
-     * @param microservice
-     * @returns {Promise<void>}
-     */
-    static async removeEndpointToDeleteOfMicroservice(microservice) {
-        logger.info(`[MicroserviceService - removeEndpointToDeleteOfMicroservice] Removing endpoints with toDelete to true of microservice ${microservice.name}`);
-        if (!microservice.endpoints) {
-            return;
-        }
-        for (let i = 0, { length } = microservice.endpoints; i < length; i++) {
-            await EndpointModel.deleteMany({
-                method: microservice.endpoints[i].method,
-                path: microservice.endpoints[i].path,
-                toDelete: true
-            }).exec();
-        }
-    }
-
-    /**
      * Deletes a microservice and its endpoints
      *
-     * It works in 3 steps
-     * - Iterates over its endpoints. If they only have 1 redirect, sets their `toDelete` value to true, else removes this MS from the redirects list.
-     * - Iterates over its endpoints with `toDelete` value set to true, and deletes them.
+     * It works in 2 steps
+     * - Iterates over its endpoints. If they only have 1 redirect, deletes them.
      * - Deletes the actual Microservice object from the database.
      *
      * @param id
@@ -427,7 +396,6 @@ class Microservice {
 
         logger.info(`[MicroserviceService] Removing endpoints for MS ${microservice.name}`);
         await Microservice.removeEndpointsOfMicroservice(microservice);
-        await Microservice.removeEndpointToDeleteOfMicroservice(microservice);
 
         logger.info(`[MicroserviceService] Removing microservice ${microservice.name}`);
         await microservice.remove();

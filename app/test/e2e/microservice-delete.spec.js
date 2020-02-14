@@ -65,7 +65,6 @@ describe('Delete a microservice', () => {
                 binary: false,
                 cache: [],
                 uncache: [],
-                toDelete: false,
                 path: '/v1/testOne',
                 method: 'GET',
                 pathRegex: /^\/v1\/testOne(?:\/(?=$))?$/i,
@@ -89,7 +88,6 @@ describe('Delete a microservice', () => {
                 binary: false,
                 cache: [],
                 uncache: [],
-                toDelete: false,
                 path: '/v1/testTwo',
                 method: 'GET',
                 pathRegex: /^\/v1\/testTwo(?:\/(?=$))?$/i,
@@ -107,8 +105,7 @@ describe('Delete a microservice', () => {
         );
 
         (await MicroserviceModel.find()).should.have.lengthOf(1);
-        (await EndpointModel.find({ toDelete: true })).should.have.lengthOf(0);
-        (await EndpointModel.find({ toDelete: false })).should.have.lengthOf(2);
+        (await EndpointModel.find()).should.have.lengthOf(2);
 
         const response = await requester.delete(`/api/v1/microservice/${microservice.id.toString()}`)
             .send()
@@ -117,8 +114,7 @@ describe('Delete a microservice', () => {
         response.status.should.equal(200);
 
         (await MicroserviceModel.find()).should.have.lengthOf(0);
-        (await EndpointModel.find({ toDelete: true })).should.have.lengthOf(0);
-        (await EndpointModel.find({ toDelete: false })).should.have.lengthOf(0);
+        (await EndpointModel.find()).should.have.lengthOf(0);
     });
 
     it('Deleting a microservice should delete exclusive endpoints and the microservice document from the database, but preserve shared endpoints without redirects', async () => {
@@ -183,7 +179,6 @@ describe('Delete a microservice', () => {
                 binary: false,
                 cache: [],
                 uncache: [],
-                toDelete: false,
                 path: '/v1/test',
                 method: 'GET',
                 pathRegex: /^\/v1\/test(?:\/(?=$))?$/i,
@@ -214,7 +209,6 @@ describe('Delete a microservice', () => {
                 binary: false,
                 cache: [],
                 uncache: [],
-                toDelete: false,
                 path: '/v1/testOne',
                 method: 'GET',
                 pathRegex: /^\/v1\/testOne(?:\/(?=$))?$/i,
@@ -238,7 +232,6 @@ describe('Delete a microservice', () => {
                 binary: false,
                 cache: [],
                 uncache: [],
-                toDelete: false,
                 path: '/v1/testTwo',
                 method: 'GET',
                 pathRegex: /^\/v1\/testTwo(?:\/(?=$))?$/i,
@@ -256,8 +249,7 @@ describe('Delete a microservice', () => {
         );
 
         (await MicroserviceModel.find()).should.have.lengthOf(2);
-        (await EndpointModel.find({ toDelete: true })).should.have.lengthOf(0);
-        (await EndpointModel.find({ toDelete: false })).should.have.lengthOf(3);
+        (await EndpointModel.find()).should.have.lengthOf(3);
 
         const response = await requester.delete(`/api/v1/microservice/${microserviceOne.id.toString()}`)
             .send()
@@ -266,9 +258,8 @@ describe('Delete a microservice', () => {
         response.status.should.equal(200);
 
         (await MicroserviceModel.find()).should.have.lengthOf(1);
-        (await EndpointModel.find({ toDelete: true })).should.have.lengthOf(0);
 
-        const liveEndpoints = await EndpointModel.find({ toDelete: false });
+        const liveEndpoints = await EndpointModel.find();
         liveEndpoints.should.have.lengthOf(2);
         liveEndpoints.forEach((endpoint) => {
             endpoint.redirect.should.have.length(1);

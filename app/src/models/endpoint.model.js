@@ -13,7 +13,6 @@ const Endpoint = new Schema({
     binary: { type: Boolean, default: false },
     cache: [{ type: String, required: false }],
     uncache: [{ type: String, required: false }],
-    toDelete: { type: Boolean, required: false, default: false },
     redirect: [{
         path: { type: String, required: true, trim: true },
         url: { type: String, required: true, trim: true },

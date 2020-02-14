@@ -104,7 +104,6 @@ const endpointTest = {
     binary: false,
     cache: [],
     uncache: [],
-    toDelete: false,
     path: '/v1/dataset',
     method: 'POST',
     pathRegex: '',
