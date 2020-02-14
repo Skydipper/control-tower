@@ -73,7 +73,7 @@ describe('Microservice cron - Pending checking', () => {
         (await VersionModel.findOne({ name: appConstants.ENDPOINT_VERSION })).should.have.property('lastUpdated').and.afterTime(preVersion.lastUpdated);
     });
 
-    it('Running the "pending" cron will activate a pending microservice that has become reachable, add redirects to existing endpoints and update the version number', async () => {
+    it('Running the "pending" cron will activate a pending microservice that has become reachable, add redirects to existing endpoints (toDelete set to false) and update the version number', async () => {
         const preVersion = await VersionModel.findOne({ name: appConstants.ENDPOINT_VERSION });
 
         const testMicroserviceOne = {
@@ -98,6 +98,70 @@ describe('Microservice cron - Pending checking', () => {
             redirect: [],
             path: '/v1/test',
             method: 'GET',
+        });
+
+        nock('http://test-microservice-one:8000')
+            .get('/info')
+            .reply(200, {
+                swagger: {},
+                name: 'test-microservice-one',
+                tags: ['test'],
+                endpoints: [{
+                    path: '/v1/test',
+                    method: 'GET',
+                    redirect: {
+                        method: 'GET',
+                        path: '/api/v1/test'
+                    }
+                }]
+            });
+
+        (await MicroserviceModel.find({ status: 'error' })).should.have.lengthOf(0);
+        (await MicroserviceModel.find({ status: 'active' })).should.have.lengthOf(0);
+        (await MicroserviceModel.find({ status: 'pending' })).should.have.lengthOf(1);
+
+        (await EndpointModel.find()).should.have.lengthOf(1);
+        (await EndpointModel.find({ 'redirect.microservice': testMicroserviceOne.name })).should.have.lengthOf(0);
+
+        await MicroserviceService.checkPendingMicroservices();
+
+        (await MicroserviceModel.find({ status: 'error' })).should.have.lengthOf(0);
+        (await MicroserviceModel.find({ status: 'pending' })).should.have.lengthOf(0);
+        (await MicroserviceModel.find({ status: 'active' })).should.have.lengthOf(1);
+
+        (await EndpointModel.find()).should.have.lengthOf(1);
+        (await EndpointModel.find({ 'redirect.microservice': testMicroserviceOne.name })).should.have.lengthOf(1);
+
+        (await VersionModel.findOne({ name: appConstants.ENDPOINT_VERSION })).should.have.property('lastUpdated').and.afterTime(preVersion.lastUpdated);
+    });
+
+
+    it('Running the "pending" cron will activate a pending microservice that has become reachable, add redirects to existing endpoints (toDelete set to true) and update the version number', async () => {
+        const preVersion = await VersionModel.findOne({ name: appConstants.ENDPOINT_VERSION });
+
+        const testMicroserviceOne = {
+            name: `test-microservice-one`,
+            url: 'http://test-microservice-one:8000',
+            status: 'pending',
+            endpoints: [
+                {
+                    microservice: 'test-microservice-one',
+                    path: '/v1/test',
+                    method: 'GET',
+                    redirect: {
+                        method: 'GET',
+                        path: '/api/v1/test'
+                    }
+                }
+            ]
+        };
+
+        await createMicroservice(testMicroserviceOne);
+        await createEndpoint({
+            redirect: [],
+            path: '/v1/test',
+            method: 'GET',
+            toDelete: true
         });
 
         nock('http://test-microservice-one:8000')
