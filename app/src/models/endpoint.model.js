@@ -33,6 +33,8 @@ const Endpoint = new Schema({
         }],
     }],
     version: { type: Number, required: true },
+    updatedAt: { type: Date, default: Date.now, required: true },
+    createdAt: { type: Date, default: Date.now, required: true }
 });
 
 module.exports = mongoose.model('Endpoint', Endpoint);

@@ -84,6 +84,7 @@ class Microservice {
                 oldEndpoint.redirect.push(endpoint.redirect);
                 oldEndpoint.uncache = microservice.uncache;
                 oldEndpoint.cache = microservice.cache;
+                oldEndpoint.updatedAt = new Date();
                 await oldEndpoint.save();
             } else {
                 logger.debug('[MicroserviceService] Redirect exists. Updating', oldRedirect);
@@ -97,6 +98,7 @@ class Microservice {
                         oldRedirect.redirect[i].filters = Microservice.getFilters(endpoint);
                     }
                 }
+                oldEndpoint.updatedAt = new Date();
                 await oldRedirect.save();
             }
 
@@ -369,12 +371,14 @@ class Microservice {
                 if (redirects && redirects.length > 0) {
                     logger.info(`[MicroserviceService - removeEndpointsOfMicroservice] Updating endpoint: Path ${endpoint.path} | Method ${endpoint.method}`);
                     endpoint.redirect = redirects;
+                    endpoint.updatedAt = new Date();
                     await endpoint.save();
                 } else {
                     logger.info(`[MicroserviceService - removeEndpointsOfMicroservice] Endpoint empty. Removing endpoint: Path ${endpoint.path} | Method ${endpoint.method}`);
                     redirects = redirects.toObject().map((redirect) => ({ ...redirect, microservice: microservice.name }));
                     endpoint.redirect = redirects;
                     endpoint.toDelete = true;
+                    endpoint.updatedAt = new Date();
                     await endpoint.save();
                 }
             }

@@ -50,6 +50,12 @@ describe('GET Endpoints', () => {
         delete resEndpoints.body[0]._id;
         delete resEndpoints.body[0].redirect[0]._id;
 
+        resEndpoints.body[0].should.have.property('createdAt').and.be.a('string');
+        resEndpoints.body[0].should.have.property('updatedAt').and.be.a('string');
+
+        delete resEndpoints.body[0].createdAt;
+        delete resEndpoints.body[0].updatedAt;
+
         resEndpoints.body[0].should.deep.equal(
             {
                 pathKeys: [],

@@ -1,4 +1,5 @@
 # 14/02/2020
+- Add `createdAt` and `updatedAt` fields to the endpoint model.
 - Add basic filters to get endpoints endpoint.
 
 # 12/02/2020
