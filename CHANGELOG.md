@@ -24,7 +24,7 @@
 - Update `passport-facebook` NPM package version to its latest version.
 
 # 27/01/2020
-- Fix grammar for `email exists` error when attempting to register and exisiting user. `email exist` -> `email exists`
+- Fix grammar for `email exists` error when attempting to register and existing user. `email exist` -> `email exists`
 
 # v2.1.0
 
