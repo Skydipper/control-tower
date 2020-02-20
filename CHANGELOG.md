@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 # 14/02/2020
 - Remove `toDelete` from microservice model.
 - Add `createdAt` and `updatedAt` fields to the endpoint model.
