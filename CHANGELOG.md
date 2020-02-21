@@ -1,3 +1,6 @@
+# 21/02/2020
+- Fix error when trying to find users by ids providing invalid object ids.
+
 # 14/02/2020
 - Remove `toDelete` from microservice model.
 - Add `createdAt` and `updatedAt` fields to the endpoint model.
