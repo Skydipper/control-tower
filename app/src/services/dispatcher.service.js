@@ -11,6 +11,7 @@ const FilterError = require('errors/filterError');
 const pathToRegexp = require('path-to-regexp');
 const requestPromise = require('request-promise');
 const fs = require('fs');
+const JWT = require('jsonwebtoken');
 
 const ALLOWED_HEADERS = [
     'cache-control',
@@ -27,6 +28,13 @@ const CACHE = {
 };
 
 class Dispatcher {
+
+    static createMicroserviceToken() {
+        return JWT.sign(
+            { id: 'microservice', role: 'microservice' },
+            process.env.JWT_SECRET
+        );
+    }
 
     static getLoggedUser(ctx) {
         if (ctx.state) {
@@ -418,7 +426,14 @@ class Dispatcher {
 
         }
         if (ctx.request.headers) {
+            const { headers } = ctx.request;
             logger.debug('Adding headers');
+
+            if (headers.authorization) {
+                configRequest.headers.authorization = headers.authorization;
+            }
+
+            configRequest.headers.authorizationMS = Dispatcher.createMicroserviceToken();
         }
         if (ctx.state && ctx.state.appKey) {
             configRequest.headers.app_key = JSON.stringify(ctx.state.appKey);

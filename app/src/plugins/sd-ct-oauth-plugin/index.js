@@ -5,6 +5,7 @@ const jwt = require('koa-jwt');
 const views = require('koa-views');
 const config = require('config');
 const UserModel = require('plugins/sd-ct-oauth-plugin/models/user.model');
+const JWT = require('jsonwebtoken');
 const passportService = require('./services/passport.service');
 const apiRouter = require('./auth.router');
 const authServiceFunc = require('./services/auth.service');
@@ -71,6 +72,16 @@ function middleware(app, plugin, generalConfig) {
             await next();
         });
 
+        app.use(async (ctx, next) => {
+            if (ctx.request.headers.authorizationms) {
+                ctx.state.microservice = JWT.verify(ctx.request.headers.authorizationms, process.env.JWT_SECRET);
+                await next();
+                return;
+            }
+
+            await next();
+        });
+
         app.use(jwt({
             secret: plugin.config.jwt.secret,
             passthrough: plugin.config.jwt.passthrough,
@@ -80,6 +91,11 @@ function middleware(app, plugin, generalConfig) {
 
         // eslint-disable-next-line consistent-return
         app.use(async (ctx, next) => {
+            if (ctx.state.microservice) {
+                await next();
+                return;
+            }
+
             if (ctx.state.isLoggedAsDev) {
                 await next();
                 return;
