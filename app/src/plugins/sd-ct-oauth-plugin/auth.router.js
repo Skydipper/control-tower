@@ -19,7 +19,15 @@ module.exports = (plugin, connection, generalConfig) => {
 
     const getUser = (ctx) => ctx.req.user || ctx.state.user || ctx.state.microservice;
 
-    const getSpecificUser = (ctx, type) => ctx.state[type] || ctx.req[type];
+    const getSpecificUser = (ctx, type) => {
+        if (ctx.state[type]) return ctx.state[type];
+        if (ctx.req[type]) return ctx.req[type];
+
+        const user = getUser(ctx);
+        if (user.id === type) return user;
+
+        return null;
+    };
 
     const getOriginApp = (ctx, pluginData) => {
         if (ctx.query.origin) {
@@ -788,15 +796,10 @@ module.exports = (plugin, connection, generalConfig) => {
         logger.info('Checking if user is a microservice');
         const user = getSpecificUser(ctx, 'microservice');
         if (!user) {
-            logger.info('Not authenticated');
-            ctx.throw(401, 'Not authenticated');
-            return;
-        }
-        if (user.id === 'microservice') {
-            await next();
-        } else {
-            logger.info('Not admin');
+            logger.info('Not microservice');
             ctx.throw(403, 'Not authorized');
+        } else {
+            await next();
         }
     }
 
