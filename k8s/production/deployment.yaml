@@ -42,7 +42,7 @@ spec:
             - name: PUBLIC_URL
               value: http://api.skydipper.com
             - name: FROM_NAME
-              value: "admin@skydipper.com"
+              value: "anything@sparkpostbox.com"
             - name: APP_NAME
               value: "Skydipper API"
             - name: APP_LOGO
