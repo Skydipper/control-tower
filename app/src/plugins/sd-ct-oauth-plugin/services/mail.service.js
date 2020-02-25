@@ -8,7 +8,7 @@ function mailService(plugin) {
         constructor(sparkpostKey, publicUrl, disableEmailSending = false) {
             this.disableEmailSending = disableEmailSending;
             if (sparkpostKey) {
-                this.client = new SparkPost(sparkpostKey);
+                this.client = new SparkPost(sparkpostKey, { origin: 'https://api.eu.sparkpost.com:443' });
             }
             this.publicUrl = publicUrl;
         }
