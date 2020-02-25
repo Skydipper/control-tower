@@ -69,11 +69,6 @@ spec:
                 secretKeyRef:
                   name: ctsecrets
                   key: BASICAUTH_PASSWORD
-            - name: SPARKPOST_KEY
-              valueFrom:
-                secretKeyRef:
-                  name: ctsecrets
-                  key: SPARKPOST_KEY
 
           ports:
             - containerPort: 9000
