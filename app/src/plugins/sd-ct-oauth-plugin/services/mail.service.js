@@ -85,9 +85,7 @@ function mailService(plugin) {
             const reqOpts = {
                 substitution_data: {
                     urlRecover: `${this.publicUrl}/auth/reset-password/${data.token}?origin=${originApp}`,
-                    from: {
-                        email: generalConfig.application.emailSenderName,
-                    },
+                    from: generalConfig.application.emailSenderName,
                     appName: generalConfig.application.name,
                     logo: generalConfig.application.logo
                 },
