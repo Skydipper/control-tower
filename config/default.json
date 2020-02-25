@@ -40,7 +40,7 @@
     "logo": "https://skydipper.com/images/logo.png",
     "principalColor": "#f1b319",
     "sendNotifications": false,
-    "emailSenderName": "skydipper.com"
+    "emailSenderName": "admin@skydipper.com"
   },
   "instapush": {
     "token": "",
