@@ -36,11 +36,11 @@
     "overrideDuplicated": true
   },
   "application": {
-    "name": "RW API",
-    "logo": "http://www.wri.org/sites/all/themes/wri/images/logo.png",
+    "name": "Skydipper",
+    "logo": "https://skydipper.com/images/logo.png",
     "principalColor": "#f1b319",
     "sendNotifications": false,
-    "emailSenderName": "RW API"
+    "emailSenderName": "admin@skydipper.com"
   },
   "instapush": {
     "token": "",
