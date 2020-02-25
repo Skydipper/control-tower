@@ -108,6 +108,7 @@ function mailService(plugin) {
                 console.log("test-----", reqOpts);
                 this.client.transmissions.send(reqOpts, (error, res) => {
                     console.log("hello", error);
+                    console.log("res", res);
                     if (error) {
                         reject(error);
                     } else {
