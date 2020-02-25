@@ -35,10 +35,8 @@ function mailService(plugin) {
             }
 
             return new Promise((resolve, reject) => {
-                console.log("test---", reqOpts);
                 logger.info(reqOpts);
                 this.client.transmissions.send(reqOpts, (error, res) => {
-                    console.log("err--", error);
                     if (error) {
                         reject(error);
                     } else {
@@ -104,7 +102,9 @@ function mailService(plugin) {
             }
 
             return new Promise((resolve, reject) => {
+                console.log("test-----", reqOpts);
                 this.client.transmissions.send(reqOpts, (error, res) => {
+                    console.log("hello", error);
                     if (error) {
                         reject(error);
                     } else {
