@@ -83,6 +83,9 @@ function mailService(plugin) {
         sendRecoverPasswordMail(data, recipients, generalConfig, originApp) {
             logger.info('[MailService] Sending confirmation mail to ', recipients);
             const reqOpts = {
+                options: {
+                    sandbox: true
+                },
                 substitution_data: {
                     urlRecover: `${this.publicUrl}/auth/reset-password/${data.token}?origin=${originApp}`,
                     from: generalConfig.application.emailSenderName,
