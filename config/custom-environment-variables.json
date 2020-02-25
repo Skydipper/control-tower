@@ -15,6 +15,7 @@
   "application": {
     "name": "APP_NAME",
     "logo": "APP_LOGO",
+    "fromName": "FROM_NAME",
     "principalColor": "APP_COLOR"
   },
   "instapush": {

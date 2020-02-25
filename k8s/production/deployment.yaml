@@ -41,10 +41,12 @@ spec:
               value: http://api.skydipper.com
             - name: PUBLIC_URL
               value: http://api.skydipper.com
+            - name: FROM_NAME
+              value: "admin@skydipper.com"
             - name: APP_NAME
               value: "Skydipper API"
             - name: APP_LOGO
-              value: http://developer.skydipper.com/images/logo-skydipper.png
+              value: https://skydipper.com/images/logo.png
             - name: APP_COLOR
               value: "#f1b319"
             - name: CT_MONGO_URI
