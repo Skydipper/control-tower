@@ -450,8 +450,9 @@ module.exports = (plugin, connection, generalConfig) => {
                 return;
             }
 
-            if (plugin.config.local.confirmUrlRedirect) {
-                ctx.redirect(plugin.config.local.confirmUrlRedirect);
+            if (process.env.CONFIRM_URL_REDIRECT) {
+                console.log("test---", process.env.CONFIRM_URL_REDIRECT);
+                ctx.redirect(process.env.CONFIRM_URL_REDIRECT);
                 return;
             }
             ctx.body = UserSerializer.serialize(user);
