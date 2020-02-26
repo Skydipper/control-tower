@@ -8,7 +8,6 @@ function mailService(plugin) {
         constructor(sparkpostKey, publicUrl, disableEmailSending = false) {
             this.disableEmailSending = disableEmailSending;
             if (sparkpostKey) {
-                console.log("key is---", process.env.SPARKPOST_KEY);
                 this.client = new SparkPost(process.env.SPARKPOST_KEY, { origin: 'https://api.eu.sparkpost.com:443' });
             }
             this.publicUrl = publicUrl;
@@ -84,9 +83,6 @@ function mailService(plugin) {
         sendRecoverPasswordMail(data, recipients, generalConfig, originApp) {
             logger.info('[MailService] Sending confirmation mail to ', recipients);
             const reqOpts = {
-                options: {
-                    sandbox: true
-                },
                 substitution_data: {
                     urlRecover: `${this.publicUrl}/auth/reset-password/${data.token}?origin=${originApp}`,
                     from: generalConfig.application.emailSenderName,
