@@ -45,6 +45,8 @@ spec:
               value: "admin@skydipper.com"
             - name: APP_NAME
               value: "Skydipper API"
+            - name: SENDER_NAME
+              value: "Skydipper"
             - name: APP_LOGO
               value: https://skydipper.com/images/logo.png
             - name: APP_COLOR
