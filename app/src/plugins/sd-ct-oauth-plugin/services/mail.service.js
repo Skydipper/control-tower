@@ -18,7 +18,6 @@ function mailService(plugin) {
             const reqOpts = {
                 substitution_data: {
                     urlConfirm: `${this.publicUrl}/auth/confirm/${data.confirmationToken}`,
-                    fromName: generalConfig.application.emailSenderName,
                     appName: generalConfig.application.name,
                     logo: generalConfig.application.logo
                 },
@@ -52,7 +51,6 @@ function mailService(plugin) {
                 substitution_data: {
                     urlConfirm: `${this.publicUrl}/auth/confirm/${data.confirmationToken}?${data.callbackUrl ? `callbackUrl=${data.callbackUrl}` : ''}`,
                     password: data.password,
-                    fromName: generalConfig.application.emailSenderName,
                     appName: generalConfig.application.name,
                     logo: generalConfig.application.logo
                 },
@@ -85,10 +83,6 @@ function mailService(plugin) {
             const reqOpts = {
                 substitution_data: {
                     urlRecover: `${this.publicUrl}/auth/reset-password/${data.token}?origin=${originApp}`,
-                    from: {
-                        email: generalConfig.application.emailSenderName,
-                        name: process.env.SENDER_NAME,
-                    },
                     appName: generalConfig.application.name,
                     logo: generalConfig.application.logo
                 },
@@ -105,10 +99,7 @@ function mailService(plugin) {
             }
 
             return new Promise((resolve, reject) => {
-                console.log("test-----", reqOpts);
                 this.client.transmissions.send(reqOpts, (error, res) => {
-                    console.log("hello", error);
-                    console.log("res", res);
                     if (error) {
                         reject(error);
                     } else {
