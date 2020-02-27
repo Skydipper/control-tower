@@ -292,6 +292,21 @@ class Dispatcher {
 
     }
 
+    static getIPRequest(request) {
+        return _.get(request, 'headers.x-forwarded-for')
+            || _.get(request, 'connection.remoteAddress')
+            || _.get(request, 'socket.remoteAddress')
+            || _.get(request, 'connection.socket.remoteAddress');
+    }
+
+    static isAuthenticatedRequired(request, endpoint) {
+        logger.debug('Remote IP request', this.getIPRequest(request));
+        logger.debug('Allowed IPs for non auth request', process.env.MICROSERVICE_IPS);
+        logger.debug('Auth is require', (!request.url.startsWith('/auth') || (process.env.MICROSERVICE_IPS || []).includes(this.getIPRequest(request))));
+
+        return (!request.url.startsWith('/auth') || !(process.env.MICROSERVICE_IPS || []).includes(this.getIPRequest(request) && !endpoint.authenticated));
+    }
+
     static async getRequest(ctx) {
         logger.info(`Searching endpoint where redirect url ${ctx.request.url}
             and method ${ctx.request.method}`);
@@ -316,7 +331,7 @@ class Dispatcher {
         }
 
         logger.debug('Checking if authentication is necessary');
-        if (!ctx.request.url.startsWith('/auth') && !Dispatcher.getLoggedUser(ctx)) {
+        if (Dispatcher.isAuthenticatedRequired(ctx.request, endpoint) && !Dispatcher.getLoggedUser(ctx)) {
             logger.info('Authentication is needed but no user data was found in the request');
             throw new NotAuthenticated();
         }

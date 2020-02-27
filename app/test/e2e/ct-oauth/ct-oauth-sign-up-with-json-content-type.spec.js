@@ -96,7 +96,7 @@ describe('OAuth endpoints tests - Sign up with JSON content type', () => {
     });
 
     it('Registering a user with correct data and no app returns a 200', async () => {
-        nock('https://api.sparkpost.com')
+        nock('https://api.eu.sparkpost.com')
             .post('/api/v1/transmissions', (body) => {
                 const expectedRequestBody = {
                     content: {
@@ -110,7 +110,6 @@ describe('OAuth endpoints tests - Sign up with JSON content type', () => {
                         }
                     ],
                     substitution_data: {
-                        fromName: 'RW API',
                         appName: 'RW API',
                         logo: 'https://resourcewatch.org/static/images/logo-embed.png'
                     }
@@ -125,7 +124,7 @@ describe('OAuth endpoints tests - Sign up with JSON content type', () => {
 
                 return isEqual(body, expectedRequestBody);
             })
-            .reply(200);
+            .reply(200, {});
 
         const missingUser = await UserTempModel.findOne({ email: 'someemail@gmail.com' }).exec();
         should.not.exist(missingUser);
@@ -227,7 +226,7 @@ describe('OAuth endpoints tests - Sign up with JSON content type', () => {
 
     // User registration - with app
     it('Registering a user with correct data and app returns a 200', async () => {
-        nock('https://api.sparkpost.com')
+        nock('https://api.eu.sparkpost.com')
             .post('/api/v1/transmissions', (body) => {
                 const expectedRequestBody = {
                     content: {
@@ -241,7 +240,6 @@ describe('OAuth endpoints tests - Sign up with JSON content type', () => {
                         }
                     ],
                     substitution_data: {
-                        fromName: 'RW API',
                         appName: 'RW API',
                         logo: 'https://resourcewatch.org/static/images/logo-embed.png'
                     }
@@ -256,7 +254,7 @@ describe('OAuth endpoints tests - Sign up with JSON content type', () => {
 
                 return isEqual(body, expectedRequestBody);
             })
-            .reply(200);
+            .reply(200, {});
 
         const missingUser = await UserTempModel.findOne({ email: 'someotheremail@gmail.com' }).exec();
         should.not.exist(missingUser);

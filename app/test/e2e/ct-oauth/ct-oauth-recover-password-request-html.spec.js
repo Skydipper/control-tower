@@ -64,7 +64,7 @@ describe('OAuth endpoints tests - Recover password request - HTML version', () =
     });
 
     it('Recover password request with correct email should return OK - HTML format', async () => {
-        nock('https://api.sparkpost.com')
+        nock('https://api.eu.sparkpost.com')
             .post('/api/v1/transmissions', (body) => {
                 const expectedRequestBody = {
                     content: {
@@ -78,7 +78,6 @@ describe('OAuth endpoints tests - Recover password request - HTML version', () =
                         }
                     ],
                     substitution_data: {
-                        fromName: 'RW API',
                         appName: 'RW API',
                         logo: 'https://resourcewatch.org/static/images/logo-embed.png'
                     }

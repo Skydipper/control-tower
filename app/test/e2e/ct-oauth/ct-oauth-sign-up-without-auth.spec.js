@@ -83,7 +83,7 @@ describe('OAuth endpoints tests - Sign up without auth', () => {
     });
 
     it('Registering a user with correct data and no app returns a 200', async () => {
-        nock('https://api.sparkpost.com')
+        nock('https://api.eu.sparkpost.com')
             .post('/api/v1/transmissions', (body) => {
                 const expectedRequestBody = {
                     content: {
@@ -97,7 +97,6 @@ describe('OAuth endpoints tests - Sign up without auth', () => {
                         }
                     ],
                     substitution_data: {
-                        fromName: 'RW API',
                         appName: 'RW API',
                         logo: 'https://resourcewatch.org/static/images/logo-embed.png'
                     }
@@ -112,7 +111,7 @@ describe('OAuth endpoints tests - Sign up without auth', () => {
 
                 return isEqual(body, expectedRequestBody);
             })
-            .reply(200);
+            .reply(200, {});
 
         const missingUser = await UserTempModel.findOne({ email: 'someemail@gmail.com' }).exec();
         should.not.exist(missingUser);
@@ -196,7 +195,7 @@ describe('OAuth endpoints tests - Sign up without auth', () => {
     });
 
     it('Registering a user with correct data and app returns a 200', async () => {
-        nock('https://api.sparkpost.com')
+        nock('https://api.eu.sparkpost.com')
             .post('/api/v1/transmissions', (body) => {
                 const expectedRequestBody = {
                     content: {
@@ -210,7 +209,6 @@ describe('OAuth endpoints tests - Sign up without auth', () => {
                         }
                     ],
                     substitution_data: {
-                        fromName: 'RW API',
                         appName: 'RW API',
                         logo: 'https://resourcewatch.org/static/images/logo-embed.png'
                     }
@@ -225,7 +223,7 @@ describe('OAuth endpoints tests - Sign up without auth', () => {
 
                 return isEqual(body, expectedRequestBody);
             })
-            .reply(200);
+            .reply(200, {});
 
         const missingUser = await UserTempModel.findOne({ email: 'someotheremail@gmail.com' }).exec();
         should.not.exist(missingUser);

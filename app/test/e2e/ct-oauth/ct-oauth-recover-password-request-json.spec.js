@@ -67,7 +67,7 @@ describe('OAuth endpoints tests - Recover password request - JSON version', () =
     });
 
     it('Recover password request with correct email should return OK - JSON format', async () => {
-        nock('https://api.sparkpost.com')
+        nock('https://api.eu.sparkpost.com')
             .post('/api/v1/transmissions', (body) => {
                 const expectedRequestBody = {
                     content: {
@@ -81,7 +81,6 @@ describe('OAuth endpoints tests - Recover password request - JSON version', () =
                         }
                     ],
                     substitution_data: {
-                        fromName: 'RW API',
                         appName: 'RW API',
                         logo: 'https://resourcewatch.org/static/images/logo-embed.png'
                     }
@@ -123,7 +122,7 @@ describe('OAuth endpoints tests - Recover password request - JSON version', () =
     });
 
     it('Recover password request with correct email and a custom origin should return OK - JSON format', async () => {
-        nock('https://api.sparkpost.com')
+        nock('https://api.eu.sparkpost.com')
             .post('/api/v1/transmissions', (body) => {
                 const expectedRequestBody = {
                     content: {
@@ -137,7 +136,6 @@ describe('OAuth endpoints tests - Recover password request - JSON version', () =
                         }
                     ],
                     substitution_data: {
-                        fromName: 'GFW',
                         appName: 'GFW',
                         logo: 'https://www.globalforestwatch.org/packs/gfw-9c5fe396ee5b15cb5f5b639a7ef771bd.png'
                     }
@@ -154,7 +152,7 @@ describe('OAuth endpoints tests - Recover password request - JSON version', () =
                 return isEqual(body, expectedRequestBody);
             })
             .once()
-            .reply(200);
+            .reply(200, {});
 
         await new UserModel({
             email: 'potato@gmail.com'

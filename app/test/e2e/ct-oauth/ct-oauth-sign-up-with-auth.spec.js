@@ -93,7 +93,7 @@ describe('OAuth endpoints tests - Sign up with HTML UI', () => {
     it('Registering a user with correct data and no app returns a 200', async () => {
         const { token } = await createUserAndToken({ role: 'ADMIN' });
 
-        nock('https://api.sparkpost.com')
+        nock('https://api.eu.sparkpost.com')
             .post('/api/v1/transmissions', (body) => {
                 const expectedRequestBody = {
                     content: {
@@ -107,7 +107,6 @@ describe('OAuth endpoints tests - Sign up with HTML UI', () => {
                         }
                     ],
                     substitution_data: {
-                        fromName: 'RW API',
                         appName: 'RW API',
                         logo: 'https://resourcewatch.org/static/images/logo-embed.png'
                     }
@@ -122,7 +121,7 @@ describe('OAuth endpoints tests - Sign up with HTML UI', () => {
 
                 return isEqual(body, expectedRequestBody);
             })
-            .reply(200);
+            .reply(200, {});
 
         const missingUser = await UserTempModel.findOne({ email: 'someemail@gmail.com' }).exec();
         should.not.exist(missingUser);
@@ -215,7 +214,7 @@ describe('OAuth endpoints tests - Sign up with HTML UI', () => {
     it('Registering a user with correct data and app returns a 200', async () => {
         const { token } = await createUserAndToken({ role: 'ADMIN' });
 
-        nock('https://api.sparkpost.com')
+        nock('https://api.eu.sparkpost.com')
             .post('/api/v1/transmissions', (body) => {
                 const expectedRequestBody = {
                     content: {
@@ -229,7 +228,6 @@ describe('OAuth endpoints tests - Sign up with HTML UI', () => {
                         }
                     ],
                     substitution_data: {
-                        fromName: 'RW API',
                         appName: 'RW API',
                         logo: 'https://resourcewatch.org/static/images/logo-embed.png'
                     }
@@ -244,7 +242,7 @@ describe('OAuth endpoints tests - Sign up with HTML UI', () => {
 
                 return isEqual(body, expectedRequestBody);
             })
-            .reply(200);
+            .reply(200, {});
 
         const missingUser = await UserTempModel.findOne({ email: 'someotheremail@gmail.com' }).exec();
         should.not.exist(missingUser);
@@ -278,7 +276,7 @@ describe('OAuth endpoints tests - Sign up with HTML UI', () => {
     it('Registering a user with correct data, app and a custom origin returns a 200 and sends the email with the corresponding logo', async () => {
         const { token } = await createUserAndToken({ role: 'ADMIN' });
 
-        nock('https://api.sparkpost.com')
+        nock('https://api.eu.sparkpost.com')
             .post('/api/v1/transmissions', (body) => {
                 const expectedRequestBody = {
                     content: {
@@ -292,7 +290,6 @@ describe('OAuth endpoints tests - Sign up with HTML UI', () => {
                         }
                     ],
                     substitution_data: {
-                        fromName: 'GFW',
                         appName: 'GFW',
                         logo: 'https://www.globalforestwatch.org/packs/gfw-9c5fe396ee5b15cb5f5b639a7ef771bd.png'
                     }
@@ -307,7 +304,7 @@ describe('OAuth endpoints tests - Sign up with HTML UI', () => {
 
                 return isEqual(body, expectedRequestBody);
             })
-            .reply(200);
+            .reply(200, {});
 
         const missingUser = await UserTempModel.findOne({ email: 'someotheremail@gmail.com' }).exec();
         should.not.exist(missingUser);

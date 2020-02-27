@@ -75,6 +75,7 @@ describe('Dispatch DELETE requests with filters', () => {
         await createEndpoint({
             method: 'DELETE',
             pathRegex: new RegExp('^/api/v1/dataset$'),
+            authenticated: true,
             redirect: [{
                 ...endpointTest.redirect[0],
                 method: 'DELETE',
@@ -84,6 +85,7 @@ describe('Dispatch DELETE requests with filters', () => {
         await createEndpoint({
             path: '/api/v1/test1/test',
             method: 'DELETE',
+            authenticated: true,
             redirect: [
                 {
                     filters: null,
@@ -102,10 +104,14 @@ describe('Dispatch DELETE requests with filters', () => {
         createMockEndpointWithBody(`/api/v1/dataset?foo=bar&dataset=${JSON.stringify({ body: { data: { foo: 'bar' } } })}&loggedUser=${await getUserFromToken(token)}`, {
             method: 'delete'
         });
+
+        process.env.TEST_ENV=true;
+
         const response = await requester
             .delete('/api/v1/dataset')
             .set('Authorization', `Bearer ${token}`)
             .query({ foo: 'bar' });
+        process.env.TEST_ENV=false
 
         response.status.should.equal(200);
         response.text.should.equal('ok');
