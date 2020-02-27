@@ -301,10 +301,11 @@ class Dispatcher {
 
     static isAuthenticatedRequired(request, endpoint) {
         logger.debug('Remote IP request', this.getIPRequest(request));
-        logger.debug('Allowed IPs for non auth request', process.env.MICROSERVICE_IPS);
-        logger.debug('Auth is require', (!request.url.startsWith('/auth') || (process.env.MICROSERVICE_IPS || []).includes(this.getIPRequest(request))));
+        logger.debug('Allowed IPs for non auth request', process.env.CLUSTER_IPS);
+        logger.debug('Auth is require', request.url.startsWith('/auth') || ((process.env.CLUSTER_IPS || []).includes(this.getIPRequest(request)) && endpoint.authenticated));
+        logger.debug('Endpoint require auth', endpoint.authenticated);
 
-        return (!request.url.startsWith('/auth') || !(process.env.MICROSERVICE_IPS || []).includes(this.getIPRequest(request) && !endpoint.authenticated));
+        return request.url.startsWith('/auth') || !((process.env.CLUSTER_IPS || []).includes(this.getIPRequest(request)) && endpoint.authenticated);
     }
 
     static async getRequest(ctx) {
@@ -331,7 +332,7 @@ class Dispatcher {
         }
 
         logger.debug('Checking if authentication is necessary');
-        if (Dispatcher.isAuthenticatedRequired(ctx.request, endpoint) && !Dispatcher.getLoggedUser(ctx)) {
+        if (!Dispatcher.isAuthenticatedRequired(ctx.request, endpoint) && !Dispatcher.getLoggedUser(ctx)) {
             logger.info('Authentication is needed but no user data was found in the request');
             throw new NotAuthenticated();
         }

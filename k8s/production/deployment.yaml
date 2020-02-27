@@ -37,11 +37,11 @@ spec:
               value: app/src
             - name: BASICAUTH_USERNAME
               value: vizzuality
-            - name: MICROSERVICE_IPS
+            - name: CLUSTER_IPS
               valueFrom:
                 secretKeyRef:
                   name: ctsecrets
-                  key: MICROSERVICE_IPS
+                  key: CLUSTER_IPS
             - name: CONFIRM_URL_REDIRECT
               value: http://api.skydipper.com/auth/login
             - name: PUBLIC_URL
