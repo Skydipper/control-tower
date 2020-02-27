@@ -300,6 +300,10 @@ class Dispatcher {
     }
 
     static isAuthenticatedRequired(request, endpoint) {
+        console.log("test1---", _.get(request, 'headers.x-forwarded-for'));
+        console.log("test1---", _.get(request, 'connection.remoteAddress'));
+        console.log("test1---", _.get(request, 'socket.remoteAddress'));
+        console.log("test1---", _.get(request, 'connection.socket.remoteAddress'));
         logger.debug('Remote IP request', this.getIPRequest(request));
         logger.debug('Allowed IPs for non auth request', process.env.CLUSTER_IPS);
         logger.debug('Auth is require', request.url.startsWith('/auth') || ((process.env.CLUSTER_IPS || []).includes(this.getIPRequest(request)) && endpoint.authenticated));
