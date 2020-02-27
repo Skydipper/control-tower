@@ -451,7 +451,6 @@ module.exports = (plugin, connection, generalConfig) => {
             }
 
             if (process.env.CONFIRM_URL_REDIRECT) {
-                console.log("test---", process.env.CONFIRM_URL_REDIRECT);
                 ctx.redirect(process.env.CONFIRM_URL_REDIRECT);
                 return;
             }
