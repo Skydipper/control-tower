@@ -73,6 +73,8 @@ function middleware(app, plugin, generalConfig) {
         });
 
         app.use(async (ctx, next) => {
+            console.log("tset--- jwt secret", plugin.config.jwt.secret);
+            console.log("tset--- jwt secret", process.env.JWT_SECRET);
             if (ctx.request.headers.authorizationms) {
                 ctx.state.microservice = JWT.verify(ctx.request.headers.authorizationms, process.env.JWT_SECRET);
                 await next();
