@@ -27,28 +27,6 @@ const CACHE = {
     version: null
 };
 
-console.log("test1---", JWT.sign(
-    {
-        id: 'microservice',
-        role: 'ADMIN',
-        provider: 'local',
-        email: 'microservice@control-tower.org',
-        extraUserData: {
-            apps: [
-                'rw',
-                'gfw',
-                'gfw-climate',
-                'prep',
-                'aqueduct',
-                'forest-atlas',
-                'data4sdgs',
-                'skydipper'
-            ]
-        }
-    },
-    "yh2meO98eW3vQYDLZS8kluc7"
-));
-
 class Dispatcher {
 
     static createMicroserviceToken() {

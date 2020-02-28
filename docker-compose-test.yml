@@ -15,6 +15,7 @@ services:
       EXEC_MIGRATION: 'true'
       JWT_SECRET: mysecret
       COOKIE_DOMAIN: mymachine
+      CLUSTER_IPS: ['127.0.0.1', '::1', '::ffff:127.0.0.1']
       PUBLIC_URL: http://localhost:9000
       SPARKPOST_KEY: fakeSparkpostKey
       MONGO_PORT_27017_TCP_ADDR: mongo
