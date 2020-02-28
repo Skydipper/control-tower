@@ -292,26 +292,6 @@ class Dispatcher {
 
     }
 
-    static getIPRequest(request) {
-        return _.get(request, 'headers.x-forwarded-for')
-            || _.get(request, 'connection.remoteAddress')
-            || _.get(request, 'socket.remoteAddress')
-            || _.get(request, 'connection.socket.remoteAddress');
-    }
-
-    static isAuthenticatedRequired(request, endpoint) {
-        console.log("test1---", _.get(request, 'headers.x-forwarded-for'));
-        console.log("test1---", _.get(request, 'connection.remoteAddress'));
-        console.log("test1---", _.get(request, 'socket.remoteAddress'));
-        console.log("test1---", _.get(request, 'connection.socket.remoteAddress'));
-        logger.debug('Remote IP request', this.getIPRequest(request));
-        logger.debug('Allowed IPs for non auth request', process.env.CLUSTER_IPS);
-        logger.debug('Auth is require', request.url.startsWith('/auth') || ((process.env.CLUSTER_IPS || []).includes(this.getIPRequest(request)) && endpoint.authenticated));
-        logger.debug('Endpoint require auth', endpoint.authenticated);
-
-        return request.url.startsWith('/auth') || !((process.env.CLUSTER_IPS || []).includes(this.getIPRequest(request)) && endpoint.authenticated);
-    }
-
     static async getRequest(ctx) {
         logger.info(`Searching endpoint where redirect url ${ctx.request.url}
             and method ${ctx.request.method}`);
@@ -336,7 +316,7 @@ class Dispatcher {
         }
 
         logger.debug('Checking if authentication is necessary');
-        if (!Dispatcher.isAuthenticatedRequired(ctx.request, endpoint) && !Dispatcher.getLoggedUser(ctx)) {
+        if (!ctx.request.url.startsWith('/auth') && !Dispatcher.getLoggedUser(ctx)) {
             logger.info('Authentication is needed but no user data was found in the request');
             throw new NotAuthenticated();
         }
