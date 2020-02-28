@@ -84,7 +84,7 @@ function authService(plugin, connection) {
                         photo: userData.photo,
                         name: userData.name
                     };
-                    token = await promisify(JWT.sign)(dataToken, plugin.config.jwt.secret, options);
+                    token = await promisify(JWT.sign)(dataToken, process.env.JWT_SECRET, options);
                     if (saveInUser) {
                         await WhiteListModel.deleteOne({ token: userData.userToken });
                         userData.userToken = token;
@@ -94,7 +94,7 @@ function authService(plugin, connection) {
                     const dataToken = { ...user };
                     delete dataToken.exp;
                     dataToken.createdAt = Date.now();
-                    token = await promisify(JWT.sign)(dataToken, plugin.config.jwt.secret, options);
+                    token = await promisify(JWT.sign)(dataToken, process.env.JWT_SECRET, options);
                 }
                 await new WhiteListModel({ token }).save();
 
