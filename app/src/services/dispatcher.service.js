@@ -293,6 +293,9 @@ class Dispatcher {
     }
 
     static async getRequest(ctx) {
+        console.log("headers are- --- ", ctx.request.headers);
+        console.log("url are- --- ", ctx.request.url);
+        console.log("url cstate- --- ", ctx.state);
         logger.info(`Searching endpoint where redirect url ${ctx.request.url}
             and method ${ctx.request.method}`);
         const parsedUrl = url.parse(ctx.request.url);
