@@ -146,6 +146,23 @@ describe('List users', () => {
         ensureHasPaginationElements(response);
     });
 
+    it('Visiting /auth/user while logged in as ADMIN should return the list of users - filter by email address with plus sign in it is supported as long as it\'s escaped', async () => {
+        const { token, user } = await createUserAndToken({ role: 'ADMIN', email: 'text+email@vizzuality.com' });
+
+        const response = await requester
+            .get(`/auth/user`)
+            // eslint-disable-next-line no-useless-escape
+            .query({ email: 'text\\\+email@vizzuality.com' })
+            .set('Content-Type', 'application/json')
+            .set('Authorization', `Bearer ${token}`);
+
+        response.status.should.equal(200);
+        response.body.should.have.property('data').and.be.an('array').and.have.length(1);
+        response.body.data.map((e) => e.email).should.include(user.email);
+
+        ensureHasPaginationElements(response);
+    });
+
     it('Visiting /auth/user while logged in as ADMIN should return the list of users - filter by provider is supported', async () => {
         const { token, user: userOne } = await createUserAndToken({ role: 'ADMIN' });
         const { user: userTwo } = await createUserAndToken({ provider: 'google', role: 'ADMIN' });
