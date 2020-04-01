@@ -6,7 +6,7 @@ const Plugin = require('models/plugin.model');
 const UserModel = require('plugins/sd-ct-oauth-plugin/models/user.model');
 
 const { getTestAgent, closeTestAgent } = require('./test-server');
-const { createEndpoint, setPluginSetting } = require('./utils/helpers');
+const { createUserAndToken, createEndpoint, setPluginSetting } = require('./utils/helpers');
 const { createMockEndpoint } = require('./mock');
 
 let requester;
@@ -176,6 +176,33 @@ describe('Read-only mode spec', () => {
         const deleteResult = await requester.delete('/api/v1/dataset');
         deleteResult.status.should.equal(200);
         deleteResult.text.should.equal('ok');
+    });
+
+    it('Applies the same read-only criteria for CT endpoints', async () => {
+        requester = await getTestAgent(true);
+
+        const { token } = await createUserAndToken({ role: 'ADMIN' });
+        const getResult = await requester
+            .get('/api/v1/microservice')
+            .set('Authorization', `Bearer ${token}`);
+        getResult.status.should.equal(200);
+        getResult.text.should.equal('[]');
+
+        const postResult = await requester.post('/api/v1/microservice');
+        postResult.status.should.equal(503);
+        postResult.text.should.equal('API under maintenance, please try again later.');
+
+        const putResult = await requester.put('/api/v1/microservice');
+        putResult.status.should.equal(503);
+        putResult.text.should.equal('API under maintenance, please try again later.');
+
+        const patchResult = await requester.patch('/api/v1/microservice');
+        patchResult.status.should.equal(503);
+        patchResult.text.should.equal('API under maintenance, please try again later.');
+
+        const deleteResult = await requester.delete('/api/v1/microservice');
+        deleteResult.status.should.equal(503);
+        deleteResult.text.should.equal('API under maintenance, please try again later.');
     });
 
     afterEach(async () => {
