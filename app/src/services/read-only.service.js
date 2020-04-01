@@ -6,11 +6,11 @@ module.exports = class ReadOnlyService {
     }
 
     isBlacklisted(path) {
-        return this.blacklist.includes(path);
+        return this.blacklist.some((element) => new RegExp(element).test(path));
     }
 
     isWhitelisted(path) {
-        return this.whitelist.includes(path);
+        return this.whitelist.some((element) => new RegExp(element).test(path));
     }
 
     shouldBlockRequest(method, path) {

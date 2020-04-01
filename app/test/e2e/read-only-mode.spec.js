@@ -205,6 +205,42 @@ describe('Read-only mode spec', () => {
         deleteResult.text.should.equal('API under maintenance, please try again later.');
     });
 
+    it('Allows usage of Regex to define paths on blacklist', async () => {
+        await createCRUDEndpoints();
+        await setPluginSetting('readOnly', 'blacklist', ['.*dataset.*']);
+        requester = await getTestAgent(true);
+
+        const getResult = await requester.get('/api/v1/dataset');
+        getResult.status.should.equal(503);
+        getResult.text.should.equal('API under maintenance, please try again later.');
+    });
+
+    it('Allows usage of Regex to define paths on whitelist', async () => {
+        await createCRUDEndpoints();
+        await setPluginSetting('readOnly', 'whitelist', ['.*dataset.*']);
+        requester = await getTestAgent(true);
+
+        createMockEndpoint('/api/v1/dataset', { method: 'post' });
+        const postResult = await requester.post('/api/v1/dataset');
+        postResult.status.should.equal(200);
+        postResult.text.should.equal('ok');
+
+        createMockEndpoint('/api/v1/dataset', { method: 'put' });
+        const putResult = await requester.put('/api/v1/dataset');
+        putResult.status.should.equal(200);
+        putResult.text.should.equal('ok');
+
+        createMockEndpoint('/api/v1/dataset', { method: 'patch' });
+        const patchResult = await requester.patch('/api/v1/dataset');
+        patchResult.status.should.equal(200);
+        patchResult.text.should.equal('ok');
+
+        createMockEndpoint('/api/v1/dataset?loggedUser=null', { method: 'delete' });
+        const deleteResult = await requester.delete('/api/v1/dataset');
+        deleteResult.status.should.equal(200);
+        deleteResult.text.should.equal('ok');
+    });
+
     afterEach(async () => {
         await UserModel.deleteMany({}).exec();
         await MicroserviceModel.deleteMany({}).exec();
