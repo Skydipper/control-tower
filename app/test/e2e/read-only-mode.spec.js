@@ -110,7 +110,6 @@ describe('Read-only mode spec', () => {
 
     it('When read-only mode is ON, GET requests that are NOT blacklisted should be passed through', async () => {
         await createCRUDEndpoints();
-        // await setPluginSetting('readOnly', 'local.confirmUrlRedirect', 'http://www.google.com/');
         requester = await getTestAgent(true);
 
         createMockEndpoint('/api/v1/dataset?loggedUser=null', { method: 'get' });
@@ -121,7 +120,6 @@ describe('Read-only mode spec', () => {
 
     it('When read-only mode is ON, POST/PUT/PATCH/DELETE requests that are NOT whitelisted should return appropriate error message', async () => {
         await createCRUDEndpoints();
-        // await setPluginSetting('readOnly', 'local.confirmUrlRedirect', 'http://www.google.com/');
         requester = await getTestAgent(true);
 
         const postResult = await requester.post('/api/v1/dataset');
