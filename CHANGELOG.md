@@ -1,3 +1,6 @@
+## 01/04/2020
+- Add possibility of toggling a read-only mode that blocks all write endpoints.
+
 ## 21/02/2020
 - Fix error when trying to find users by ids providing invalid object ids.
 
