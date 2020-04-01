@@ -103,6 +103,9 @@ describe('Read-only mode spec', () => {
                     whitelist: [],
                 },
             }).save();
+        } else {
+            existing.active = true;
+            await existing.save();
         }
 
         requester = await getTestAgent(true);
