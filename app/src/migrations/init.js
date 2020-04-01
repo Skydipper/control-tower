@@ -205,6 +205,17 @@ module.exports = async function init() {
         },
     }).save();
 
+    await new Plugin({
+        name: 'readOnly',
+        description: 'Turn on/off read-only mode for CT, blocking writes to the database.',
+        mainFile: 'plugins/read-only',
+        active: false,
+        config: {
+            blacklist: [],
+            whitelist: [],
+        },
+    }).save();
+
     await Microservice.deleteMany({});
     await Endpoint.deleteMany({});
     await Version.deleteMany({});
