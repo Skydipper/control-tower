@@ -19,7 +19,7 @@ module.exports = class ReadOnlyService {
     }
 
     static isRead(method) {
-        return method === 'GET';
+        return ['GET', 'OPTIONS', 'HEAD'].includes(method);
     }
 
     static isWrite(method) {
