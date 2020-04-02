@@ -205,6 +205,31 @@ describe('Read-only mode spec', () => {
         deleteResult.text.should.equal('API under maintenance, please try again later.');
     });
 
+    it('Applies the same read-only criteria for CT authentication endpoints', async () => {
+        requester = await getTestAgent(true);
+
+        const { token } = await createUserAndToken({ role: 'ADMIN' });
+        const getResult = await requester
+            .get('/auth/user')
+            .set('Authorization', `Bearer ${token}`);
+        getResult.status.should.equal(200);
+        getResult.body.should.have.property('data');
+
+        const postResult = await requester
+            .post('/auth/user')
+            .set('Authorization', `Bearer ${token}`);
+        postResult.status.should.equal(503);
+        postResult.text.should.equal('API under maintenance, please try again later.');
+
+        const patchResult = await requester.patch('/auth/user');
+        patchResult.status.should.equal(503);
+        patchResult.text.should.equal('API under maintenance, please try again later.');
+
+        const deleteResult = await requester.delete('/auth/user');
+        deleteResult.status.should.equal(503);
+        deleteResult.text.should.equal('API under maintenance, please try again later.');
+    });
+
     it('Allows usage of Regex to define paths on blacklist', async () => {
         await createCRUDEndpoints();
         await setPluginSetting('readOnly', 'blacklist', ['.*dataset.*']);
