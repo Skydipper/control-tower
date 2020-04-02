@@ -182,6 +182,7 @@ module.exports = async function init() {
             publicUrl: process.env.PUBLIC_URL,
             allowPublicRegistration: true
         },
+        ordering: 2,
     }).save();
 
     await new Plugin({
@@ -214,6 +215,7 @@ module.exports = async function init() {
             blacklist: [],
             whitelist: [],
         },
+        ordering: 1
     }).save();
 
     await Microservice.deleteMany({});

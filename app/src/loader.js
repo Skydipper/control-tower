@@ -17,9 +17,7 @@ function getGeneralConfig() {
 async function loadPlugins(app) {
     logger.info('Loading plugins');
     const generalConfig = getGeneralConfig();
-    const plugins = await Plugin.find({
-        active: true,
-    });
+    const plugins = await Plugin.find({ active: true }).sort({ ordering: 1 });
     plugins.forEach((plugin) => {
         try {
             logger.info(`Loading ${plugin.name} plugin`);
