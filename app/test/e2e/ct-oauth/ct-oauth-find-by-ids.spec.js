@@ -62,6 +62,16 @@ describe('Find users by id', () => {
         response.body.errors[0].should.have.property('detail').and.equal(`Ids objects required`);
     });
 
+    it('Find users with id list containing non-object ids returns an empty list (invalid ids are ignored)', async () => {
+        const response = await requester
+            .post(`/auth/user/find-by-ids`)
+            .set('Authorization', `Bearer ${TOKENS.MICROSERVICE}`)
+            .send({ ids: ['123'] });
+
+        response.status.should.equal(200);
+        response.body.should.have.property('data').and.be.an('array').and.length(0);
+    });
+
     it('Find users with id list containing user that does not exist returns an empty list (empty db)', async () => {
         const response = await requester
             .post(`/auth/user/find-by-ids`)

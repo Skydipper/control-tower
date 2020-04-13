@@ -9,6 +9,7 @@ const Plugin = new Schema({
     cronFile: { type: String, required: false, trim: true },
     active: { type: Boolean, default: false },
     config: { type: Schema.Types.Mixed, required: false },
+    ordering: { type: Number, required: false, trim: true },
 });
 
 

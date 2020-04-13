@@ -145,7 +145,7 @@ function authService(plugin, connection) {
         }
 
         static async getUsersByIds(ids = []) {
-            const newIds = ids.map((id) => new ObjectId(id));
+            const newIds = ids.filter(ObjectId.isValid).map((id) => new ObjectId(id));
             return UserModel.find({
                 _id: {
                     $in: newIds

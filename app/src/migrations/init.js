@@ -182,6 +182,7 @@ module.exports = async function init() {
             publicUrl: process.env.PUBLIC_URL,
             allowPublicRegistration: true
         },
+        ordering: 2,
     }).save();
 
     await new Plugin({
@@ -203,6 +204,18 @@ module.exports = async function init() {
             key: process.env.FASTLY_APIKEY,
             serviceId: process.env.FASTLY_SERVICEID,
         },
+    }).save();
+
+    await new Plugin({
+        name: 'readOnly',
+        description: 'Turn on/off read-only mode for CT, blocking writes to the database.',
+        mainFile: 'plugins/read-only',
+        active: false,
+        config: {
+            blacklist: [],
+            whitelist: [],
+        },
+        ordering: 1
     }).save();
 
     await Microservice.deleteMany({});
