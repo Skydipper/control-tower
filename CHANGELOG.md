@@ -3,9 +3,6 @@
 ## 02/04/2020
 
 - Add possibility of toggling a read-only mode that blocks all write endpoints.
-
-## 21/02/2020
-
 - Fix error when trying to find users by ids providing invalid object ids.
 
 # 2.2.0
@@ -40,9 +37,6 @@
 ## 27/01/2020
 
 - Update `passport-facebook` NPM package version to its latest version.
-
-## 27/01/2020
-
 - Fix grammar for `email exists` error when attempting to register and existing user. `email exist` -> `email exists`
 
 # v2.1.0
