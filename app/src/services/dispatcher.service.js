@@ -316,7 +316,7 @@ class Dispatcher {
         }
 
         logger.debug('Checking if authentication is necessary');
-        if (!ctx.request.url.startsWith('/auth') && !Dispatcher.getLoggedUser(ctx)) {
+        if (!(ctx.request.url.startsWith('/auth') || ctx.request.url.startsWith('/v1/basemaps')) && !Dispatcher.getLoggedUser(ctx)) {
             logger.info('Authentication is needed but no user data was found in the request');
             throw new NotAuthenticated();
         }
