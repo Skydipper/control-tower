@@ -316,7 +316,7 @@ class Dispatcher {
         }
 
         logger.debug('Checking if authentication is necessary');
-        if (!(ctx.request.url.startsWith('/auth') || ctx.request.url.startsWith('/v1/basemaps')) && !Dispatcher.getLoggedUser(ctx)) {
+        if (!(ctx.request.url.startsWith('/auth') || ctx.request.url.startsWith('/v1/basemaps') || ctx.request.url.startsWith('/v1/layer') || ctx.request.url.startsWith('/v1/dataset') || ctx.request.url.startsWith('/v1/geostore')) && !Dispatcher.getLoggedUser(ctx)) {
             logger.info('Authentication is needed but no user data was found in the request');
             throw new NotAuthenticated();
         }
