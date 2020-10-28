@@ -80,7 +80,7 @@
     "koa-router": "^7.0.1",
     "koa-simple-healthcheck": "0.0.1",
     "koa-views": "^5.0.2",
-    "lodash": "^4.17.14",
+    "lodash": "^4.17.20",
     "mongoose": "^5.7.5",
     "mongoose-paginate": "^5.0.3",
     "mongoose-regexp": "^0.0.1",
