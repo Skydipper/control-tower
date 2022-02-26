@@ -96,7 +96,7 @@
     "request-promise": "^4.1.1",
     "sleep": "^6.1.0",
     "sparkpost": "^2.1.2",
-    "url-parse": "^1.4.3"
+    "url-parse": "^1.5.8"
   },
   "husky": {
     "hooks": {
